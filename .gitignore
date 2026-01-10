@@ -2,12 +2,13 @@
 .DS_Store
 Thumbs.db
 
-
 # Environment / Secrets
 .env
 *.env
 application-*.yml
-!application.yml
+application.yml
+application-*.properties
+application.properties
 
 # Java
 *.class
@@ -20,26 +21,22 @@ replay_pid*
 !src/**/build/
 out/
 
-
 # IntelliJ IDEA
 .idea/
 *.iml
 *.ipr
 *.iws
 
-
 # Logs
 *.log
 
-
-# Package artifacts (DO NOT commit)
+# Package artifacts
 *.jar
 *.war
 *.ear
 *.zip
 *.tar.gz
 *.rar
-
 
 # Eclipse
 .project
