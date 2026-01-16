@@ -40,4 +40,9 @@ public class Review extends BaseEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "book_id")
   private Book book;
+
+  public void update(String content) {
+    this.content = content;
+
+  }
 }
