@@ -5,17 +5,25 @@ import com.bookripple.api.domain.book.exception.BookException;
 import com.bookripple.api.domain.book.exception.code.BookErrorCode;
 import com.bookripple.api.domain.book.repository.BookRepository;
 import com.bookripple.api.domain.member.entity.Member;
-import com.bookripple.api.domain.member.exception.MemberException;
-import com.bookripple.api.domain.member.exception.code.MemberErrorCode;
 import com.bookripple.api.domain.member.repository.MemberRepository;
 import com.bookripple.api.domain.review.converter.ReviewConverter;
+import com.bookripple.api.domain.review.dto.ReviewResDto.Item;
+import com.bookripple.api.domain.review.dto.ReviewResDto.MyReview;
+import com.bookripple.api.domain.review.dto.ReviewResDto.MyReviewList;
+import com.bookripple.api.domain.review.dto.ReviewResDto.ReviewList;
 import com.bookripple.api.domain.review.entity.Review;
+import com.bookripple.api.domain.review.exception.ReviewException;
+import com.bookripple.api.domain.review.exception.code.ReviewErrorCode;
 import com.bookripple.api.domain.review.repository.ReviewRepository;
 import com.bookripple.api.global.converter.GlobalConverter;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
 import jakarta.transaction.Transactional;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 
@@ -33,12 +41,86 @@ public class ReviewServiceImpl implements ReviewService {
 
     Book book = bookRepository.findById(bookId)
         .orElseThrow(() -> new BookException(BookErrorCode.NO_BOOK));
-    Member member = memberRepository.findById(memberId)
-        .orElseThrow(() -> new MemberException(MemberErrorCode.NO_MEMBER));
+
+    Member member = memberRepository.getReferenceById(memberId);
 
     Review review = ReviewConverter.toReview(request, member, book);
 
     reviewRepository.save(review);
     return GlobalConverter.toIdRes(review.getId());
+  }
+
+  @Override
+  public IdRes deleteReview(Long reviewId, Long memberId) {
+    Review review = reviewRepository.findById(reviewId)
+        .orElseThrow(() -> new ReviewException(ReviewErrorCode.NO_REVIEW));
+
+    if (!review.getMember().getId().equals(memberId)) {
+      throw new ReviewException(ReviewErrorCode.FORBIDDEN);
+    }
+    reviewRepository.delete(review);
+
+    return GlobalConverter.toIdRes(reviewId);
+  }
+
+  @Override
+  @Transactional
+  public IdRes updateReview(Long reviewId, Long memberId, ContentReq request) {
+    Review review = reviewRepository.findById(reviewId)
+        .orElseThrow(() -> new ReviewException(ReviewErrorCode.NO_REVIEW));
+
+    if (!review.getMember().getId().equals(memberId)) {
+      throw new ReviewException(ReviewErrorCode.FORBIDDEN);
+    }
+    review.update(request.content());
+
+    return GlobalConverter.toIdRes(reviewId);
+  }
+
+  @Override
+  public ReviewList getReviews(Long bookId, Long memberId, Long lastId, int size) {
+    Book book = bookRepository.findById(bookId)
+        .orElseThrow(() -> new BookException(BookErrorCode.NO_BOOK));
+
+    Long cursor = (lastId == null) ? Long.MAX_VALUE : lastId;
+
+    Pageable pageable = PageRequest.of(0, size);
+
+    Slice<Review> reviewSlice = reviewRepository.findReviewByCursor(bookId, memberId, cursor,
+        pageable);
+
+    List<Item> reviewList = reviewSlice.getContent().stream()
+        .map(ReviewConverter::toItem)
+        .toList();
+
+    Long nextCursor = null;
+    if (!reviewList.isEmpty()) {
+      nextCursor = reviewList.get(reviewList.size() - 1).id();
+    }
+    return ReviewConverter.toReviewList(reviewList, nextCursor, reviewSlice.hasNext());
+  }
+
+  @Override
+  public MyReviewList getMyReviews(Long memberId, String lastBookTitle, Long lastId, int size) {
+
+    Pageable pageable = PageRequest.of(0, size);
+    Slice<Review> reviewSlice = reviewRepository.findMyReviewByCursor(memberId, lastBookTitle
+        , lastId, pageable);
+
+    List<MyReview> myReviewList = reviewSlice.getContent().stream()
+        .map(ReviewConverter::toMyReview)
+        .toList();
+
+    String nextBookTitle = null;
+    Long nextId = null;
+
+    if (!myReviewList.isEmpty()) {
+      MyReview last = myReviewList.get(myReviewList.size() - 1);
+      nextBookTitle = last.bookTitle();
+      nextId = last.id();
+    }
+
+    return ReviewConverter.toMyReviewList(myReviewList, nextBookTitle, nextId,
+        reviewSlice.hasNext());
   }
 }

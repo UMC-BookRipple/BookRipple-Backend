@@ -2,6 +2,8 @@ package com.bookripple.api.domain.review.controller;
 
 import com.bookripple.api.common.code.CommonSuccessCode;
 import com.bookripple.api.common.response.ApiResponse;
+import com.bookripple.api.domain.review.dto.ReviewResDto.MyReviewList;
+import com.bookripple.api.domain.review.dto.ReviewResDto.ReviewList;
 import com.bookripple.api.domain.review.service.ReviewService;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
@@ -9,6 +11,9 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,14 +29,55 @@ public class ReviewController {
 
   private final ReviewService reviewService;
 
-  @PostMapping("/books/{bookId}/reviews")
+  @PostMapping("/books/{book-id}/reviews")
   public ApiResponse<IdRes> createReview(
-      @PathVariable @Min(1) Long bookId,
+      @PathVariable("book-id") @Min(1) Long bookId,
       @RequestParam @Min(1) Long memberId,
       @Valid @RequestBody ContentReq request
   ) {
 
     return ApiResponse.onSuccess(CommonSuccessCode.CREATED,
         reviewService.createReview(bookId, memberId, request));
+  }
+
+  @DeleteMapping("/reviews/{review-id}")
+  public ApiResponse<IdRes> deleteReview(
+      @PathVariable("review-id") @Min(1) Long reviewId,
+      @RequestParam @Min(1) Long memberId
+  ) {
+    return ApiResponse.onSuccess(CommonSuccessCode.OK,
+        reviewService.deleteReview(reviewId, memberId));
+  }
+
+  @PatchMapping("/reviews/{review-id}")
+  public ApiResponse<IdRes> updateReview(
+      @PathVariable("review-id") @Min(1) Long reviewId,
+      @RequestParam @Min(1) Long memberId,
+      @Valid @RequestBody ContentReq request
+  ) {
+    return ApiResponse.onSuccess(CommonSuccessCode.OK,
+        reviewService.updateReview(reviewId, memberId, request));
+  }
+
+  @GetMapping("/books/{book-id}/reviews")
+  public ApiResponse<ReviewList> getReviews(
+      @PathVariable("book-id") @Min(1) Long bookId,
+      @RequestParam @Min(1) Long memberId,
+      @RequestParam(required = false) Long lastId,
+      @RequestParam(defaultValue = "3") int size
+  ) {
+    return ApiResponse.onSuccess(CommonSuccessCode.OK,
+        reviewService.getReviews(bookId, memberId, lastId, size));
+  }
+
+  @GetMapping("/reviews/me")
+  public ApiResponse<MyReviewList> getMyReviews(
+      @RequestParam @Min(1) Long memberId,
+      @RequestParam(required = false) String lastBookTitle,
+      @RequestParam(required = false) Long lastId,
+      @RequestParam(defaultValue = "3") int size
+  ) {
+    return ApiResponse.onSuccess(CommonSuccessCode.OK,
+        reviewService.getMyReviews(memberId, lastBookTitle, lastId, size));
   }
 }
