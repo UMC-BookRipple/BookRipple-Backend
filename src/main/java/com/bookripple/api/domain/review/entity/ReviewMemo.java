@@ -44,4 +44,7 @@ public class ReviewMemo extends BaseEntity {
   @OnDelete(action = OnDeleteAction.CASCADE)
   private Review review;
 
+  public void update(String content) {
+    this.content = content;
+  }
 }
