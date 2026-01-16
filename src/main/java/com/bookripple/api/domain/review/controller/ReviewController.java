@@ -2,6 +2,7 @@ package com.bookripple.api.domain.review.controller;
 
 import com.bookripple.api.common.code.CommonSuccessCode;
 import com.bookripple.api.common.response.ApiResponse;
+import com.bookripple.api.domain.review.dto.ReviewResDto.ReviewList;
 import com.bookripple.api.domain.review.service.ReviewService;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
@@ -10,6 +11,7 @@ import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -54,5 +56,16 @@ public class ReviewController {
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         reviewService.updateReview(reviewId, memberId, request));
+  }
+
+  @GetMapping("/books/{bookId}/reviews")
+  public ApiResponse<ReviewList> getReviews(
+      @PathVariable @Min(1) Long bookId,
+      @RequestParam @Min(1) Long memberId,
+      @RequestParam(required = false) Long lastId,
+      @RequestParam(defaultValue = "3") int size
+  ) {
+    return ApiResponse.onSuccess(CommonSuccessCode.OK,
+        reviewService.getReviews(bookId, memberId, lastId, size));
   }
 }

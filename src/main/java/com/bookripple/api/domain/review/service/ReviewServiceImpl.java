@@ -9,6 +9,8 @@ import com.bookripple.api.domain.member.exception.MemberException;
 import com.bookripple.api.domain.member.exception.code.MemberErrorCode;
 import com.bookripple.api.domain.member.repository.MemberRepository;
 import com.bookripple.api.domain.review.converter.ReviewConverter;
+import com.bookripple.api.domain.review.dto.ReviewResDto.Item;
+import com.bookripple.api.domain.review.dto.ReviewResDto.ReviewList;
 import com.bookripple.api.domain.review.entity.Review;
 import com.bookripple.api.domain.review.exception.ReviewException;
 import com.bookripple.api.domain.review.exception.code.ReviewErrorCode;
@@ -17,7 +19,11 @@ import com.bookripple.api.global.converter.GlobalConverter;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
 import jakarta.transaction.Transactional;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 
@@ -69,5 +75,28 @@ public class ReviewServiceImpl implements ReviewService {
     review.update(request.content());
 
     return GlobalConverter.toIdRes(reviewId);
+  }
+
+  @Override
+  public ReviewList getReviews(Long bookId, Long memberId, Long lastId, int size) {
+    Book book = bookRepository.findById(bookId)
+        .orElseThrow(() -> new BookException(BookErrorCode.NO_BOOK));
+
+    Long cursor = (lastId == null) ? Long.MAX_VALUE : lastId;
+
+    Pageable pageable = PageRequest.of(0, size);
+
+    Slice<Review> reviewSlice = reviewRepository.findReviewByCursor(bookId, memberId, cursor,
+        pageable);
+
+    List<Item> reviewList = reviewSlice.getContent().stream()
+        .map(ReviewConverter::toItem)
+        .toList();
+
+    Long nextCursor = null;
+    if (!reviewList.isEmpty()) {
+      nextCursor = reviewList.get(reviewList.size() - 1).id();
+    }
+    return ReviewConverter.toReviewList(reviewList, nextCursor, reviewSlice.hasNext());
   }
 }

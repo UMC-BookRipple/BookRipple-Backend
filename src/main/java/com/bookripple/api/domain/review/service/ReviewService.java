@@ -1,5 +1,6 @@
 package com.bookripple.api.domain.review.service;
 
+import com.bookripple.api.domain.review.dto.ReviewResDto.ReviewList;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
 
@@ -11,4 +12,6 @@ public interface ReviewService {
   IdRes deleteReview(Long reviewId, Long memberId);
 
   IdRes updateReview(Long reviewId, Long memberId, ContentReq request);
+
+  ReviewList getReviews(Long bookId, Long memberId, Long lastId, int size);
 }
