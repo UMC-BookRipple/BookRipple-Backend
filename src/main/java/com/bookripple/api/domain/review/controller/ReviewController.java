@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,5 +34,14 @@ public class ReviewController {
 
     return ApiResponse.onSuccess(CommonSuccessCode.CREATED,
         reviewService.createReview(bookId, memberId, request));
+  }
+
+  @DeleteMapping("/reviews/{reviewId}")
+  public ApiResponse<IdRes> deleteReview(
+      @PathVariable @Min(1) Long reviewId,
+      @RequestParam @Min(1) Long memberId
+  ) {
+    return ApiResponse.onSuccess(CommonSuccessCode.OK,
+        reviewService.deleteReview(reviewId, memberId));
   }
 }

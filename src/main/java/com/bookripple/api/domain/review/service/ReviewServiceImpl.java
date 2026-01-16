@@ -10,6 +10,8 @@ import com.bookripple.api.domain.member.exception.code.MemberErrorCode;
 import com.bookripple.api.domain.member.repository.MemberRepository;
 import com.bookripple.api.domain.review.converter.ReviewConverter;
 import com.bookripple.api.domain.review.entity.Review;
+import com.bookripple.api.domain.review.exception.ReviewException;
+import com.bookripple.api.domain.review.exception.code.ReviewErrorCode;
 import com.bookripple.api.domain.review.repository.ReviewRepository;
 import com.bookripple.api.global.converter.GlobalConverter;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
@@ -40,5 +42,18 @@ public class ReviewServiceImpl implements ReviewService {
 
     reviewRepository.save(review);
     return GlobalConverter.toIdRes(review.getId());
+  }
+
+  @Override
+  public IdRes deleteReview(Long reviewId, Long memberId) {
+    Review review = reviewRepository.findById(reviewId)
+        .orElseThrow(() -> new ReviewException(ReviewErrorCode.NO_REVIEW));
+
+    if (!review.getMember().getId().equals(memberId)) {
+      throw new ReviewException(ReviewErrorCode.FORBIDDEN);
+    }
+    reviewRepository.delete(review);
+
+    return GlobalConverter.toIdRes(reviewId);
   }
 }

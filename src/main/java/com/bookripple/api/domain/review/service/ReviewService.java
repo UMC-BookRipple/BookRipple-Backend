@@ -8,4 +8,5 @@ public interface ReviewService {
 
   IdRes createReview(Long bookId, Long memberId, ContentReq request);
 
+  IdRes deleteReview(Long reviewId, Long memberId);
 }
