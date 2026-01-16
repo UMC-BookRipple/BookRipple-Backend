@@ -56,4 +56,18 @@ public class ReviewServiceImpl implements ReviewService {
 
     return GlobalConverter.toIdRes(reviewId);
   }
+
+  @Override
+  @Transactional
+  public IdRes updateReview(Long reviewId, Long memberId, ContentReq request) {
+    Review review = reviewRepository.findById(reviewId)
+        .orElseThrow(() -> new ReviewException(ReviewErrorCode.NO_REVIEW));
+
+    if (!review.getMember().getId().equals(memberId)) {
+      throw new ReviewException(ReviewErrorCode.FORBIDDEN);
+    }
+    review.update(request.content());
+
+    return GlobalConverter.toIdRes(reviewId);
+  }
 }

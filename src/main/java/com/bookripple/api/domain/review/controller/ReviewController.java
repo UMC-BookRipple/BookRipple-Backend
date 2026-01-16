@@ -10,6 +10,7 @@ import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -43,5 +44,15 @@ public class ReviewController {
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         reviewService.deleteReview(reviewId, memberId));
+  }
+
+  @PatchMapping("/reviews/{reviewId}")
+  public ApiResponse<IdRes> updateReview(
+      @PathVariable @Min(1) Long reviewId,
+      @RequestParam @Min(1) Long memberId,
+      @Valid @RequestBody ContentReq request
+  ) {
+    return ApiResponse.onSuccess(CommonSuccessCode.OK,
+        reviewService.updateReview(reviewId, memberId, request));
   }
 }
