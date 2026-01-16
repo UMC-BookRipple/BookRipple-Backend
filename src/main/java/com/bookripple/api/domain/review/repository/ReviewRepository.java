@@ -24,5 +24,19 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
       Pageable pageable
   );
 
+  @Query("SELECT r FROM Review r " +
+      "JOIN FETCH r.book " +
+      "WHERE r.member.id = :memberId " +
+      "AND (:lastBookTitle IS NULL OR " +
+      "    r.book.title > :lastBookTitle OR " +
+      "    (r.book.title = :lastBookTitle AND r.id < :lastId)) " +
+      "ORDER BY r.book.title ASC, r.id DESC "
+  )
+  Slice<Review> findMyReviewByCursor(
+      @Param("memberId") Long memberId,
+      @Param("lastBookTitle") String lastBookTitle,
+      @Param("lastId") Long lastId,
+      Pageable pageable
+  );
 
 }

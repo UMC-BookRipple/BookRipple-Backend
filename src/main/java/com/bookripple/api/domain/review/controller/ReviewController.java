@@ -2,6 +2,7 @@ package com.bookripple.api.domain.review.controller;
 
 import com.bookripple.api.common.code.CommonSuccessCode;
 import com.bookripple.api.common.response.ApiResponse;
+import com.bookripple.api.domain.review.dto.ReviewResDto.MyReviewList;
 import com.bookripple.api.domain.review.dto.ReviewResDto.ReviewList;
 import com.bookripple.api.domain.review.service.ReviewService;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
@@ -67,5 +68,16 @@ public class ReviewController {
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         reviewService.getReviews(bookId, memberId, lastId, size));
+  }
+
+  @GetMapping("/reviews/me")
+  public ApiResponse<MyReviewList> getMyReviews(
+      @RequestParam @Min(1) Long memberId,
+      @RequestParam(required = false) String lastBookTitle,
+      @RequestParam(required = false) Long lastId,
+      @RequestParam(defaultValue = "3") int size
+  ) {
+    return ApiResponse.onSuccess(CommonSuccessCode.OK,
+        reviewService.getMyReviews(memberId, lastBookTitle, lastId, size));
   }
 }

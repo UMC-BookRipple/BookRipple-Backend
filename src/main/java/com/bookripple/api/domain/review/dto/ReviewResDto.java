@@ -24,4 +24,24 @@ public class ReviewResDto {
   ) {
 
   }
+
+  @Builder
+  public record MyReview(
+      Long id,
+      String bookTitle,
+      String content,
+      LocalDateTime updatedAt
+  ) {
+
+  }
+
+  @Builder
+  public record MyReviewList(
+      List<MyReview> myReviewList,
+      Boolean hasNext,
+      String lastBookTitle,
+      Long lastId
+  ) {
+
+  }
 }

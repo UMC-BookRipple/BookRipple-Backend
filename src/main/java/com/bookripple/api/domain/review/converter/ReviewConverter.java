@@ -3,6 +3,8 @@ package com.bookripple.api.domain.review.converter;
 import com.bookripple.api.domain.book.entity.Book;
 import com.bookripple.api.domain.member.entity.Member;
 import com.bookripple.api.domain.review.dto.ReviewResDto.Item;
+import com.bookripple.api.domain.review.dto.ReviewResDto.MyReview;
+import com.bookripple.api.domain.review.dto.ReviewResDto.MyReviewList;
 import com.bookripple.api.domain.review.dto.ReviewResDto.ReviewList;
 import com.bookripple.api.domain.review.entity.Review;
 import com.bookripple.api.global.dto.GlobalDto;
@@ -32,6 +34,25 @@ public class ReviewConverter {
         .reviewList(reviewList)
         .hasNext(hasNext)
         .lastId(lastId)
+        .build();
+  }
+
+  public static MyReview toMyReview(Review review) {
+    return MyReview.builder()
+        .id(review.getId())
+        .bookTitle(review.getBook().getTitle())
+        .content(review.getContent())
+        .updatedAt(review.getUpdatedAt())
+        .build();
+  }
+
+  public static MyReviewList toMyReviewList(List<MyReview> myReviewList,
+      String lastBookTitle, Long lastId, Boolean hasNext) {
+    return MyReviewList.builder()
+        .myReviewList(myReviewList)
+        .lastBookTitle(lastBookTitle)
+        .lastId(lastId)
+        .hasNext(hasNext)
         .build();
   }
 }
