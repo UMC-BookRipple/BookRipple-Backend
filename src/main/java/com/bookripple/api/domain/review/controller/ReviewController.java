@@ -28,9 +28,9 @@ public class ReviewController {
 
   private final ReviewService reviewService;
 
-  @PostMapping("/books/{bookId}/reviews")
+  @PostMapping("/books/{book-id}/reviews")
   public ApiResponse<IdRes> createReview(
-      @PathVariable @Min(1) Long bookId,
+      @PathVariable("book-id") @Min(1) Long bookId,
       @RequestParam @Min(1) Long memberId,
       @Valid @RequestBody ContentReq request
   ) {
@@ -39,18 +39,18 @@ public class ReviewController {
         reviewService.createReview(bookId, memberId, request));
   }
 
-  @DeleteMapping("/reviews/{reviewId}")
+  @DeleteMapping("/reviews/{review-id}")
   public ApiResponse<IdRes> deleteReview(
-      @PathVariable @Min(1) Long reviewId,
+      @PathVariable("review-id") @Min(1) Long reviewId,
       @RequestParam @Min(1) Long memberId
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         reviewService.deleteReview(reviewId, memberId));
   }
 
-  @PatchMapping("/reviews/{reviewId}")
+  @PatchMapping("/reviews/{review-id}")
   public ApiResponse<IdRes> updateReview(
-      @PathVariable @Min(1) Long reviewId,
+      @PathVariable("review-id") @Min(1) Long reviewId,
       @RequestParam @Min(1) Long memberId,
       @Valid @RequestBody ContentReq request
   ) {
@@ -58,9 +58,9 @@ public class ReviewController {
         reviewService.updateReview(reviewId, memberId, request));
   }
 
-  @GetMapping("/books/{bookId}/reviews")
+  @GetMapping("/books/{book-id}/reviews")
   public ApiResponse<ReviewList> getReviews(
-      @PathVariable @Min(1) Long bookId,
+      @PathVariable("book-id") @Min(1) Long bookId,
       @RequestParam @Min(1) Long memberId,
       @RequestParam(required = false) Long lastId,
       @RequestParam(defaultValue = "3") int size
