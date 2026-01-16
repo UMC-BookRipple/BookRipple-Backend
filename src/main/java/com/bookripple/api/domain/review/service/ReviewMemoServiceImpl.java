@@ -12,6 +12,7 @@ import com.bookripple.api.domain.review.repository.ReviewRepository;
 import com.bookripple.api.global.converter.GlobalConverter;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -38,5 +39,20 @@ public class ReviewMemoServiceImpl implements ReviewMemoService {
     reviewMemoRepository.save(reviewMemo);
 
     return GlobalConverter.toIdRes(reviewMemo.getId());
+  }
+
+  @Override
+  @Transactional
+  public IdRes updateReviewMemo(Long reviewMemoId, Long memberId, ContentReq request) {
+    ReviewMemo reviewMemo = reviewMemoRepository.findById(reviewMemoId)
+        .orElseThrow(() -> new ApiException(ReviewErrorCode.NO_REVIEW_MEMO));
+
+    if (!reviewMemo.getMember().getId().equals(memberId)) {
+      throw new ApiException(ReviewErrorCode.MEMO_FORBIDDEN);
+    }
+
+    reviewMemo.update(request.content());
+
+    return GlobalConverter.toIdRes(reviewMemoId);
   }
 }
