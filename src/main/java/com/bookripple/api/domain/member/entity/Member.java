@@ -1,6 +1,7 @@
 package com.bookripple.api.domain.member.entity;
 
 import com.bookripple.api.global.entity.BaseEntity;
+import com.bookripple.api.domain.member.enums.*;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -25,6 +26,33 @@ public class Member extends BaseEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Column(nullable = false, length = 20)
+  private String name;
+
   @Column(nullable = false, length = 50)
   private String loginId;
+
+  @Column(columnDefinition = "TEXT")
+  private String password; // 소셜 로그인 시 NULL 가능
+
+  @Column(nullable = false)
+  private LocalDate birthDate;
+
+  @Column(length = 20)
+  private String phoneNum;
+
+  @Column(nullable = false, length = 100)
+  private String email;
+
+  @Column(nullable = false)
+  private Boolean isCertified;
+
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private MemberStatus status; // ACTIVE, SLEEP, QUIT
+
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private LoginType loginType; // LOCAL, KAKAO, GUEST
+
 }
