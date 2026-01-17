@@ -1,8 +1,9 @@
 package com.bookripple.api.domain.review.service;
 
+import com.bookripple.api.common.code.BookErrorCode;
+import com.bookripple.api.common.code.ReviewErrorCode;
+import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.domain.book.entity.Book;
-import com.bookripple.api.domain.book.exception.BookException;
-import com.bookripple.api.domain.book.exception.code.BookErrorCode;
 import com.bookripple.api.domain.book.repository.BookRepository;
 import com.bookripple.api.domain.member.entity.Member;
 import com.bookripple.api.domain.member.repository.MemberRepository;
@@ -12,8 +13,6 @@ import com.bookripple.api.domain.review.dto.ReviewResDto.MyReview;
 import com.bookripple.api.domain.review.dto.ReviewResDto.MyReviewList;
 import com.bookripple.api.domain.review.dto.ReviewResDto.ReviewList;
 import com.bookripple.api.domain.review.entity.Review;
-import com.bookripple.api.domain.review.exception.ReviewException;
-import com.bookripple.api.domain.review.exception.code.ReviewErrorCode;
 import com.bookripple.api.domain.review.repository.ReviewRepository;
 import com.bookripple.api.global.converter.GlobalConverter;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
@@ -40,7 +39,7 @@ public class ReviewServiceImpl implements ReviewService {
   public IdRes createReview(Long bookId, Long memberId, ContentReq request) {
 
     Book book = bookRepository.findById(bookId)
-        .orElseThrow(() -> new BookException(BookErrorCode.NO_BOOK));
+        .orElseThrow(() -> new ApiException(BookErrorCode.NO_BOOK));
 
     Member member = memberRepository.getReferenceById(memberId);
 
@@ -53,10 +52,10 @@ public class ReviewServiceImpl implements ReviewService {
   @Override
   public IdRes deleteReview(Long reviewId, Long memberId) {
     Review review = reviewRepository.findById(reviewId)
-        .orElseThrow(() -> new ReviewException(ReviewErrorCode.NO_REVIEW));
+        .orElseThrow(() -> new ApiException(ReviewErrorCode.NO_REVIEW));
 
     if (!review.getMember().getId().equals(memberId)) {
-      throw new ReviewException(ReviewErrorCode.FORBIDDEN);
+      throw new ApiException(ReviewErrorCode.FORBIDDEN);
     }
     reviewRepository.delete(review);
 
@@ -67,10 +66,10 @@ public class ReviewServiceImpl implements ReviewService {
   @Transactional
   public IdRes updateReview(Long reviewId, Long memberId, ContentReq request) {
     Review review = reviewRepository.findById(reviewId)
-        .orElseThrow(() -> new ReviewException(ReviewErrorCode.NO_REVIEW));
+        .orElseThrow(() -> new ApiException(ReviewErrorCode.NO_REVIEW));
 
     if (!review.getMember().getId().equals(memberId)) {
-      throw new ReviewException(ReviewErrorCode.FORBIDDEN);
+      throw new ApiException(ReviewErrorCode.FORBIDDEN);
     }
     review.update(request.content());
 
@@ -80,7 +79,7 @@ public class ReviewServiceImpl implements ReviewService {
   @Override
   public ReviewList getReviews(Long bookId, Long memberId, Long lastId, int size) {
     Book book = bookRepository.findById(bookId)
-        .orElseThrow(() -> new BookException(BookErrorCode.NO_BOOK));
+        .orElseThrow(() -> new ApiException(BookErrorCode.NO_BOOK));
 
     Long cursor = (lastId == null) ? Long.MAX_VALUE : lastId;
 
