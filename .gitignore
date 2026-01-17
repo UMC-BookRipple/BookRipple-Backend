@@ -32,6 +32,7 @@ out/
 
 # Package artifacts
 *.jar
+!gradle-wrapper.jar
 *.war
 *.ear
 *.zip
