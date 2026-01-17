@@ -1,5 +1,7 @@
 package com.bookripple.api.domain.auth.service;
 
+import com.bookripple.api.common.code.CommonErrorCode;
+import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.global.security.JwtTokenProvider;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -58,14 +60,20 @@ public class AuthService {
 
   private void validateLocalMember(Member member) {
     if (member.getLoginType() != LoginType.LOCAL) {
-      throw new IllegalArgumentException("로컬 로그인 계정이 아닙니다.");
+      throw new ApiException(
+          CommonErrorCode.BAD_REQUEST,
+          "로컬 로그인 계정이 아닙니다."
+      );
     }
   }
 
   private void validatePassword(String rawPassword, String encodedPassword) {
     if (encodedPassword == null
         || !passwordEncoder.matches(rawPassword, encodedPassword)) {
-      throw new IllegalArgumentException("비밀번호가 올바르지 않습니다.");
+      throw new ApiException(
+          CommonErrorCode.UNAUTHORIZED,
+          "비밀번호가 올바르지 않습니다."
+      );
     }
   }
 }

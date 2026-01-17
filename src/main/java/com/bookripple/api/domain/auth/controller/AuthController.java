@@ -1,5 +1,9 @@
 package com.bookripple.api.domain.auth.controller;
 
+import com.bookripple.api.common.code.CommonSuccessCode;
+import com.bookripple.api.common.response.ApiResponse;
+import com.bookripple.api.domain.auth.dto.AuthResDto.Login;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,8 +24,14 @@ public class AuthController {
   private final AuthService authService;
 
   @PostMapping("/login/local")
-  public ResponseEntity<AuthResDto.Login> localLogin(
-      @RequestBody AuthReqDto.Login request) {
-    return ResponseEntity.ok(authService.localLogin(request));
+  public ResponseEntity<ApiResponse<Login>> login(
+      @RequestBody @Valid AuthReqDto.Login request) {
+
+    AuthResDto.Login result = authService.localLogin(request);
+
+    return ResponseEntity
+        .status(CommonSuccessCode.OK.getHttpStatus())
+        .body(ApiResponse.onSuccess(CommonSuccessCode.OK, result));
   }
+
 }
