@@ -5,6 +5,8 @@ import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.domain.member.entity.Member;
 import com.bookripple.api.domain.member.repository.MemberRepository;
 import com.bookripple.api.domain.review.converter.ReviewMemoConverter;
+import com.bookripple.api.domain.review.dto.ReviewMemoResDto.MyReviewMemoList;
+import com.bookripple.api.domain.review.dto.ReviewMemoResDto.ReviewAndMemo;
 import com.bookripple.api.domain.review.entity.Review;
 import com.bookripple.api.domain.review.entity.ReviewMemo;
 import com.bookripple.api.domain.review.repository.ReviewMemoRepository;
@@ -13,7 +15,11 @@ import com.bookripple.api.global.converter.GlobalConverter;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
 import jakarta.transaction.Transactional;
+import java.util.List;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -67,5 +73,31 @@ public class ReviewMemoServiceImpl implements ReviewMemoService {
     reviewMemoRepository.delete(reviewMemo);
 
     return GlobalConverter.toIdRes(reviewMemoId);
+  }
+
+  @Override
+  public MyReviewMemoList getMyReviewMemoList(Long memberId, String lastBookTitle,
+      Long lastMemoId, int size) {
+
+    Pageable pageable = PageRequest.of(0, size);
+
+    Slice<ReviewMemo> reviewMemoSlice = reviewMemoRepository.findMyReviewMemoByCursor(memberId,
+        lastBookTitle, lastMemoId, pageable);
+
+    List<ReviewAndMemo> reviewAndMemoList = reviewMemoSlice.stream()
+        .map(ReviewMemoConverter::toReviewAndMemo)
+        .toList();
+
+    String nextBookTitle = null;
+    Long nextId = null;
+
+    if (!reviewAndMemoList.isEmpty()) {
+      ReviewAndMemo last = reviewAndMemoList.get(reviewAndMemoList.size() - 1);
+      nextBookTitle = last.bookTitle();
+      nextId = last.reviewMemoId();
+    }
+
+    return ReviewMemoConverter.toMyReviewMemoList(reviewAndMemoList, nextBookTitle,
+        nextId, reviewMemoSlice.hasNext());
   }
 }

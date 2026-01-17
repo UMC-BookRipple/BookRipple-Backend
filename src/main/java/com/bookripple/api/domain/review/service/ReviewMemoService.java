@@ -1,5 +1,6 @@
 package com.bookripple.api.domain.review.service;
 
+import com.bookripple.api.domain.review.dto.ReviewMemoResDto.MyReviewMemoList;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
 
@@ -10,5 +11,8 @@ public interface ReviewMemoService {
   IdRes updateReviewMemo(Long reviewMemoId, Long memberId, ContentReq request);
 
   IdRes deleteReviewMemo(Long reviewMemoId, Long memberId);
+
+  MyReviewMemoList getMyReviewMemoList(Long memberId, String lastBookTitle, Long lastMemoId,
+      int size);
 
 }
