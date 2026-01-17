@@ -55,4 +55,17 @@ public class ReviewMemoServiceImpl implements ReviewMemoService {
 
     return GlobalConverter.toIdRes(reviewMemoId);
   }
+
+  @Override
+  public IdRes deleteReviewMemo(Long reviewMemoId, Long memberId) {
+    ReviewMemo reviewMemo = reviewMemoRepository.findById(reviewMemoId)
+        .orElseThrow(() -> new ApiException(ReviewErrorCode.NO_REVIEW_MEMO));
+
+    if (!reviewMemo.getMember().getId().equals(memberId)) {
+      throw new ApiException(ReviewErrorCode.MEMO_FORBIDDEN);
+    }
+    reviewMemoRepository.delete(reviewMemo);
+
+    return GlobalConverter.toIdRes(reviewMemoId);
+  }
 }
