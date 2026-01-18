@@ -42,8 +42,8 @@ public class ReviewController {
 
   @DeleteMapping("/reviews/{review-id}")
   public ApiResponse<IdRes> deleteReview(
-      @AuthenticationPrincipal Long reviewId,
-      @RequestParam @Min(1) Long memberId
+      @AuthenticationPrincipal Long memberId,
+      @PathVariable("review-id") Long reviewId
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         reviewService.deleteReview(reviewId, memberId));
