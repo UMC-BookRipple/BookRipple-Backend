@@ -9,4 +9,6 @@ public interface RecommendService {
   IdRes createRecommendation(Long memberId, Long sourceBookId, Create request);
 
   IdRes updateRecommendation(Long memberId, Long recommendationId, ContentReq request);
+
+  IdRes deleteRecommendation(Long memberId, Long recommendationId);
 }

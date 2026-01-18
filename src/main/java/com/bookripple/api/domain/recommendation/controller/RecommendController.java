@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,5 +44,14 @@ public class RecommendController {
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         recommendService.updateRecommendation(memberId, recommendationId, request));
+  }
+
+  @DeleteMapping("/recommendations/{recommendation-id}")
+  public ApiResponse<IdRes> deleteRecommendation(
+      @AuthenticationPrincipal Long memberId,
+      @PathVariable("recommendation-id") Long recommendationId
+  ) {
+    return ApiResponse.onSuccess(CommonSuccessCode.OK,
+        recommendService.deleteRecommendation(memberId, recommendationId));
   }
 }

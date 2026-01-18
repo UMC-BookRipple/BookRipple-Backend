@@ -60,4 +60,20 @@ public class RecommendServiceImpl implements RecommendService {
 
     return GlobalConverter.toIdRes(recommendationId);
   }
+
+  @Override
+  public IdRes deleteRecommendation(Long memberId, Long recommendationId) {
+
+    Recommendation recommendation = recommendRepository.findById(recommendationId)
+        .orElseThrow(() -> new ApiException(RecommendErrorCode.NO_RECOMMENDATION));
+
+    if (!recommendation.getMember().getId().equals(memberId)) {
+      throw new ApiException(RecommendErrorCode.FORBIDDEN);
+    }
+
+    recommendRepository.delete(recommendation);
+
+    return GlobalConverter.toIdRes(recommendationId);
+  }
+  
 }
