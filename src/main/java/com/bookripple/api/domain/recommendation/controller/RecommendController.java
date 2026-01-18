@@ -4,11 +4,13 @@ import com.bookripple.api.common.code.CommonSuccessCode;
 import com.bookripple.api.common.response.ApiResponse;
 import com.bookripple.api.domain.recommendation.dto.RecommendReqDto.Create;
 import com.bookripple.api.domain.recommendation.service.RecommendService;
+import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,5 +33,15 @@ public class RecommendController {
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.CREATED,
         recommendService.createRecommendation(memberId, sourceBookId, request));
+  }
+
+  @PatchMapping("/recommendations/{recommendation-id}")
+  public ApiResponse<IdRes> updateRecommendation(
+      @AuthenticationPrincipal Long memberId,
+      @PathVariable("recommendation-id") Long recommendationId,
+      @RequestBody @Valid ContentReq request
+  ) {
+    return ApiResponse.onSuccess(CommonSuccessCode.OK,
+        recommendService.updateRecommendation(memberId, recommendationId, request));
   }
 }

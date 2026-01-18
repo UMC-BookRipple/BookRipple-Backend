@@ -45,4 +45,7 @@ public class Recommendation extends BaseEntity {
   @JoinColumn(name = "target_book_id")
   private Book targetBook;
 
+  public void update(String content) {
+    this.content = content;
+  }
 }
