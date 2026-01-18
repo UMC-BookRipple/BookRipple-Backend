@@ -28,10 +28,10 @@ public class BlindSalePost extends BaseEntity {
     private Book book;
 
     @Column(nullable = false)
-    private String seller_review;
+    private String title;
 
     @Column(nullable = false)
-    private String favorite_quote;
+    private String quote;
 
     @Column(nullable = false)
     private Integer price;
