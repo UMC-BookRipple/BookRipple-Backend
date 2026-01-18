@@ -10,6 +10,7 @@ import com.bookripple.api.global.dto.GlobalDto.IdRes;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,17 +33,16 @@ public class ReviewController {
   @PostMapping("/books/{book-id}/reviews")
   public ApiResponse<IdRes> createReview(
       @PathVariable("book-id") @Min(1) Long bookId,
-      @RequestParam @Min(1) Long memberId,
+      @AuthenticationPrincipal Long memberId,
       @Valid @RequestBody ContentReq request
   ) {
-
     return ApiResponse.onSuccess(CommonSuccessCode.CREATED,
         reviewService.createReview(bookId, memberId, request));
   }
 
   @DeleteMapping("/reviews/{review-id}")
   public ApiResponse<IdRes> deleteReview(
-      @PathVariable("review-id") @Min(1) Long reviewId,
+      @AuthenticationPrincipal Long reviewId,
       @RequestParam @Min(1) Long memberId
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
@@ -52,7 +52,7 @@ public class ReviewController {
   @PatchMapping("/reviews/{review-id}")
   public ApiResponse<IdRes> updateReview(
       @PathVariable("review-id") @Min(1) Long reviewId,
-      @RequestParam @Min(1) Long memberId,
+      @AuthenticationPrincipal Long memberId,
       @Valid @RequestBody ContentReq request
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
@@ -62,7 +62,7 @@ public class ReviewController {
   @GetMapping("/books/{book-id}/reviews")
   public ApiResponse<ReviewList> getReviews(
       @PathVariable("book-id") @Min(1) Long bookId,
-      @RequestParam @Min(1) Long memberId,
+      @AuthenticationPrincipal Long memberId,
       @RequestParam(required = false) Long lastId,
       @RequestParam(defaultValue = "3") int size
   ) {
@@ -72,7 +72,7 @@ public class ReviewController {
 
   @GetMapping("/reviews/me")
   public ApiResponse<MyReviewList> getMyReviews(
-      @RequestParam @Min(1) Long memberId,
+      @AuthenticationPrincipal Long memberId,
       @RequestParam(required = false) String lastBookTitle,
       @RequestParam(required = false) Long lastId,
       @RequestParam(defaultValue = "3") int size
