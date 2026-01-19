@@ -3,6 +3,7 @@ package com.bookripple.api.domain.auth.controller;
 import com.bookripple.api.common.code.CommonSuccessCode;
 import com.bookripple.api.common.response.ApiResponse;
 import com.bookripple.api.domain.auth.dto.AuthResDto.Login;
+import com.bookripple.api.domain.member.repository.MemberRepository;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 public class AuthController {
 
   private final AuthService authService;
+  private final MemberRepository memberRepository;
 
   @PostMapping("/login/local")
   public ResponseEntity<ApiResponse<Login>> login(
@@ -38,13 +40,11 @@ public class AuthController {
   }
 
   @GetMapping("/check-id")
-  public ResponseEntity<GlobalDto.SingleRes<String>> checkDuplicateLoginId(
+  public ResponseEntity<ApiResponse<Boolean>> checkDuplicateLoginId(
       @RequestParam("loginId") String loginId
   ) {
-    boolean isAvailable = authService.checkDuplicateLoginId(loginId);
-    String message = isAvailable ? "사용 가능한 아이디입니다." : "사용 불가능한 아이디입니다.";
-    return ResponseEntity.ok(GlobalDto.SingleRes.of(message));
+    boolean isAvailable = !memberRepository.existsByLoginId(loginId);
+    return ResponseEntity.ok(ApiResponse.onSuccess(CommonSuccessCode.OK, isAvailable));
   }
-
 
 }
