@@ -12,6 +12,13 @@ public class GlobalDto {
 
   }
 
+  @Builder
+  public record SingleRes<T>(
+      T data
+  ) {
+
+  }
+
 
   public record ContentReq(
       @NotBlank
