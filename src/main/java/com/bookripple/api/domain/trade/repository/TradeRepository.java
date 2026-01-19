@@ -8,11 +8,4 @@ import java.util.List;
 
 public interface TradeRepository extends JpaRepository<Trade, Long> {
 
-    List<Trade> findByBuyerId(Long buyerId);
-
-    List<Trade> findBySellerId(Long sellerId);
-
-    List<Trade> findByStatus(TradeStatus status);
-
-    List<Trade> findByBlindSalePostId(Long blindSalePostId);
 }

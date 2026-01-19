@@ -7,7 +7,4 @@ import java.util.List;
 
 public interface BlindSalePostRepository extends JpaRepository<BlindSalePost, Long> {
 
-    List<BlindSalePost> findByMemberId(Long memberId);
-
-    List<BlindSalePost> findByBookId(Long bookId);
 }
