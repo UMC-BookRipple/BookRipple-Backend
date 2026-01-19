@@ -27,7 +27,7 @@ public class Payment {
     @Column(nullable = false)
     private PaymentProvider provider;
 
-    @Column(name = "payment_key", length = 200)
+    @Column(nullable = false, length = 200)
     private String paymentKey;
 
     @Enumerated(EnumType.STRING)
