@@ -1,4 +1,4 @@
-package com.bookripple.api.domain.trade.enums;
+package com.bookripple.api.domain.order.enums;
 
 public enum TradeStatus {
     REQUESTED, // 구매요청(결제 전)

@@ -1,8 +1,8 @@
-package com.bookripple.api.domain.trade.entity;
+package com.bookripple.api.domain.order.entity;
 
 import com.bookripple.api.domain.blindsalepost.entity.BlindSalePost;
 import com.bookripple.api.domain.member.entity.Member;
-import com.bookripple.api.domain.trade.enums.TradeStatus;
+import com.bookripple.api.domain.order.enums.TradeStatus;
 import com.bookripple.api.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
