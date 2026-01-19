@@ -41,14 +41,17 @@ public class Member extends BaseEntity {
   @Column(nullable = false)
   private LocalDate birthDate;
 
-  @Column(length = 20)
-  private String phoneNum;
-
   @Column(nullable = false, length = 100)
   private String email;
 
   @Column(nullable = false)
   private Boolean isCertified;
+
+  @Column(nullable = false)
+  private Boolean isRequiredAgreed; // 필수약관동의 여부
+
+  @Column(nullable = false)
+  private Boolean isOptionalAgreed; // 선택약관동의 여부
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
