@@ -1,7 +1,6 @@
 package com.bookripple.api.domain.order.entity;
 
 import com.bookripple.api.domain.member.entity.Member;
-import com.bookripple.api.domain.order.enums.PaymentProvider;
 import com.bookripple.api.domain.order.enums.SettlementStatus;
 import com.bookripple.api.global.entity.BaseEntity;
 import jakarta.persistence.*;

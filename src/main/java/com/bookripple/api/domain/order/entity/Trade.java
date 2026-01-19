@@ -16,7 +16,6 @@ import lombok.*;
 public class Trade extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "trade_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
