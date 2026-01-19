@@ -76,4 +76,14 @@ public class AuthService {
       );
     }
   }
+
+  /**
+   * 아이디 중복 여부 확인
+   *
+   * @param loginId 사용자 입력 loginId
+   * @return true = 사용 가능, false = 중복
+   */
+  public boolean checkDuplicateLoginId(String loginId) {
+    return !memberRepository.existsByLoginId(loginId);
+  }
 }
