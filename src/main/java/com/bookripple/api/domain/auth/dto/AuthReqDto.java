@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,7 +24,7 @@ public class AuthReqDto {
 
   @Getter
   @NoArgsConstructor
-  public static class Signup{
+  public static class Signup {
 
     @NotBlank(message = "로그인 아이디는 필수입니다.")
     private String loginId;
