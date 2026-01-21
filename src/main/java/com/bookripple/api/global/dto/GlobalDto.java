@@ -1,6 +1,8 @@
 package com.bookripple.api.global.dto;
 
+import com.bookripple.api.global.validation.ValidationGroups;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 
 public class GlobalDto {
@@ -15,6 +17,7 @@ public class GlobalDto {
 
   public record ContentReq(
       @NotBlank
+      @Size(max = 50, message = "질문은 50자를 넘을 수 없습니다.", groups = ValidationGroups.QuestionGroup.class)
       String content
   ) {
 
