@@ -9,6 +9,8 @@ import com.bookripple.api.domain.member.entity.Member;
 import com.bookripple.api.domain.member.repository.MemberRepository;
 import com.bookripple.api.domain.recommendation.converter.RecommendConverter;
 import com.bookripple.api.domain.recommendation.dto.RecommendReqDto.Create;
+import com.bookripple.api.domain.recommendation.dto.RecommendResDto.MyRecommend;
+import com.bookripple.api.domain.recommendation.dto.RecommendResDto.MyRecommendList;
 import com.bookripple.api.domain.recommendation.dto.RecommendResDto.Recommend;
 import com.bookripple.api.domain.recommendation.dto.RecommendResDto.RecommendList;
 import com.bookripple.api.domain.recommendation.entity.Recommendation;
@@ -106,6 +108,31 @@ public class RecommendServiceImpl implements RecommendService {
       nextCursor = recommendList.get(recommendList.size() - 1).id();
     }
     return RecommendConverter.toRecommendList(recommendList, nextCursor, recommendSlice.hasNext());
+  }
+
+  @Override
+  public MyRecommendList getMyRecommendList(Long memberId, String lastBookTitle, Long lastId,
+      int size) {
+
+    Pageable pageable = PageRequest.of(0, size);
+
+    Slice<Recommendation> myRecommendSlice = recommendRepository.findMyRecommendationByCursor(
+        memberId, lastBookTitle, lastId, pageable);
+
+    List<MyRecommend> myRecommendList = myRecommendSlice.stream()
+        .map(RecommendConverter::toMyRecommend)
+        .toList();
+
+    String nextBookTitle = null;
+    Long nextId = null;
+
+    if (!myRecommendList.isEmpty()) {
+      MyRecommend last = myRecommendList.get(myRecommendList.size() - 1);
+      nextBookTitle = last.sourceBookTitle();
+      nextId = last.id();
+    }
+    return RecommendConverter.toMyRecommendList(myRecommendList, nextBookTitle, nextId,
+        myRecommendSlice.hasNext());
   }
 
 }

@@ -30,4 +30,24 @@ public class RecommendResDto {
 
   }
 
+  @Builder
+  public record MyRecommend(
+      Long id,
+      String sourceBookTitle,
+      String targetBookTitle,
+      String content,
+      LocalDateTime updatedAt
+  ) {
+
+  }
+
+  @Builder
+  public record MyRecommendList(
+      List<MyRecommend> myRecommendList,
+      Boolean hasNext,
+      String lastSourceBookTitle,
+      Long lastId
+  ) {
+
+  }
 }

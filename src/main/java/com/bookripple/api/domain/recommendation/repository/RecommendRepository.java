@@ -25,4 +25,19 @@ public interface RecommendRepository extends JpaRepository<Recommendation, Long>
       @Param("lastId") Long lastId,
       Pageable pageable
   );
+
+  @Query("SELECT rec FROM Recommendation rec " +
+      "JOIN FETCH rec.sourceBook " +
+      "JOIN FETCH rec.targetBook " +
+      "WHERE rec.member.id = :memberId " +
+      "AND (:lastSourceBookTitle IS NULL OR " +
+      "    rec.sourceBook.title > :lastSourceBookTitle OR " +
+      "    (rec.sourceBook.title = :lastSourceBookTitle AND rec.id < :lastId)) " +
+      "ORDER BY rec.sourceBook.title ASC, rec.id DESC ")
+  Slice<Recommendation> findMyRecommendationByCursor(
+      @Param("memberId") Long memberId,
+      @Param("lastSourceBookTitle") String lastSourceBookTitle,
+      @Param("lastId") Long lastId,
+      Pageable pageable
+  );
 }

@@ -2,6 +2,8 @@ package com.bookripple.api.domain.recommendation.converter;
 
 import com.bookripple.api.domain.book.entity.Book;
 import com.bookripple.api.domain.member.entity.Member;
+import com.bookripple.api.domain.recommendation.dto.RecommendResDto.MyRecommend;
+import com.bookripple.api.domain.recommendation.dto.RecommendResDto.MyRecommendList;
 import com.bookripple.api.domain.recommendation.dto.RecommendResDto.Recommend;
 import com.bookripple.api.domain.recommendation.dto.RecommendResDto.RecommendList;
 import com.bookripple.api.domain.recommendation.entity.Recommendation;
@@ -37,6 +39,26 @@ public class RecommendConverter {
       Boolean hasNext) {
     return RecommendList.builder()
         .recommendList(recommendListList)
+        .hasNext(hasNext)
+        .lastId(lastId)
+        .build();
+  }
+
+  public static MyRecommend toMyRecommend(Recommendation recommendation) {
+    return MyRecommend.builder()
+        .content(recommendation.getContent())
+        .id(recommendation.getId())
+        .sourceBookTitle(recommendation.getSourceBook().getTitle())
+        .targetBookTitle(recommendation.getTargetBook().getTitle())
+        .updatedAt(recommendation.getUpdatedAt())
+        .build();
+  }
+
+  public static MyRecommendList toMyRecommendList(List<MyRecommend> myRecommendList,
+      String lastSourceBookTitle, Long lastId, Boolean hasNext) {
+    return MyRecommendList.builder()
+        .myRecommendList(myRecommendList)
+        .lastSourceBookTitle(lastSourceBookTitle)
         .hasNext(hasNext)
         .lastId(lastId)
         .build();
