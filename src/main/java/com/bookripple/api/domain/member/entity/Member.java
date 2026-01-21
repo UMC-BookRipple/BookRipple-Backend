@@ -29,7 +29,7 @@ public class Member extends BaseEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false, length = 50)
+  @Column(nullable = false, unique = true, length = 50)
   private String loginId;
 
   @Column(columnDefinition = "TEXT")
@@ -38,7 +38,7 @@ public class Member extends BaseEntity {
   @Column(nullable = false, length = 20)
   private String name;
 
-  @Column(nullable = false, length = 100)
+  @Column(nullable = false, unique = true, length = 100)
   private String email;
 
   @Column(nullable = false)
@@ -64,5 +64,9 @@ public class Member extends BaseEntity {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private MemberRole role; // USER, ADMIN
+
+  public void certify() {
+    this.isCertified = true;
+  }
 
 }
