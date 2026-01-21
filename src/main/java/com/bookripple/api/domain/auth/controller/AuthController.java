@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.bookripple.api.global.dto.GlobalDto;
 import com.bookripple.api.domain.auth.dto.AuthReqDto;
 import com.bookripple.api.domain.auth.dto.AuthResDto;
 import com.bookripple.api.domain.auth.service.AuthService;
@@ -46,5 +45,4 @@ public class AuthController {
     boolean isAvailable = !memberRepository.existsByLoginId(loginId);
     return ResponseEntity.ok(ApiResponse.onSuccess(CommonSuccessCode.OK, isAvailable));
   }
-
 }
