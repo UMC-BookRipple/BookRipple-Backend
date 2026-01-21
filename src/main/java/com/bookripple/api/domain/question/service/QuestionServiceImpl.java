@@ -1,6 +1,7 @@
 package com.bookripple.api.domain.question.service;
 
 import com.bookripple.api.common.code.BookErrorCode;
+import com.bookripple.api.common.code.QuestionErrorCode;
 import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.domain.book.entity.Book;
 import com.bookripple.api.domain.book.repository.BookRepository;
@@ -38,5 +39,20 @@ public class QuestionServiceImpl implements QuestionService {
     questionRepository.save(question);
 
     return GlobalConverter.toIdRes(question.getId());
+  }
+
+  @Override
+  @Transactional
+  public IdRes deleteQuestion(Long memberId, Long questionId) {
+    Question question = questionRepository.findById(questionId)
+        .orElseThrow(() -> new ApiException(QuestionErrorCode.QUESTION_NOT_FOUND));
+
+    if (!question.getMember().getId().equals(memberId)) {
+      throw new ApiException(QuestionErrorCode.QUESTION_FORBIDDEN);
+    }
+
+    questionRepository.delete(question);
+
+    return GlobalConverter.toIdRes(questionId);
   }
 }

@@ -10,6 +10,7 @@ import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,5 +33,14 @@ public class QuestionController {
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.CREATED,
         questionService.createQuestion(memberId, bookId, request));
+  }
+
+  @DeleteMapping("questions/{question-id}")
+  public ApiResponse<IdRes> deleteQuestion(
+      @AuthenticationPrincipal Long memberId,
+      @PathVariable("question-id") Long questionId
+  ) {
+    return ApiResponse.onSuccess(CommonSuccessCode.OK,
+        questionService.deleteQuestion(memberId, questionId));
   }
 }

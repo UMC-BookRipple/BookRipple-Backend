@@ -6,4 +6,6 @@ import com.bookripple.api.global.dto.GlobalDto.IdRes;
 public interface QuestionService {
 
   IdRes createQuestion(Long memberId, Long bookId, ContentReq request);
+
+  IdRes deleteQuestion(Long memberId, Long questionId);
 }
