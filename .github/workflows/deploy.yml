@@ -23,7 +23,6 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build with Gradle
-        working-directory: backend-java
         run: ./gradlew clean build -x test
 
       - name: Verify jar build output
