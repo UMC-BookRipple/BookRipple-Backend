@@ -29,7 +29,7 @@ public class ReviewMemoController {
 
   private final ReviewMemoService reviewMemoService;
 
-  @PostMapping("reviews/{review-id}/review-memos")
+  @PostMapping("/reviews/{review-id}/review-memos")
   public ApiResponse<IdRes> createReviewMemo(
       @PathVariable("review-id") @Min(1) Long reviewId,
       @AuthenticationPrincipal Long memberId,
@@ -39,7 +39,7 @@ public class ReviewMemoController {
         reviewMemoService.createReviewMemo(reviewId, memberId, request));
   }
 
-  @PatchMapping("review-memos/{review-memo-id}")
+  @PatchMapping("/review-memos/{review-memo-id}")
   public ApiResponse<IdRes> updateReviewMemo(
       @PathVariable("review-memo-id") @Min(1) Long reviewMemoId,
       @AuthenticationPrincipal Long memberId,
@@ -49,7 +49,7 @@ public class ReviewMemoController {
         reviewMemoService.updateReviewMemo(reviewMemoId, memberId, request));
   }
 
-  @DeleteMapping("review-memos/{review-memo-id}")
+  @DeleteMapping("/review-memos/{review-memo-id}")
   public ApiResponse<IdRes> deleteReviewMemo(
       @PathVariable("review-memo-id") @Min(1) Long reviewMemoId,
       @AuthenticationPrincipal Long memberId
@@ -58,7 +58,7 @@ public class ReviewMemoController {
         reviewMemoService.deleteReviewMemo(reviewMemoId, memberId));
   }
 
-  @GetMapping("review-memos/me")
+  @GetMapping("/review-memos/me")
   public ApiResponse<MyReviewMemoList> getMyReviewMemo(
       @AuthenticationPrincipal @Min(1) Long memberId,
       @RequestParam(required = false) String lastBookTitle,
