@@ -9,6 +9,7 @@ import com.bookripple.api.global.dto.GlobalDto.IdRes;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,7 +32,7 @@ public class ReviewMemoController {
   @PostMapping("reviews/{review-id}/review-memos")
   public ApiResponse<IdRes> createReviewMemo(
       @PathVariable("review-id") @Min(1) Long reviewId,
-      @RequestParam Long memberId,
+      @AuthenticationPrincipal Long memberId,
       @Valid @RequestBody ContentReq request
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.CREATED,
@@ -41,7 +42,7 @@ public class ReviewMemoController {
   @PatchMapping("review-memos/{review-memo-id}")
   public ApiResponse<IdRes> updateReviewMemo(
       @PathVariable("review-memo-id") @Min(1) Long reviewMemoId,
-      @RequestParam Long memberId,
+      @AuthenticationPrincipal Long memberId,
       @Valid @RequestBody ContentReq request
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
@@ -51,7 +52,7 @@ public class ReviewMemoController {
   @DeleteMapping("review-memos/{review-memo-id}")
   public ApiResponse<IdRes> deleteReviewMemo(
       @PathVariable("review-memo-id") @Min(1) Long reviewMemoId,
-      @RequestParam Long memberId
+      @AuthenticationPrincipal Long memberId
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         reviewMemoService.deleteReviewMemo(reviewMemoId, memberId));
@@ -59,7 +60,7 @@ public class ReviewMemoController {
 
   @GetMapping("review-memos/me")
   public ApiResponse<MyReviewMemoList> getMyReviewMemo(
-      @RequestParam @Min(1) Long memberId,
+      @AuthenticationPrincipal @Min(1) Long memberId,
       @RequestParam(required = false) String lastBookTitle,
       @RequestParam(required = false) Long lastReviewMemoId,
       @RequestParam(defaultValue = "3") Integer size

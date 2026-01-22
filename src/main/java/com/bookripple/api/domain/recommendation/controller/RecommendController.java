@@ -1,10 +1,11 @@
-package com.bookripple.api.domain.review.controller;
+package com.bookripple.api.domain.recommendation.controller;
 
 import com.bookripple.api.common.code.CommonSuccessCode;
 import com.bookripple.api.common.response.ApiResponse;
-import com.bookripple.api.domain.review.dto.ReviewResDto.MyReviewList;
-import com.bookripple.api.domain.review.dto.ReviewResDto.ReviewList;
-import com.bookripple.api.domain.review.service.ReviewService;
+import com.bookripple.api.domain.recommendation.dto.RecommendReqDto.Create;
+import com.bookripple.api.domain.recommendation.dto.RecommendResDto.MyRecommendList;
+import com.bookripple.api.domain.recommendation.dto.RecommendResDto.RecommendList;
+import com.bookripple.api.domain.recommendation.service.RecommendService;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
 import jakarta.validation.Valid;
@@ -26,58 +27,58 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Validated
 @RequestMapping(value = "/api/v1")
-public class ReviewController {
+public class RecommendController {
 
-  private final ReviewService reviewService;
+  private final RecommendService recommendService;
 
-  @PostMapping("/books/{book-id}/reviews")
-  public ApiResponse<IdRes> createReview(
-      @PathVariable("book-id") @Min(1) Long bookId,
+  @PostMapping("/books/{book-id}/recommendations")
+  public ApiResponse<IdRes> createRecommendation(
       @AuthenticationPrincipal Long memberId,
-      @Valid @RequestBody ContentReq request
+      @PathVariable("book-id") Long sourceBookId,
+      @RequestBody @Valid Create request
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.CREATED,
-        reviewService.createReview(bookId, memberId, request));
+        recommendService.createRecommendation(memberId, sourceBookId, request));
   }
 
-  @DeleteMapping("/reviews/{review-id}")
-  public ApiResponse<IdRes> deleteReview(
+  @PatchMapping("/recommendations/{recommendation-id}")
+  public ApiResponse<IdRes> updateRecommendation(
       @AuthenticationPrincipal Long memberId,
-      @PathVariable("review-id") Long reviewId
+      @PathVariable("recommendation-id") Long recommendationId,
+      @RequestBody @Valid ContentReq request
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
-        reviewService.deleteReview(reviewId, memberId));
+        recommendService.updateRecommendation(memberId, recommendationId, request));
   }
 
-  @PatchMapping("/reviews/{review-id}")
-  public ApiResponse<IdRes> updateReview(
-      @PathVariable("review-id") @Min(1) Long reviewId,
+  @DeleteMapping("/recommendations/{recommendation-id}")
+  public ApiResponse<IdRes> deleteRecommendation(
       @AuthenticationPrincipal Long memberId,
-      @Valid @RequestBody ContentReq request
+      @PathVariable("recommendation-id") Long recommendationId
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
-        reviewService.updateReview(reviewId, memberId, request));
+        recommendService.deleteRecommendation(memberId, recommendationId));
   }
 
-  @GetMapping("/books/{book-id}/reviews")
-  public ApiResponse<ReviewList> getReviews(
-      @PathVariable("book-id") @Min(1) Long bookId,
+  @GetMapping("/books/{book-id}/recommendations")
+  public ApiResponse<RecommendList> getRecommendations(
       @AuthenticationPrincipal Long memberId,
+      @PathVariable("book-id") @Min(1) Long sourceBookId,
       @RequestParam(required = false) Long lastId,
       @RequestParam(defaultValue = "3") int size
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
-        reviewService.getReviews(bookId, memberId, lastId, size));
+        recommendService.getRecommendList(memberId, sourceBookId, lastId, size));
   }
 
-  @GetMapping("/reviews/me")
-  public ApiResponse<MyReviewList> getMyReviews(
+  @GetMapping("/recommendations/me")
+  public ApiResponse<MyRecommendList> getMyRecommendations(
       @AuthenticationPrincipal Long memberId,
-      @RequestParam(required = false) String lastBookTitle,
+      @RequestParam(required = false) String lastSourceBookTitle,
       @RequestParam(required = false) Long lastId,
       @RequestParam(defaultValue = "3") int size
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
-        reviewService.getMyReviews(memberId, lastBookTitle, lastId, size));
+        recommendService.getMyRecommendList(memberId, lastSourceBookTitle, lastId, size));
   }
 }

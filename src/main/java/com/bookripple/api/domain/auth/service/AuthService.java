@@ -2,18 +2,16 @@ package com.bookripple.api.domain.auth.service;
 
 import com.bookripple.api.common.code.CommonErrorCode;
 import com.bookripple.api.common.error.ApiException;
-import com.bookripple.api.global.security.JwtTokenProvider;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.bookripple.api.domain.auth.dto.AuthReqDto;
 import com.bookripple.api.domain.auth.dto.AuthResDto;
 import com.bookripple.api.domain.member.entity.Member;
 import com.bookripple.api.domain.member.enums.LoginType;
 import com.bookripple.api.domain.member.repository.MemberRepository;
-
+import com.bookripple.api.global.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,15 +25,13 @@ public class AuthService {
   @Transactional(readOnly = true)
   public AuthResDto.Login localLogin(AuthReqDto.Login request) {
 
-    // TODO: DB 연동 전 임시 mock member (제거 예정)
-    Member member = getMockMember(request.getLoginId());
+//    // TODO: DB 연동 전 임시 mock member (제거 예정)
+//    Member member = getMockMember(request.getLoginId());
 
-    /*
     Member member =
         memberRepository
             .findByLoginId(request.getLoginId())
             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 로그인 아이디입니다."));
-    */
 
     validateLocalMember(member);
     validatePassword(request.getPassword(), member.getPassword());
