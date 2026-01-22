@@ -27,4 +27,24 @@ public class QuestionResDto {
 
   }
 
+  @Builder
+  public record MyQ(
+      Long id,
+      String bookTitle,
+      QuestionType type,
+      String content,
+      LocalDateTime createdAt
+  ) {
+
+  }
+
+  @Builder
+  public record MyQuestionList(
+      List<MyQ> questionList,
+      Boolean hasNext,
+      String lastBookTitle,
+      Long lastId
+  ) {
+
+  }
 }

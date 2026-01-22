@@ -8,6 +8,8 @@ import com.bookripple.api.domain.book.repository.BookRepository;
 import com.bookripple.api.domain.member.entity.Member;
 import com.bookripple.api.domain.member.repository.MemberRepository;
 import com.bookripple.api.domain.question.converter.QuestionConverter;
+import com.bookripple.api.domain.question.dto.QuestionResDto.MyQ;
+import com.bookripple.api.domain.question.dto.QuestionResDto.MyQuestionList;
 import com.bookripple.api.domain.question.dto.QuestionResDto.Q;
 import com.bookripple.api.domain.question.dto.QuestionResDto.QuestionList;
 import com.bookripple.api.domain.question.entity.Question;
@@ -92,5 +94,28 @@ public class QuestionServiceImpl implements QuestionService {
     return QuestionConverter.toQuestionList(questionList, nextId, questionSlice.hasNext(),
         totalCnt);
 
+  }
+
+  @Override
+  public MyQuestionList getMyQuestion(Long memberId, String lastBookTitle, Long lastId, int size) {
+    Pageable pageable = PageRequest.of(0, size);
+
+    Slice<Question> questionSlice = questionRepository.findMyQuestionByCursor(memberId,
+        lastBookTitle, lastId, pageable);
+
+    List<MyQ> questionList = questionSlice.stream()
+        .map(QuestionConverter::toMyQ)
+        .toList();
+
+    String nextTitle = null;
+    Long nextId = null;
+    if (!questionList.isEmpty()) {
+      MyQ last = questionList.get(questionList.size() - 1);
+      nextTitle = last.bookTitle();
+      nextId = last.id();
+    }
+
+    return QuestionConverter.toMyQuestionList(questionList, nextTitle, nextId,
+        questionSlice.hasNext());
   }
 }

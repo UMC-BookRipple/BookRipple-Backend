@@ -44,4 +44,19 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
       @Param("keyword") String keyword,
       @Param("onlyMine") boolean onlyMine
   );
+
+  @Query("SELECT q FROM Question q " +
+      "JOIN FETCH q.book " +
+      "WHERE q.member.id = :memberId " +
+      "AND (:lastBookTitle IS NULL OR " +
+      "    q.book.title > :lastBookTitle OR " +
+      "    (q.book.title = :lastBookTitle AND q.id < :lastId)) " +
+      "ORDER BY q.book.title ASC, q.id DESC "
+  )
+  Slice<Question> findMyQuestionByCursor(
+      @Param("memberId") Long memberId,
+      @Param("lastBookTitle") String lastBookTitle,
+      @Param("lastId") Long lastId,
+      Pageable pageable
+  );
 }

@@ -2,6 +2,7 @@ package com.bookripple.api.domain.question.controller;
 
 import com.bookripple.api.common.code.CommonSuccessCode;
 import com.bookripple.api.common.response.ApiResponse;
+import com.bookripple.api.domain.question.dto.QuestionResDto.MyQuestionList;
 import com.bookripple.api.domain.question.dto.QuestionResDto.QuestionList;
 import com.bookripple.api.domain.question.service.QuestionService;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
@@ -28,7 +29,7 @@ public class QuestionController {
 
   private final QuestionService questionService;
 
-  @PostMapping("books/{book-id}/questions")
+  @PostMapping("/books/{book-id}/questions")
   public ApiResponse<IdRes> createQuestion(
       @AuthenticationPrincipal Long memberId,
       @PathVariable("book-id") @Min(1) Long bookId,
@@ -38,7 +39,7 @@ public class QuestionController {
         questionService.createQuestion(memberId, bookId, request));
   }
 
-  @DeleteMapping("questions/{question-id}")
+  @DeleteMapping("/questions/{question-id}")
   public ApiResponse<IdRes> deleteQuestion(
       @AuthenticationPrincipal Long memberId,
       @PathVariable("question-id") Long questionId
@@ -47,7 +48,7 @@ public class QuestionController {
         questionService.deleteQuestion(memberId, questionId));
   }
 
-  @GetMapping("books/{book-id}/questions")
+  @GetMapping("/books/{book-id}/questions")
   public ApiResponse<QuestionList> getQuestion(
       @AuthenticationPrincipal Long memberId,
       @PathVariable("book-id") @Min(1) Long bookId,
@@ -58,5 +59,16 @@ public class QuestionController {
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         questionService.getQuestion(memberId, bookId, keyword, onlyMine, lastId, size));
+  }
+
+  @GetMapping("/questions/me")
+  public ApiResponse<MyQuestionList> getMyQuestion(
+      @AuthenticationPrincipal Long memberId,
+      @RequestParam(required = false) String lastBookTitle,
+      @RequestParam(required = false) Long lastId,
+      @RequestParam(defaultValue = "3") int size
+  ) {
+    return ApiResponse.onSuccess(CommonSuccessCode.OK,
+        questionService.getMyQuestion(memberId, lastBookTitle, lastId, size));
   }
 }
