@@ -8,14 +8,21 @@ import com.bookripple.api.domain.book.repository.BookRepository;
 import com.bookripple.api.domain.member.entity.Member;
 import com.bookripple.api.domain.member.repository.MemberRepository;
 import com.bookripple.api.domain.question.converter.QuestionConverter;
+import com.bookripple.api.domain.question.dto.QuestionResDto.Q;
+import com.bookripple.api.domain.question.dto.QuestionResDto.QuestionList;
 import com.bookripple.api.domain.question.entity.Question;
 import com.bookripple.api.domain.question.repository.QuestionRepository;
 import com.bookripple.api.global.converter.GlobalConverter;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
 import jakarta.transaction.Transactional;
+import java.util.List;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Service
 @AllArgsConstructor
@@ -54,5 +61,36 @@ public class QuestionServiceImpl implements QuestionService {
     questionRepository.delete(question);
 
     return GlobalConverter.toIdRes(questionId);
+  }
+
+  @Override
+  public QuestionList getQuestion(Long memberId, Long bookId, String keyword, Boolean onlyMine,
+      Long lastId, int size) {
+
+    Book book = bookRepository.findById(bookId)
+        .orElseThrow(() -> new ApiException(BookErrorCode.NO_BOOK));
+
+    Pageable pageable = PageRequest.of(0, size);
+
+    Slice<Question> questionSlice = questionRepository.findQuestionByCursor(bookId, lastId,
+        memberId, keyword, onlyMine, pageable);
+
+    List<Q> questionList = questionSlice.stream()
+        .map(QuestionConverter::toQ)
+        .toList();
+
+    Long nextId = null;
+    if (!questionList.isEmpty()) {
+      nextId = questionList.get(questionList.size() - 1).id();
+    }
+
+    long totalCnt = 0;
+    if (lastId == null && StringUtils.hasText(keyword)) {
+      totalCnt = questionRepository.countQuestions(bookId, memberId, keyword, onlyMine);
+    }
+
+    return QuestionConverter.toQuestionList(questionList, nextId, questionSlice.hasNext(),
+        totalCnt);
+
   }
 }

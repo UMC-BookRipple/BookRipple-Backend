@@ -1,5 +1,6 @@
 package com.bookripple.api.domain.question.service;
 
+import com.bookripple.api.domain.question.dto.QuestionResDto.QuestionList;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
 
@@ -8,4 +9,7 @@ public interface QuestionService {
   IdRes createQuestion(Long memberId, Long bookId, ContentReq request);
 
   IdRes deleteQuestion(Long memberId, Long questionId);
+
+  QuestionList getQuestion(Long memberId, Long bookId, String keyword, Boolean onlyMine,
+      Long lastId, int size);
 }
