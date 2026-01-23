@@ -55,5 +55,17 @@ public class AnswerServiceImpl implements AnswerService {
     return GlobalConverter.toIdRes(answerId);
   }
 
+  @Override
+  public IdRes deleteAnswer(Long answerId, Long memberId) {
+    Answer answer = answerRepository.findById(answerId)
+        .orElseThrow(() -> new ApiException(AnswerErrorCode.NO_ANSWER));
 
+    if (!answer.getMember().getId().equals(memberId)) {
+      throw new ApiException(AnswerErrorCode.FORBIDDEN);
+    }
+
+    answerRepository.delete(answer);
+
+    return GlobalConverter.toIdRes(answerId);
+  }
 }

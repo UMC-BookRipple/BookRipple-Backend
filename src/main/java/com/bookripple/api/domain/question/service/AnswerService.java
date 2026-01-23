@@ -9,4 +9,6 @@ public interface AnswerService {
 
   IdRes updateAnswer(Long answerId, Long memberId, ContentReq request);
 
+  IdRes deleteAnswer(Long answerId, Long memberId);
+
 }
