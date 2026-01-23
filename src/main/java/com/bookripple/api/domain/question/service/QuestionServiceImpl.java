@@ -69,8 +69,9 @@ public class QuestionServiceImpl implements QuestionService {
   public QuestionList getQuestion(Long memberId, Long bookId, String keyword, Boolean onlyMine,
       Long lastId, int size) {
 
-    Book book = bookRepository.findById(bookId)
-        .orElseThrow(() -> new ApiException(BookErrorCode.NO_BOOK));
+    if (!bookRepository.existsById(bookId)) {
+      throw new ApiException(BookErrorCode.NO_BOOK);
+    }
 
     Pageable pageable = PageRequest.of(0, size);
 
