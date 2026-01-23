@@ -1,5 +1,6 @@
 package com.bookripple.api.domain.question.service;
 
+import com.bookripple.api.common.code.AnswerErrorCode;
 import com.bookripple.api.common.code.QuestionErrorCode;
 import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.domain.member.entity.Member;
@@ -38,4 +39,21 @@ public class AnswerServiceImpl implements AnswerService {
 
     return GlobalConverter.toIdRes(answer.getId());
   }
+
+  @Override
+  @Transactional
+  public IdRes updateAnswer(Long answerId, Long memberId, ContentReq request) {
+    Answer answer = answerRepository.findById(answerId)
+        .orElseThrow(() -> new ApiException(AnswerErrorCode.NO_ANSWER));
+
+    if (!answer.getMember().getId().equals(memberId)) {
+      throw new ApiException(AnswerErrorCode.FORBIDDEN);
+    }
+
+    answer.update(request.content());
+
+    return GlobalConverter.toIdRes(answerId);
+  }
+
+
 }

@@ -39,4 +39,8 @@ public class Answer extends BaseEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "question_id")
   private Question question;
+
+  public void update(String content) {
+    this.content = content;
+  }
 }
