@@ -2,6 +2,7 @@ package com.bookripple.api.domain.question.controller;
 
 import com.bookripple.api.common.code.CommonSuccessCode;
 import com.bookripple.api.common.response.ApiResponse;
+import com.bookripple.api.domain.question.dto.AnswerResDto.AnswerList;
 import com.bookripple.api.domain.question.service.AnswerService;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
@@ -10,6 +11,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -54,5 +56,12 @@ public class AnswerController {
         answerService.deleteAnswer(answerId, memberId));
   }
 
-
+  @GetMapping("/questions/{question-id}/answers")
+  public ApiResponse<AnswerList> getAnswerList(
+      @AuthenticationPrincipal Long memberId,
+      @PathVariable("question-id") Long questionId
+  ) {
+    return ApiResponse.onSuccess(CommonSuccessCode.OK,
+        answerService.getAnswers(questionId, memberId));
+  }
 }

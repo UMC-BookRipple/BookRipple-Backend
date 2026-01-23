@@ -6,6 +6,8 @@ import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.domain.member.entity.Member;
 import com.bookripple.api.domain.member.repository.MemberRepository;
 import com.bookripple.api.domain.question.converter.AnswerConverter;
+import com.bookripple.api.domain.question.dto.AnswerResDto.Ans;
+import com.bookripple.api.domain.question.dto.AnswerResDto.AnswerList;
 import com.bookripple.api.domain.question.entity.Answer;
 import com.bookripple.api.domain.question.entity.Question;
 import com.bookripple.api.domain.question.repository.AnswerRepository;
@@ -13,6 +15,7 @@ import com.bookripple.api.domain.question.repository.QuestionRepository;
 import com.bookripple.api.global.converter.GlobalConverter;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,5 +70,24 @@ public class AnswerServiceImpl implements AnswerService {
     answerRepository.delete(answer);
 
     return GlobalConverter.toIdRes(answerId);
+  }
+
+  @Override
+  public AnswerList getAnswers(Long questionId, Long memberId) {
+
+    if (!questionRepository.existsById(questionId)) {
+      throw new ApiException(QuestionErrorCode.QUESTION_NOT_FOUND);
+    }
+
+    List<Answer> answerList = answerRepository.findAllByQuestionId(questionId);
+
+    List<Ans> ansList = answerList.stream()
+        .map(answer -> {
+          boolean isMine = answer.getMember().getId().equals(memberId);
+          return AnswerConverter.toAns(answer, isMine);
+        })
+        .toList();
+
+    return AnswerConverter.toAnswerList(ansList);
   }
 }

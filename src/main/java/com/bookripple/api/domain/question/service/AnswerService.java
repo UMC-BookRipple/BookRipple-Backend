@@ -1,5 +1,6 @@
 package com.bookripple.api.domain.question.service;
 
+import com.bookripple.api.domain.question.dto.AnswerResDto.AnswerList;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
 
@@ -11,4 +12,5 @@ public interface AnswerService {
 
   IdRes deleteAnswer(Long answerId, Long memberId);
 
+  AnswerList getAnswers(Long questionId, Long memberId);
 }
