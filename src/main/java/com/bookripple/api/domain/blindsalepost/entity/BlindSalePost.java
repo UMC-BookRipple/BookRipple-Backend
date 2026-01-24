@@ -1,6 +1,7 @@
 package com.bookripple.api.domain.blindsalepost.entity;
 
 import com.bookripple.api.domain.blindsalepost.enums.BookCondition;
+import com.bookripple.api.domain.blindsalepost.enums.PostStatus;
 import com.bookripple.api.domain.book.entity.Book;
 import com.bookripple.api.domain.member.entity.Member;
 import com.bookripple.api.global.entity.BaseEntity;
@@ -39,6 +40,11 @@ public class BlindSalePost extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "book_condition", nullable = false)
     private BookCondition bookCondition;
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(name = "post_status", nullable = false)
+    private PostStatus postStatus = PostStatus.SALE;
 
 
 }
