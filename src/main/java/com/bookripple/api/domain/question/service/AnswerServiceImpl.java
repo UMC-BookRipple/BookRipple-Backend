@@ -8,6 +8,8 @@ import com.bookripple.api.domain.member.repository.MemberRepository;
 import com.bookripple.api.domain.question.converter.AnswerConverter;
 import com.bookripple.api.domain.question.dto.AnswerResDto.Ans;
 import com.bookripple.api.domain.question.dto.AnswerResDto.AnswerList;
+import com.bookripple.api.domain.question.dto.AnswerResDto.MyAnswer;
+import com.bookripple.api.domain.question.dto.AnswerResDto.MyAnswerList;
 import com.bookripple.api.domain.question.entity.Answer;
 import com.bookripple.api.domain.question.entity.Question;
 import com.bookripple.api.domain.question.repository.AnswerRepository;
@@ -17,6 +19,9 @@ import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
 import java.util.List;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -89,5 +94,26 @@ public class AnswerServiceImpl implements AnswerService {
         .toList();
 
     return AnswerConverter.toAnswerList(ansList);
+  }
+
+  @Override
+  public MyAnswerList getMyAnswers(Long memberId, Long lastAnswerId, int size) {
+
+    Pageable pageable = PageRequest.of(0, size);
+
+    Long cursor = lastAnswerId == null ? Long.MAX_VALUE : lastAnswerId;
+
+    Slice<Answer> answerSlice = answerRepository.findMyAnswerByCursor(memberId, cursor, pageable);
+
+    List<MyAnswer> myAnswerList = answerSlice.stream()
+        .map(AnswerConverter::toMyAnswer)
+        .toList();
+
+    Long nextId = null;
+    if (!myAnswerList.isEmpty()) {
+      nextId = myAnswerList.get(myAnswerList.size() - 1).answerId();
+    }
+
+    return AnswerConverter.toMyAnswerList(myAnswerList, answerSlice.hasNext(), nextId);
   }
 }

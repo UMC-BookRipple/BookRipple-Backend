@@ -3,10 +3,12 @@ package com.bookripple.api.domain.question.controller;
 import com.bookripple.api.common.code.CommonSuccessCode;
 import com.bookripple.api.common.response.ApiResponse;
 import com.bookripple.api.domain.question.dto.AnswerResDto.AnswerList;
+import com.bookripple.api.domain.question.dto.AnswerResDto.MyAnswerList;
 import com.bookripple.api.domain.question.service.AnswerService;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
 import com.bookripple.api.global.validation.ValidationGroups;
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -63,5 +66,15 @@ public class AnswerController {
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         answerService.getAnswers(questionId, memberId));
+  }
+
+  @GetMapping("/answers/me")
+  public ApiResponse<MyAnswerList> getMyAnswerList(
+      @AuthenticationPrincipal Long memberId,
+      @RequestParam(required = false) @Min(1) Long lastAnswerId,
+      @RequestParam(defaultValue = "3") int size
+  ) {
+    return ApiResponse.onSuccess(CommonSuccessCode.OK,
+        answerService.getMyAnswers(memberId, lastAnswerId, size));
   }
 }

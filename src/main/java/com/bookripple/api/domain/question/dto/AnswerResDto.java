@@ -22,4 +22,24 @@ public class AnswerResDto {
   ) {
 
   }
+
+  @Builder
+  public record MyAnswer(
+      Long questionId,
+      String questionContent,
+      Long answerId,
+      String answerContent,
+      LocalDateTime updatedAt
+  ) {
+
+  }
+
+  @Builder
+  public record MyAnswerList(
+      List<MyAnswer> myAnswerList,
+      Boolean hasNext,
+      Long lastAnswerId
+  ) {
+
+  }
 }
