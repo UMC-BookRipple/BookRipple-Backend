@@ -11,5 +11,5 @@ public interface BlindSalePostRepository extends JpaRepository<BlindSalePost, Lo
     List<BlindSalePost> findAllByMemberId(Long memberId);
 
     // 2. 판매 상태별 조회 (판매중/거래완료 탭 구분용)
-     List<BlindSalePost> findAllByStatus(PostStatus status);
+     List<BlindSalePost> findAllByPostStatus(PostStatus status);
 }
