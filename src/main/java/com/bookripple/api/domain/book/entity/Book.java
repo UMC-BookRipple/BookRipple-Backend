@@ -1,20 +1,23 @@
 package com.bookripple.api.domain.book.entity;
 
 import com.bookripple.api.global.entity.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Entity
-@Table(name = "book")
+@Table(
+        name = "book",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_book_isbn", columnNames = "isbn"),
+                @UniqueConstraint(name = "uk_book_aladin_book_id", columnNames = "aladin_book_id")
+        }
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
@@ -26,6 +29,9 @@ public class Book extends BaseEntity {
   Long id;
 
   @Column(nullable = false)
+  private String story;
+
+  @Column(nullable = false)
   String title;
 
   @Column(nullable = false)
@@ -33,4 +39,20 @@ public class Book extends BaseEntity {
   
   @Column(name = "cover_url", nullable = false)
   String bookCover;
+
+  @Column(nullable = false)
+  private LocalDate year;
+
+  @Column(length = 13, unique = true)
+  private String isbn;
+
+  @Column(nullable = false)
+  private String publisher;
+
+  @Column(nullable = false)
+  private Integer totalPage;
+
+  // aladin_book_id bigint NULL UNIQUE
+  @Column(unique = true)
+  private Long aladinBookId;
 }
