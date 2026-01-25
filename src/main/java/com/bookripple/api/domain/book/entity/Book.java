@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @Table(
         name = "book",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uk_book_isbn", columnNames = "isbn"),
+                @UniqueConstraint(name = "uk_book_isbn13", columnNames = "isbn13"),
                 @UniqueConstraint(name = "uk_book_aladin_book_id", columnNames = "aladin_book_id")
         }
 )
@@ -28,7 +28,7 @@ public class Book extends BaseEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Long id;
 
-  @Column(nullable = false)
+  @Column
   private String story;
 
   @Column(nullable = false)
@@ -41,10 +41,13 @@ public class Book extends BaseEntity {
   String bookCover;
 
   @Column(nullable = false)
-  private LocalDate year;
+  private LocalDate publishedAt;
 
-  @Column(length = 13, unique = true)
-  private String isbn;
+  @Column(name = "isbn13", length = 13, unique = true)
+  private String isbn13;
+
+  @Column(length = 10, unique = true)
+  private String isbn10;
 
   @Column(nullable = false)
   private String publisher;
@@ -52,7 +55,6 @@ public class Book extends BaseEntity {
   @Column(nullable = false)
   private Integer totalPage;
 
-  // aladin_book_id bigint NULL UNIQUE
-  @Column(unique = true)
+  @Column(name = "aladin_book_id")
   private Long aladinBookId;
 }
