@@ -87,8 +87,9 @@ public class RecommendServiceImpl implements RecommendService {
   @Override
   public RecommendList getRecommendList(Long memberId, Long bookId, Long lastId, int size) {
 
-    Book book = bookRepository.findById(bookId)
-        .orElseThrow(() -> new ApiException(BookErrorCode.NO_BOOK));
+    if (!bookRepository.existsById(bookId)) {
+      throw new ApiException(BookErrorCode.NO_BOOK);
+    }
 
     Long cursor = (lastId == null) ? Long.MAX_VALUE : lastId;
 

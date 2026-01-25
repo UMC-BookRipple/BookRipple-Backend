@@ -18,6 +18,7 @@ public class GlobalDto {
   public record ContentReq(
       @NotBlank
       @Size(max = 50, message = "질문은 50자를 넘을 수 없습니다.", groups = ValidationGroups.QuestionGroup.class)
+      @Size(max = 200, message = "답변은 200자를 넘을 수 없습니다.", groups = ValidationGroups.AnswerGroup.class)
       String content
   ) {
 

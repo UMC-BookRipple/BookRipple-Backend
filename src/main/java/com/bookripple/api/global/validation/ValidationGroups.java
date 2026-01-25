@@ -8,5 +8,8 @@ public class ValidationGroups {
 
   }
 
+  public interface AnswerGroup extends Default {
+
+  }
 
 }
