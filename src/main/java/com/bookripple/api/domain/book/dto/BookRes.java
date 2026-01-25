@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @Builder
 public class BookRes {
     private Long bookId;         // 북리플 내 DB pk
-    private Long aladinItemId;   // 외부 pk
+    private Long aladinItemId;   // 알라딘 pk
     private String title;
     private String author;
     private String publisher;

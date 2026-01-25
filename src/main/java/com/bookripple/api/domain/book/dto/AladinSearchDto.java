@@ -1,29 +1,26 @@
 package com.bookripple.api.domain.book.dto;
-import lombok.Builder;
+
 import lombok.Getter;
 
 import java.util.List;
 
-@Getter
-@Builder
-public class BookSearchRes {
+// 알라딘 도서 검색 API 응답 DTO 우선 만들어두기만 함
 
+@Getter
+public class AladinSearchDto {
     private Integer totalResults;
     private Integer startIndex;
     private Integer itemsPerPage;
-    private Boolean hasNext;
-
-    private List<Item> items;
+    private List<Item> item;
 
     @Getter
-    @Builder
     public static class Item {
-        private Long aladinItemId;
+        private Long itemId;        // 알라딘 itemId
         private String title;
         private String author;
         private String publisher;
-        private String coverUrl;
-        private String pubDate;
+        private String pubDate;     // "yyyy-MM-dd" or "yyyyMMdd"
+        private String cover;
         private String isbn10;
         private String isbn13;
     }
