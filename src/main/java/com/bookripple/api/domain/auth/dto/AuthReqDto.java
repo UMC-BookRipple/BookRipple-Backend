@@ -52,5 +52,13 @@ public class AuthReqDto {
 
     private Boolean isOptionalAgreed;
   }
+
+  @Getter
+  @NoArgsConstructor
+  public static class Verify {
+
+    private String email;
+    private String code;
+  }
 }
 
