@@ -20,12 +20,13 @@ logging:
   level:
     root: INFO
 
-    server:
-      tomcat:
-        basedir: ${APP_DIR:/home/ec2-user/app}/tomcat
-        accesslog:
-          enabled: true
-          directory: ${APP_DIR:/home/ec2-user/app}/logs
-          prefix: access
-          suffix: .log
-          pattern: '%h %l %u %t "%r" %s %b %D'
+
+server:
+  tomcat:
+    basedir: ${APP_DIR:/home/ec2-user/app}/tomcat
+    accesslog:
+      enabled: true
+      directory: ${APP_DIR:/home/ec2-user/app}/logs
+      prefix: access
+      suffix: .log
+      pattern: '%h %l %u %t "%r" %s %b %D'
