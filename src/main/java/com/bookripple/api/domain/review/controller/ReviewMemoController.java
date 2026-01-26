@@ -2,9 +2,8 @@ package com.bookripple.api.domain.review.controller;
 
 import com.bookripple.api.common.code.CommonSuccessCode;
 import com.bookripple.api.common.response.ApiResponse;
-import com.bookripple.api.domain.review.dto.ReviewResDto.MyReviewList;
-import com.bookripple.api.domain.review.dto.ReviewResDto.ReviewList;
-import com.bookripple.api.domain.review.service.ReviewService;
+import com.bookripple.api.domain.review.dto.ReviewMemoResDto.MyReviewMemoList;
+import com.bookripple.api.domain.review.service.ReviewMemoService;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
 import jakarta.validation.Valid;
@@ -26,58 +25,48 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Validated
 @RequestMapping(value = "/api/v1")
-public class ReviewController {
+public class ReviewMemoController {
 
-  private final ReviewService reviewService;
+  private final ReviewMemoService reviewMemoService;
 
-  @PostMapping("/books/{book-id}/reviews")
-  public ApiResponse<IdRes> createReview(
-      @PathVariable("book-id") @Min(1) Long bookId,
-      @AuthenticationPrincipal Long memberId,
-      @Valid @RequestBody ContentReq request
-  ) {
-    return ApiResponse.onSuccess(CommonSuccessCode.CREATED,
-        reviewService.createReview(bookId, memberId, request));
-  }
-
-  @DeleteMapping("/reviews/{review-id}")
-  public ApiResponse<IdRes> deleteReview(
-      @AuthenticationPrincipal Long memberId,
-      @PathVariable("review-id") Long reviewId
-  ) {
-    return ApiResponse.onSuccess(CommonSuccessCode.OK,
-        reviewService.deleteReview(reviewId, memberId));
-  }
-
-  @PatchMapping("/reviews/{review-id}")
-  public ApiResponse<IdRes> updateReview(
+  @PostMapping("/reviews/{review-id}/review-memos")
+  public ApiResponse<IdRes> createReviewMemo(
       @PathVariable("review-id") @Min(1) Long reviewId,
       @AuthenticationPrincipal Long memberId,
       @Valid @RequestBody ContentReq request
   ) {
-    return ApiResponse.onSuccess(CommonSuccessCode.OK,
-        reviewService.updateReview(reviewId, memberId, request));
+    return ApiResponse.onSuccess(CommonSuccessCode.CREATED,
+        reviewMemoService.createReviewMemo(reviewId, memberId, request));
   }
 
-  @GetMapping("/books/{book-id}/reviews")
-  public ApiResponse<ReviewList> getReviews(
-      @PathVariable("book-id") @Min(1) Long bookId,
+  @PatchMapping("/review-memos/{review-memo-id}")
+  public ApiResponse<IdRes> updateReviewMemo(
+      @PathVariable("review-memo-id") @Min(1) Long reviewMemoId,
       @AuthenticationPrincipal Long memberId,
-      @RequestParam(required = false) Long lastId,
-      @RequestParam(defaultValue = "3") int size
+      @Valid @RequestBody ContentReq request
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
-        reviewService.getReviews(bookId, memberId, lastId, size));
+        reviewMemoService.updateReviewMemo(reviewMemoId, memberId, request));
   }
 
-  @GetMapping("/reviews/me")
-  public ApiResponse<MyReviewList> getMyReviews(
-      @AuthenticationPrincipal Long memberId,
+  @DeleteMapping("/review-memos/{review-memo-id}")
+  public ApiResponse<IdRes> deleteReviewMemo(
+      @PathVariable("review-memo-id") @Min(1) Long reviewMemoId,
+      @AuthenticationPrincipal Long memberId
+  ) {
+    return ApiResponse.onSuccess(CommonSuccessCode.OK,
+        reviewMemoService.deleteReviewMemo(reviewMemoId, memberId));
+  }
+
+  @GetMapping("/review-memos/me")
+  public ApiResponse<MyReviewMemoList> getMyReviewMemo(
+      @AuthenticationPrincipal @Min(1) Long memberId,
       @RequestParam(required = false) String lastBookTitle,
-      @RequestParam(required = false) Long lastId,
-      @RequestParam(defaultValue = "3") int size
+      @RequestParam(required = false) Long lastReviewMemoId,
+      @RequestParam(defaultValue = "3") Integer size
   ) {
+
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
-        reviewService.getMyReviews(memberId, lastBookTitle, lastId, size));
+        reviewMemoService.getMyReviewMemoList(memberId, lastBookTitle, lastReviewMemoId, size));
   }
 }

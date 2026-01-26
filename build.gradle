@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.bookripple'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.1'
 
 java {
     toolchain {
@@ -52,4 +52,8 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+tasks.named('bootJar') {
+    archiveFileName = 'app.jar'
 }

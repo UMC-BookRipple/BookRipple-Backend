@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    url: ${LOCAL_DB_URL:jdbc:mysql://localhost:3306/bookripple}
+    username: ${LOCAL_DB_USER:root}
+    password: ${LOCAL_DB_PW}
+    driver-class-name: ${LOCAL_DB_DRIVER:com.mysql.cj.jdbc.Driver}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-expiration-ms: ${JWT_ACCESS_TOKEN_EXPIRATION_MS:1800000}
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG

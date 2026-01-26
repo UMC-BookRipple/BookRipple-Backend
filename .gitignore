@@ -5,10 +5,20 @@ Thumbs.db
 # Environment / Secrets
 .env
 *.env
-application-*.yml
-application.yml
+!.env.example
 application-*.properties
 application.properties
+!application-*.example.yml
+!application-*.example.yaml
+
+# Certificates / Keys
+*.pem
+*.key
+*.crt
+*.cer
+*.jks
+*.p12
+*.pfx
 
 # Java
 *.class
@@ -29,6 +39,8 @@ out/
 
 # Logs
 *.log
+logs/
+nohup.out
 
 # Package artifacts
 *.jar
