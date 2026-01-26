@@ -38,7 +38,7 @@ public class BlindSalePostConverter {
         return BlindSalePostResDto.ListElement.builder()
                 .blindBookId(post.getId())
                 .title(post.getTitle())
-                .author(post.getBook().getAuthor()) // 연관된 Book 엔티티에서 저자명 추출
+                //.author(post.getBook().getAuthor()) // 연관된 Book 엔티티에서 저자명 추출
                 .price(post.getPrice())
                 .status(post.getPostStatus().name()) // SALE, DONE 등
                 .build();

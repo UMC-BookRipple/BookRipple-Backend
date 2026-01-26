@@ -4,7 +4,9 @@ import com.bookripple.api.domain.blindsalepost.converter.BlindSalePostConverter;
 import com.bookripple.api.domain.blindsalepost.dto.BlindSalePostReqDto;
 import com.bookripple.api.domain.blindsalepost.dto.BlindSalePostResDto;
 import com.bookripple.api.domain.blindsalepost.entity.BlindSalePost;
+import com.bookripple.api.domain.blindsalepost.entity.PurchaseRequest;
 import com.bookripple.api.domain.blindsalepost.repository.BlindSalePostRepository;
+import com.bookripple.api.domain.blindsalepost.repository.PurchaseRequestRepository;
 import com.bookripple.api.domain.book.entity.Book;
 import com.bookripple.api.domain.book.repository.BookRepository;
 import com.bookripple.api.domain.member.entity.Member;
@@ -12,6 +14,8 @@ import com.bookripple.api.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +25,7 @@ public class BlindSalePostServiceImpl implements BlindSalePostService {
     private final BlindSalePostRepository blindSalePostRepository;
     private final MemberRepository memberRepository;
     private final BookRepository bookRepository;
+    private final PurchaseRequestRepository purchaseRequestRepository;
 
     @Override
     @Transactional
@@ -39,5 +44,18 @@ public class BlindSalePostServiceImpl implements BlindSalePostService {
 
         // 4. [Converter]를 사용하여 저장된 엔티티를 응답 DTO로 변환하여 반환합니다.
         return BlindSalePostConverter.toCreateResponse(savedPost);
+    }
+
+    @Override
+    public BlindSalePostResDto.Detail getPostDetail(Long blindPostId) {
+        // 1. 게시글 존재 여부 확인
+        BlindSalePost post = blindSalePostRepository.findById(blindPostId)
+                .orElseThrow(() -> new RuntimeException("해당 게시글을 찾을 수 없습니다."));
+
+        // 2. 해당 게시글에 들어온 모든 구매 요청 리스트 조회
+        List<PurchaseRequest> requests = purchaseRequestRepository.findAllByBlindSalePostId(blindPostId);
+
+        // 3. 컨버터를 통해 게시글 정보와 요청자 명단을 합쳐서 DTO로 변환
+        return BlindSalePostConverter.toDetail(post, requests);
     }
 }
