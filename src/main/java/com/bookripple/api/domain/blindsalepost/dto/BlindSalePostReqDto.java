@@ -5,10 +5,20 @@ import lombok.Builder;
 public class BlindSalePostReqDto {
     @Builder
     public record Create(
-            Long actualBookId,     // 검색으로 선택한 실제 책 ID
-            String title,          // 사용자가 입력한 블라인드 제목
-            String blindContent,   // 엔티티의 quote 필드에 매핑
-            String bookCondition,  // "상", "중", "하" 등 상태
-            Integer price          // 가격
+            Long actualBookId,
+            String title,
+            String subtitle,    // 추가: 포스트잇 내용
+            String description, // 추가: 상세 설명
+            String bookCondition,
+            Integer price
+    ) {}
+
+    @Builder
+    public record Update(
+            String title,
+            String subtitle,    // 추가
+            String description, // 추가
+            String bookCondition,
+            Integer price
     ) {}
 }

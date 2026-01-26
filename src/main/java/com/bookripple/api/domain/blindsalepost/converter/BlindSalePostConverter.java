@@ -18,10 +18,11 @@ public class BlindSalePostConverter {
                 .member(member)
                 .book(book)
                 .title(request.title())
-                .quote(request.blindContent()) // DTO의 blindContent -> 엔티티의 quote
+                .subtitle(request.subtitle())
+                .description(request.description())
                 .price(request.price())
                 .bookCondition(BookCondition.valueOf(request.bookCondition()))
-                .build(); // postStatus는 엔티티 기본값 SALE 적용
+                .build();
     }
 
     //  엔티티 -> 등록 응답 DTO 변환
@@ -49,7 +50,8 @@ public class BlindSalePostConverter {
         return BlindSalePostResDto.Detail.builder()
                 .blindBookId(post.getId())
                 .title(post.getTitle())
-                .quote(post.getQuote()) // 포스트잇 문구
+                .subtitle(post.getSubtitle())
+                .description(post.getDescription())
                 .price(post.getPrice())
                 .status(post.getPostStatus().name())
                 .requestCount((long) requests.size()) // 실시간 요청 인원수 계산

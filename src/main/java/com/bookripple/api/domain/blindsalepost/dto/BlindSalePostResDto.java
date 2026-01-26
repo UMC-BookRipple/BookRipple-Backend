@@ -36,7 +36,8 @@ public class BlindSalePostResDto {
     public record Detail(
             Long blindBookId,
             String title,
-            String quote,      // 포스트잇 문구
+            String subtitle,
+            String description,
             Integer price,
             String status,     // 게시글 상태 (SALE, DONE 등)
             Long requestCount, // 판매요청 인원 수
