@@ -16,8 +16,8 @@ public class BlindSalePostReqDto {
     @Builder
     public record Update(
             String title,
-            String subtitle,    // 추가
-            String description, // 추가
+            String subtitle,
+            String description,
             String bookCondition,
             Integer price
     ) {}

@@ -5,6 +5,7 @@ import com.bookripple.api.domain.blindsalepost.dto.BlindSalePostReqDto;
 import com.bookripple.api.domain.blindsalepost.dto.BlindSalePostResDto;
 import com.bookripple.api.domain.blindsalepost.entity.BlindSalePost;
 import com.bookripple.api.domain.blindsalepost.entity.PurchaseRequest;
+import com.bookripple.api.domain.blindsalepost.enums.BookCondition;
 import com.bookripple.api.domain.blindsalepost.enums.PostStatus;
 import com.bookripple.api.domain.blindsalepost.repository.BlindSalePostRepository;
 import com.bookripple.api.domain.blindsalepost.repository.PurchaseRequestRepository;
@@ -88,5 +89,27 @@ public class BlindSalePostServiceImpl implements BlindSalePostService {
                 .collect(Collectors.toList());
 
         return BlindSalePostConverter.toSliceResponse(content, nextCursor, hasNext);
+    }
+
+    @Override
+    @Transactional
+    public void updatePost(Long memberId, Long blindBookId, BlindSalePostReqDto.Update request) {
+        // 1. 게시글 존재 여부 확인
+        BlindSalePost post = blindSalePostRepository.findById(blindBookId)
+                .orElseThrow(() -> new RuntimeException("해당 게시글을 찾을 수 없습니다."));
+
+        // 2. 권한 확인: 본인의 글만 수정 가능
+        if (!post.getMember().getId().equals(memberId)) {
+            throw new RuntimeException("수정 권한이 없습니다.");
+        }
+
+        // 3. 엔티티의 update 메서드 호출 (Dirty Checking으로 자동 DB 반영)
+        post.update(
+                request.title(),
+                request.subtitle(),
+                request.description(),
+                request.price(),
+                BookCondition.valueOf(request.bookCondition())
+        );
     }
 }

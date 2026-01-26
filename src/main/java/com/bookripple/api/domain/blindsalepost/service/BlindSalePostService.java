@@ -9,7 +9,9 @@ public interface BlindSalePostService {
     BlindSalePostResDto.Create createPost(Long memberId, BlindSalePostReqDto.Create dto);
 
     // 판매 게시글 상세 조회
-    public BlindSalePostResDto.Detail getPostDetail(Long blindPostId);
+    BlindSalePostResDto.Detail getPostDetail(Long blindPostId);
 
     BlindSalePostResDto.SliceResponse getMyPostList(Long memberId, PostStatus status, Long cursor, int size);
+
+    void updatePost(Long memberId, Long blindBookId, BlindSalePostReqDto.Update request);
 }
