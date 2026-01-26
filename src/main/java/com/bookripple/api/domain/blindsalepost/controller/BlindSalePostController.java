@@ -2,14 +2,12 @@ package com.bookripple.api.domain.blindsalepost.controller;
 
 import com.bookripple.api.domain.blindsalepost.dto.BlindSalePostReqDto;
 import com.bookripple.api.domain.blindsalepost.dto.BlindSalePostResDto;
+import com.bookripple.api.domain.blindsalepost.enums.PostStatus;
 import com.bookripple.api.domain.blindsalepost.service.BlindSalePostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/blind-books") // API 리스트에 정의된 공통 경로
@@ -34,5 +32,21 @@ public class BlindSalePostController {
 
         // 생성 성공 시 201 Created 상태 코드와 함께 응답 DTO를 반환합니다
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping // [GET] /api/v1/blind-books
+    public ResponseEntity<BlindSalePostResDto.SliceResponse> getMyList(
+            @RequestParam PostStatus status,             // 판매중/거래완료 탭 필터
+            @RequestParam(required = false) Long cursor, // 이전 페이지의 마지막 게시글 ID
+            @RequestParam(defaultValue = "10") int size) {
+
+        // 현재 로그인 유저 ID (추후 시큐리티로 교체 예정)
+        Long loginMemberId = 1L;
+
+        // 서비스 호출 시 로그인 유저 ID를 함께 넘겨줍니다.
+        BlindSalePostResDto.SliceResponse response =
+                blindSalePostService.getMyPostList(loginMemberId, status, cursor, size);
+
+        return ResponseEntity.ok(response);
     }
 }
