@@ -68,5 +68,18 @@ public class BlindSalePostConverter {
                 .build();
     }
 
+    // [목록 조회] List와 다음 페이지 정보를 SliceResponse DTO로 변환
+    public static BlindSalePostResDto.SliceResponse toSliceResponse(
+            List<BlindSalePostResDto.ListElement> content,
+            Long nextCursor,
+            boolean hasNext) {
+
+        return BlindSalePostResDto.SliceResponse.builder()
+                .content(content)
+                .nextCursor(nextCursor)
+                .hasNext(hasNext)
+                .build();
+    }
+
 
 }
