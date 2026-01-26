@@ -112,4 +112,20 @@ public class BlindSalePostServiceImpl implements BlindSalePostService {
                 BookCondition.valueOf(request.bookCondition())
         );
     }
+
+    @Override
+    @Transactional
+    public void deletePost(Long memberId, Long blindBookId) {
+        // 1. 삭제할 게시글이 존재하는지 확인
+        BlindSalePost post = blindSalePostRepository.findById(blindBookId)
+                .orElseThrow(() -> new RuntimeException("해당 게시글을 찾을 수 없습니다."));
+
+        // 2. 권한 확인: 게시글 작성자와 삭제 요청자가 일치하는지 체크
+        if (!post.getMember().getId().equals(memberId)) {
+            throw new RuntimeException("게시글을 삭제할 권한이 없습니다.");
+        }
+
+        // 3. 게시글 삭제 실행
+        blindSalePostRepository.delete(post);
+    }
 }

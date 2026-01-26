@@ -14,4 +14,6 @@ public interface BlindSalePostService {
     BlindSalePostResDto.SliceResponse getMyPostList(Long memberId, PostStatus status, Long cursor, int size);
 
     void updatePost(Long memberId, Long blindBookId, BlindSalePostReqDto.Update request);
+
+    void deletePost(Long memberId, Long blindBookId);
 }

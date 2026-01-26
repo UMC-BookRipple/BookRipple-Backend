@@ -60,4 +60,16 @@ public class BlindSalePostController {
 
         return ResponseEntity.ok("게시글 수정이 완료되었습니다.");
     }
+
+    @DeleteMapping("/{blind-book-id}") // [DELETE] /api/v1/blind-books/{id}
+    public ResponseEntity<String> delete(
+            @PathVariable("blind-book-id") Long blindBookId) {
+
+        // 현재 로그인 유저 ID (추후 시큐리티 적용 전까지 임시 1L 사용)
+        Long loginMemberId = 1L;
+
+        blindSalePostService.deletePost(loginMemberId, blindBookId);
+
+        return ResponseEntity.ok("게시글이 성공적으로 삭제되었습니다.");
+    }
 }
