@@ -1,20 +1,23 @@
 package com.bookripple.api.domain.book.entity;
 
 import com.bookripple.api.global.entity.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Entity
-@Table(name = "book")
+@Table(
+        name = "book",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_book_isbn13", columnNames = "isbn13"),
+                @UniqueConstraint(name = "uk_book_aladin_book_id", columnNames = "aladin_book_id")
+        }
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
@@ -25,6 +28,9 @@ public class Book extends BaseEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Long id;
 
+  @Column
+  private String story;
+
   @Column(nullable = false)
   String title;
 
@@ -33,4 +39,22 @@ public class Book extends BaseEntity {
   
   @Column(name = "cover_url", nullable = false)
   String bookCover;
+
+  @Column(nullable = false)
+  private LocalDate publishedAt;
+
+  @Column(name = "isbn13", length = 13, unique = true)
+  private String isbn13;
+
+  @Column(length = 10, unique = true)
+  private String isbn10;
+
+  @Column(nullable = false)
+  private String publisher;
+
+  @Column(nullable = false)
+  private Integer totalPage;
+
+  @Column(name = "aladin_book_id")
+  private Long aladinBookId;
 }
