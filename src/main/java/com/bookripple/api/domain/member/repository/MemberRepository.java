@@ -14,6 +14,12 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
   // 로그인 (LOCAL)
   Optional<Member> findByLoginId(String loginId);
 
+  // 아이디 중복 체크
+  boolean existsByLoginId(String loginId);
+
+  // 이메일 중복 체크
+  boolean existsByEmail(String email);
+
   // 이메일 조회 (중복 체크 / OAuth 대비)
   Optional<Member> findByEmail(String email);
 

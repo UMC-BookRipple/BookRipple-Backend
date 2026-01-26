@@ -29,26 +29,29 @@ public class Member extends BaseEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false, length = 20)
-  private String name;
-
-  @Column(nullable = false, length = 50)
+  @Column(nullable = false, unique = true, length = 50)
   private String loginId;
 
   @Column(columnDefinition = "TEXT")
   private String password; // 소셜 로그인 시 NULL 가능
 
-  @Column(nullable = false)
-  private LocalDate birthDate;
+  @Column(nullable = false, length = 20)
+  private String name;
 
-  @Column(length = 20)
-  private String phoneNum;
-
-  @Column(nullable = false, length = 100)
+  @Column(nullable = false, unique = true, length = 100)
   private String email;
 
   @Column(nullable = false)
-  private Boolean isCertified;
+  private LocalDate birthDate;
+
+  @Column(nullable = false)
+  private Boolean isCertified;  // 이메일 인증 여부
+
+  @Column(nullable = false)
+  private Boolean isRequiredAgreed; // 필수약관동의 여부
+
+  @Column(nullable = false)
+  private Boolean isOptionalAgreed; // 선택약관동의 여부
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
@@ -57,5 +60,13 @@ public class Member extends BaseEntity {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private LoginType loginType; // LOCAL, KAKAO, GUEST
+
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private MemberRole role; // USER, ADMIN
+
+  public void certify() {
+    this.isCertified = true;
+  }
 
 }

@@ -14,6 +14,15 @@ public class GlobalDto {
 
   }
 
+  @Builder
+  public record SingleRes<T>(T data) {
+
+    public static <T> SingleRes<T> of(T data) {
+      return SingleRes.<T>builder()
+          .data(data)
+          .build();
+    }
+  }
 
   public record ContentReq(
       @NotBlank
