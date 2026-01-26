@@ -3,6 +3,7 @@ package com.bookripple.api.domain.question.controller;
 import com.bookripple.api.common.code.CommonSuccessCode;
 import com.bookripple.api.common.response.ApiResponse;
 import com.bookripple.api.domain.question.dto.QuestionResDto.MyQuestionList;
+import com.bookripple.api.domain.question.dto.QuestionResDto.Q;
 import com.bookripple.api.domain.question.dto.QuestionResDto.QuestionList;
 import com.bookripple.api.domain.question.service.QuestionService;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
@@ -79,5 +80,14 @@ public class QuestionController {
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         questionService.createAfterReadingQuestion(memberId, bookId));
+  }
+
+  @PostMapping("/books/{book-id}/questions/ai/during")
+  public ApiResponse<Q> createDuringReadingQuestion(
+      @AuthenticationPrincipal Long memberId,
+      @PathVariable("book-id") Long bookId
+  ) {
+    return ApiResponse.onSuccess(CommonSuccessCode.OK,
+        questionService.createDuringReadingQuestion(memberId, bookId));
   }
 }

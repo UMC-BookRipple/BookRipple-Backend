@@ -16,8 +16,10 @@ import com.bookripple.api.domain.question.dto.QuestionResDto.MyQuestionList;
 import com.bookripple.api.domain.question.dto.QuestionResDto.Q;
 import com.bookripple.api.domain.question.dto.QuestionResDto.QuestionList;
 import com.bookripple.api.domain.question.entity.Question;
+import com.bookripple.api.domain.question.entity.ReadingQuestion;
 import com.bookripple.api.domain.question.enums.QuestionType;
 import com.bookripple.api.domain.question.repository.QuestionRepository;
+import com.bookripple.api.domain.question.repository.ReadingQuestionRepository;
 import com.bookripple.api.global.converter.GlobalConverter;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
@@ -38,6 +40,7 @@ public class QuestionServiceImpl implements QuestionService {
   private final BookRepository bookRepository;
   private final QuestionRepository questionRepository;
   private final AiService aiService;
+  private final ReadingQuestionRepository readingQuestionRepository;
 
   @Override
   @Transactional
@@ -150,5 +153,24 @@ public class QuestionServiceImpl implements QuestionService {
 
     return QuestionConverter.toQuestionList(res, null, false, 3);
   }
-  
+
+  @Override
+  @Transactional
+  public Q createDuringReadingQuestion(Long memberId, Long bookId) {
+
+    Member member = memberRepository.getReferenceById(memberId);
+
+    Book book = bookRepository.findById(bookId)
+        .orElseThrow(() -> new ApiException(BookErrorCode.NO_BOOK));
+
+    AiQuestion aiQuestion = aiService.generateQuestions(AiQuestionType.DURING, book.getTitle());
+
+    ReadingQuestion question = QuestionConverter.toReadingQuestion(member, book,
+        aiQuestion.questions().get(0));
+
+    readingQuestionRepository.save(question);
+
+    return QuestionConverter.toQ(question);
+  }
+
 }

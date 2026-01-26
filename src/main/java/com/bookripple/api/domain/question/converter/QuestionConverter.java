@@ -7,6 +7,7 @@ import com.bookripple.api.domain.question.dto.QuestionResDto.MyQuestionList;
 import com.bookripple.api.domain.question.dto.QuestionResDto.Q;
 import com.bookripple.api.domain.question.dto.QuestionResDto.QuestionList;
 import com.bookripple.api.domain.question.entity.Question;
+import com.bookripple.api.domain.question.entity.ReadingQuestion;
 import com.bookripple.api.domain.question.enums.QuestionType;
 import java.util.List;
 
@@ -60,4 +61,21 @@ public class QuestionConverter {
         .build();
   }
 
+  public static ReadingQuestion toReadingQuestion(Member member, Book book, String question) {
+    return ReadingQuestion.builder()
+        .book(book)
+        .type(QuestionType.AI_DURING_READING)
+        .question(question)
+        .member(member)
+        .build();
+  }
+
+  public static Q toQ(ReadingQuestion question) {
+    return Q.builder()
+        .id(question.getId())
+        .type(question.getType())
+        .content(question.getQuestion())
+        .createdAt(question.getCreatedAt())
+        .build();
+  }
 }
