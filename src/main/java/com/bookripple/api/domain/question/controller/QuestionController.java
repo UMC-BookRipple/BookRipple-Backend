@@ -71,4 +71,13 @@ public class QuestionController {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         questionService.getMyQuestion(memberId, lastBookTitle, lastId, size));
   }
+
+  @PostMapping("/books/{book-id}/questions/ai/after")
+  public ApiResponse<QuestionList> createAfterReadingQuestion(
+      @AuthenticationPrincipal Long memberId,
+      @PathVariable("book-id") Long bookId
+  ) {
+    return ApiResponse.onSuccess(CommonSuccessCode.OK,
+        questionService.createAfterReadingQuestion(memberId, bookId));
+  }
 }

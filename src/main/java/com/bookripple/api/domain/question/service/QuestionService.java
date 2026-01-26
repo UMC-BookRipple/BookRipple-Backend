@@ -15,4 +15,7 @@ public interface QuestionService {
       Long lastId, int size);
 
   MyQuestionList getMyQuestion(Long memberId, String lastBookTitle, Long lastId, int size);
+
+  QuestionList createAfterReadingQuestion(Long memberId, Long bookId);
+
 }

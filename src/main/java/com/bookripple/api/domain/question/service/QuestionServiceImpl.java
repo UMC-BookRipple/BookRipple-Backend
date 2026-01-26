@@ -3,6 +3,9 @@ package com.bookripple.api.domain.question.service;
 import com.bookripple.api.common.code.BookErrorCode;
 import com.bookripple.api.common.code.QuestionErrorCode;
 import com.bookripple.api.common.error.ApiException;
+import com.bookripple.api.domain.ai.dto.AiResDto.AiQuestion;
+import com.bookripple.api.domain.ai.enums.AiQuestionType;
+import com.bookripple.api.domain.ai.service.AiService;
 import com.bookripple.api.domain.book.entity.Book;
 import com.bookripple.api.domain.book.repository.BookRepository;
 import com.bookripple.api.domain.member.entity.Member;
@@ -13,6 +16,7 @@ import com.bookripple.api.domain.question.dto.QuestionResDto.MyQuestionList;
 import com.bookripple.api.domain.question.dto.QuestionResDto.Q;
 import com.bookripple.api.domain.question.dto.QuestionResDto.QuestionList;
 import com.bookripple.api.domain.question.entity.Question;
+import com.bookripple.api.domain.question.enums.QuestionType;
 import com.bookripple.api.domain.question.repository.QuestionRepository;
 import com.bookripple.api.global.converter.GlobalConverter;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
@@ -33,6 +37,7 @@ public class QuestionServiceImpl implements QuestionService {
   private final MemberRepository memberRepository;
   private final BookRepository bookRepository;
   private final QuestionRepository questionRepository;
+  private final AiService aiService;
 
   @Override
   @Transactional
@@ -43,7 +48,8 @@ public class QuestionServiceImpl implements QuestionService {
 
     Member member = memberRepository.getReferenceById(memberId);
 
-    Question question = QuestionConverter.toQuestion(member, book, request.content());
+    Question question = QuestionConverter.toQuestion(member, book, request.content(),
+        QuestionType.USER);
 
     questionRepository.save(question);
 
@@ -119,4 +125,30 @@ public class QuestionServiceImpl implements QuestionService {
     return QuestionConverter.toMyQuestionList(questionList, nextTitle, nextId,
         questionSlice.hasNext());
   }
+
+  @Override
+  @Transactional
+  public QuestionList createAfterReadingQuestion(Long memberId, Long bookId) {
+
+    Member member = memberRepository.getReferenceById(memberId);
+
+    Book book = bookRepository.findById(bookId)
+        .orElseThrow(() -> new ApiException(BookErrorCode.NO_BOOK));
+
+    AiQuestion aiQuestion = aiService.generateQuestions(AiQuestionType.AFTER, book.getTitle());
+
+    List<Question> aiQuestions = aiQuestion.questions().stream()
+        .map(content -> QuestionConverter.toQuestion(member, book, content,
+            QuestionType.AI_AFTER_READING))
+        .toList();
+
+    questionRepository.saveAll(aiQuestions);
+
+    List<Q> res = aiQuestions.stream()
+        .map(QuestionConverter::toQ)
+        .toList();
+
+    return QuestionConverter.toQuestionList(res, null, false, 3);
+  }
+  
 }
