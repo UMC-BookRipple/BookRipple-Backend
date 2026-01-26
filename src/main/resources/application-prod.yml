@@ -22,6 +22,7 @@ logging:
 
 
 server:
+  forward-headers-strategy: framework
   tomcat:
     basedir: ${APP_DIR:/home/ec2-user/app}/tomcat
     accesslog:
