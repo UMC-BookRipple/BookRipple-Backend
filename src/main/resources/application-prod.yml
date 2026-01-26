@@ -19,3 +19,15 @@ jwt:
 logging:
   level:
     root: INFO
+
+
+server:
+  forward-headers-strategy: framework
+  tomcat:
+    basedir: ${APP_DIR:/home/ec2-user/app}/tomcat
+    accesslog:
+      enabled: true
+      directory: ${APP_DIR:/home/ec2-user/app}/logs
+      prefix: access
+      suffix: .log
+      pattern: '%h %l %u %t "%r" %s %b %D'
