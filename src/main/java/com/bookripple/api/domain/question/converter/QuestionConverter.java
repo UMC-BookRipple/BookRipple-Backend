@@ -12,12 +12,12 @@ import java.util.List;
 
 public class QuestionConverter {
 
-  public static Question toQuestion(Member member, Book book, String content) {
+  public static Question toQuestion(Member member, Book book, String content, QuestionType type) {
     return Question.builder()
         .book(book)
         .content(content)
         .member(member)
-        .type(QuestionType.USER)
+        .type(type)
         .build();
   }
 
