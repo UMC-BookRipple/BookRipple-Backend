@@ -7,6 +7,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.bookripple.api.global.dto.GlobalDto;
 import com.bookripple.api.domain.auth.dto.AuthReqDto;
 import com.bookripple.api.domain.auth.dto.AuthResDto;
 import com.bookripple.api.domain.member.entity.Member;
@@ -23,6 +24,34 @@ public class AuthService {
   private final PasswordEncoder passwordEncoder;
 
   private final JwtTokenProvider jwtTokenProvider;
+
+  @Transactional
+  public GlobalDto.IdRes signup(AuthReqDto.Signup request) {
+
+    if (!checkDuplicateLoginId(request.getLoginId())) {
+      throw new ApiException(
+          CommonErrorCode.BAD_REQUEST,
+          "이미 사용 중인 로그인 아이디입니다."
+      );
+    }
+
+    String encodedPassword = passwordEncoder.encode(request.getPassword());
+
+    Member member = Member.builder()
+        .loginId(request.getLoginId())
+        .password(encodedPassword)
+        .name(request.getName())
+        .email(request.getEmail())
+        .birthDate(request.getBirthDate())
+        .loginType(LoginType.LOCAL)
+        .isRequiredAgreed(request.getIsRequiredAgreed())
+        .isOptionalAgreed(request.getIsOptionalAgreed())
+        .build();
+
+    Member savedMember = memberRepository.save(member);
+
+    return new GlobalDto.IdRes(savedMember.getId());
+  }
 
   @Transactional(readOnly = true)
   public AuthResDto.Login localLogin(AuthReqDto.Login request) {
@@ -46,6 +75,11 @@ public class AuthService {
         .memberId(member.getId())
         .accessToken(accessToken)
         .build();
+  }
+
+  // 아이디 중복 여부 확인
+  public boolean checkDuplicateLoginId(String loginId) {
+    return !memberRepository.existsByLoginId(loginId);
   }
 
   // TODO: DB 연동 전 임시 mock member (제거 예정)
@@ -75,15 +109,5 @@ public class AuthService {
           "비밀번호가 올바르지 않습니다."
       );
     }
-  }
-
-  /**
-   * 아이디 중복 여부 확인
-   *
-   * @param loginId 사용자 입력 loginId
-   * @return true = 사용 가능, false = 중복
-   */
-  public boolean checkDuplicateLoginId(String loginId) {
-    return !memberRepository.existsByLoginId(loginId);
   }
 }
