@@ -46,5 +46,12 @@ public class BlindSalePost extends BaseEntity {
     @Column(name = "post_status", nullable = false)
     private PostStatus postStatus = PostStatus.SALE;
 
+    // 게시글 수정을 위한 메서드
+    public void update(String title, String quote, Integer price, BookCondition condition) {
+        this.title = title;
+        this.quote = quote;
+        this.price = price;
+        this.bookCondition = condition;
+    }
 
 }
