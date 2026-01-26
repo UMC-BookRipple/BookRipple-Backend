@@ -5,6 +5,8 @@ import com.bookripple.api.domain.member.entity.Member;
 import com.bookripple.api.domain.member.enums.LoginType;
 import com.bookripple.api.domain.member.enums.MemberRole;
 import com.bookripple.api.domain.member.enums.MemberStatus;
+import com.bookripple.api.domain.member.exception.DuplicateEmailException;
+import com.bookripple.api.domain.member.exception.DuplicateLoginIdException;
 import com.bookripple.api.domain.member.repository.MemberRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +24,11 @@ public class SignupService {
   public Long signup(AuthReqDto.Signup request) {
 
     if (memberRepository.existsByLoginId(request.getLoginId())) {
-      throw new IllegalArgumentException("이미 사용 중인 아이디입니다.");
+      throw new DuplicateLoginIdException();
+    }
+
+    if (memberRepository.existsByEmail(request.getEmail())) {
+      throw new DuplicateEmailException();
     }
 
     String encodedPassword = passwordEncoder.encode(request.getPassword());
