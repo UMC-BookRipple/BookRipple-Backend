@@ -49,4 +49,15 @@ public class BlindSalePostController {
 
         return ResponseEntity.ok(response);
     }
+
+    @PatchMapping("/{blind-book-id}") // 글 수정하기 버튼 매핑
+    public ResponseEntity<String> update(
+            @PathVariable("blind-book-id") Long blindBookId,
+            @RequestBody BlindSalePostReqDto.Update requestDto) {
+
+        // 현재 로그인 유저 ID (임시 1L) 전달
+        blindSalePostService.updatePost(1L, blindBookId, requestDto);
+
+        return ResponseEntity.ok("게시글 수정이 완료되었습니다.");
+    }
 }
