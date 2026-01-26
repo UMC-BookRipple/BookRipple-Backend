@@ -1,6 +1,9 @@
 package com.bookripple.api.domain.blindsalepost.dto;
 
+import lombok.Builder;
+
 public class BlindSalePostReqDto {
+    @Builder
     public record Create(
             Long actualBookId,     // 검색으로 선택한 실제 책 ID
             String title,          // 사용자가 입력한 블라인드 제목
