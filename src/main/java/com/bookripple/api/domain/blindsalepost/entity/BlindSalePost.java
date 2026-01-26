@@ -1,6 +1,7 @@
 package com.bookripple.api.domain.blindsalepost.entity;
 
 import com.bookripple.api.domain.blindsalepost.enums.BookCondition;
+import com.bookripple.api.domain.blindsalepost.enums.PostStatus;
 import com.bookripple.api.domain.book.entity.Book;
 import com.bookripple.api.domain.member.entity.Member;
 import com.bookripple.api.global.entity.BaseEntity;
@@ -28,10 +29,13 @@ public class BlindSalePost extends BaseEntity {
     private Book book;
 
     @Column(nullable = false)
-    private String title;
+    private String title;       // 게시글 제목
 
     @Column(nullable = false)
-    private String quote;
+    private String subtitle;     // 포스트잇 문구 (부제목)
+
+    @Column(nullable = false)
+    private String description;  // 상세 판매 문구
 
     @Column(nullable = false)
     private Integer price;
@@ -40,5 +44,18 @@ public class BlindSalePost extends BaseEntity {
     @Column(name = "book_condition", nullable = false)
     private BookCondition bookCondition;
 
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(name = "post_status", nullable = false)
+    private PostStatus postStatus = PostStatus.SALE;
+
+    // 수정(Update) 메서드도 함께 업데이트해 줍니다.
+    public void update(String title, String subtitle, String description, Integer price, BookCondition condition) {
+        this.title = title;
+        this.subtitle = subtitle;
+        this.description = description;
+        this.price = price;
+        this.bookCondition = condition;
+    }
 
 }
