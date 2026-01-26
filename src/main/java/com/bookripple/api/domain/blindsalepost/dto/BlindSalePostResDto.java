@@ -47,7 +47,7 @@ public class BlindSalePostResDto {
     @Builder
     public record PurchaseRequestInfo(
             Long requestId,
-            String anonymousNickname, // "익명의 사용자 1325"
-            String status             // WAITING, ACCEPTED 등
+            String name,    // 구매 요청한 사람 이름
+            String status   // WAITING, ACCEPTED 등
     ) {}
 }
