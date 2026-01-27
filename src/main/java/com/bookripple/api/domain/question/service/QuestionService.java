@@ -25,4 +25,6 @@ public interface QuestionService {
   IdRes updateReadingQuestion(Long memberId, Long readingQuestionId, ContentReq request);
 
   ReadingAiQnAList getReadingAiQnAList(Long memberId, Long bookId, Long lastId, int size);
+
+  IdRes deleteReadingAiQnA(Long memberId, Long questionId);
 }

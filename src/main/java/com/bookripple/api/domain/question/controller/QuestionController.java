@@ -113,4 +113,14 @@ public class QuestionController {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         questionService.getReadingAiQnAList(memberId, bookId, lastId, size));
   }
+
+  @DeleteMapping("/reading-questions/{reading-question-id}")
+  public ApiResponse<IdRes> deleteReadingAiQnA(
+      @AuthenticationPrincipal Long memberId,
+      @PathVariable("reading-question-id") @Min(1) Long readingQuestionId
+  ) {
+    return ApiResponse.onSuccess(CommonSuccessCode.OK,
+        questionService.deleteReadingAiQnA(memberId, readingQuestionId));
+  }
+
 }

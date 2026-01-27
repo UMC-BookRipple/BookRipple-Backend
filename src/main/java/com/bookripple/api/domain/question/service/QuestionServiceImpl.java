@@ -214,4 +214,21 @@ public class QuestionServiceImpl implements QuestionService {
     return QuestionConverter.toReadingAiQnAList(readingAiQnAS, readingQuestionSlice.hasNext(),
         nextId);
   }
+
+  @Override
+  @Transactional
+  public IdRes deleteReadingAiQnA(Long memberId, Long questionId) {
+    ReadingQuestion question = readingQuestionRepository.findById(questionId)
+        .orElseThrow(() -> new ApiException(QuestionErrorCode.QUESTION_NOT_FOUND));
+
+    if (!question.getMember().getId().equals(memberId)) {
+      throw new ApiException(QuestionErrorCode.QUESTION_FORBIDDEN);
+    }
+
+    readingQuestionRepository.delete(question);
+
+    return GlobalConverter.toIdRes(questionId);
+  }
+
+
 }
