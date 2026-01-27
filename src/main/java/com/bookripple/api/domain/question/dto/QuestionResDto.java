@@ -1,6 +1,6 @@
 package com.bookripple.api.domain.question.dto;
 
-import com.bookripple.api.global.enums.QuestionType;
+import com.bookripple.api.domain.question.enums.QuestionType;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Builder;
@@ -43,6 +43,26 @@ public class QuestionResDto {
       List<MyQ> questionList,
       Boolean hasNext,
       String lastBookTitle,
+      Long lastId
+  ) {
+
+  }
+
+  @Builder
+  public record ReadingAiQnA(
+      Long id,
+      QuestionType type,
+      String question,
+      String answer,
+      LocalDateTime updatedAt
+  ) {
+
+  }
+
+  @Builder
+  public record ReadingAiQnAList(
+      List<ReadingAiQnA> readingAiQnAS,
+      Boolean hasNext,
       Long lastId
   ) {
 

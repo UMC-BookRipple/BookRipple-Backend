@@ -3,7 +3,9 @@ package com.bookripple.api.domain.question.controller;
 import com.bookripple.api.common.code.CommonSuccessCode;
 import com.bookripple.api.common.response.ApiResponse;
 import com.bookripple.api.domain.question.dto.QuestionResDto.MyQuestionList;
+import com.bookripple.api.domain.question.dto.QuestionResDto.Q;
 import com.bookripple.api.domain.question.dto.QuestionResDto.QuestionList;
+import com.bookripple.api.domain.question.dto.QuestionResDto.ReadingAiQnAList;
 import com.bookripple.api.domain.question.service.QuestionService;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
@@ -14,6 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -71,4 +74,53 @@ public class QuestionController {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         questionService.getMyQuestion(memberId, lastBookTitle, lastId, size));
   }
+
+  @PostMapping("/books/{book-id}/questions/ai/after")
+  public ApiResponse<QuestionList> createAfterReadingQuestion(
+      @AuthenticationPrincipal Long memberId,
+      @PathVariable("book-id") Long bookId
+  ) {
+    return ApiResponse.onSuccess(CommonSuccessCode.OK,
+        questionService.createAfterReadingQuestion(memberId, bookId));
+  }
+
+  @PostMapping("/books/{book-id}/questions/ai/during")
+  public ApiResponse<Q> createDuringReadingQuestion(
+      @AuthenticationPrincipal Long memberId,
+      @PathVariable("book-id") Long bookId
+  ) {
+    return ApiResponse.onSuccess(CommonSuccessCode.OK,
+        questionService.createDuringReadingQuestion(memberId, bookId));
+  }
+
+  @PatchMapping("/reading-questions/{reading-question-id}")
+  public ApiResponse<IdRes> updateReadingQuestion(
+      @AuthenticationPrincipal Long memberId,
+      @PathVariable("reading-question-id") @Min(1) Long readingQuestionId,
+      @RequestBody @Validated(ValidationGroups.AnswerGroup.class) ContentReq request
+  ) {
+    return ApiResponse.onSuccess(CommonSuccessCode.OK,
+        questionService.updateReadingQuestion(memberId, readingQuestionId, request));
+  }
+
+  @GetMapping("/books/{book-id}/reading-questions")
+  public ApiResponse<ReadingAiQnAList> getReadingAiQnA(
+      @AuthenticationPrincipal Long memberId,
+      @PathVariable("book-id") @Min(1) Long bookId,
+      @RequestParam(required = false) Long lastId,
+      @RequestParam(defaultValue = "3") Integer size
+  ) {
+    return ApiResponse.onSuccess(CommonSuccessCode.OK,
+        questionService.getReadingAiQnAList(memberId, bookId, lastId, size));
+  }
+
+  @DeleteMapping("/reading-questions/{reading-question-id}")
+  public ApiResponse<IdRes> deleteReadingAiQnA(
+      @AuthenticationPrincipal Long memberId,
+      @PathVariable("reading-question-id") @Min(1) Long readingQuestionId
+  ) {
+    return ApiResponse.onSuccess(CommonSuccessCode.OK,
+        questionService.deleteReadingAiQnA(memberId, readingQuestionId));
+  }
+
 }

@@ -22,12 +22,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "question")
+@Table(name = "reading_question")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Builder
-public class Question extends BaseEntity {
+public class ReadingQuestion extends BaseEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,7 +38,10 @@ public class Question extends BaseEntity {
   private QuestionType type;
 
   @Column(nullable = false, length = 50)
-  private String content;
+  private String question;
+
+  @Column(length = 200)
+  private String answer;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "member_id")
@@ -47,5 +50,9 @@ public class Question extends BaseEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "book_id")
   private Book book;
+
+  public void update(String answer) {
+    this.answer = answer;
+  }
 
 }

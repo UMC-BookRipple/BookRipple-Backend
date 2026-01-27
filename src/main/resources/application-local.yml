@@ -31,3 +31,8 @@ jwt:
 logging:
   level:
     org.hibernate.SQL: DEBUG
+
+gemini:
+  api:
+    key: ${GEMINI_KEY}
+    url: ${GEMINI_URL}

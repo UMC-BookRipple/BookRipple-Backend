@@ -30,6 +30,10 @@ logging:
   level:
     root: INFO
 
+gemini:
+  api:
+    key: ${GEMINI_KEY}
+    url: ${GEMINI_URL}
 
 server:
   forward-headers-strategy: framework
