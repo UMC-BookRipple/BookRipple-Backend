@@ -36,7 +36,7 @@ public class ReadingQuestion extends BaseEntity {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private QuestionType type;
-  
+
   @Column(nullable = false, length = 50)
   private String question;
 
@@ -50,5 +50,9 @@ public class ReadingQuestion extends BaseEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "book_id")
   private Book book;
+
+  public void update(String answer) {
+    this.answer = answer;
+  }
 
 }

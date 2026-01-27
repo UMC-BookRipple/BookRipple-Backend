@@ -15,6 +15,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -89,5 +90,15 @@ public class QuestionController {
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         questionService.createDuringReadingQuestion(memberId, bookId));
+  }
+
+  @PatchMapping("/reading-questions/{reading-question-id}")
+  public ApiResponse<IdRes> updateReadingQuestion(
+      @AuthenticationPrincipal Long memberId,
+      @PathVariable("reading-question-id") Long readingQustionId,
+      @RequestBody @Validated(ValidationGroups.AnswerGroup.class) ContentReq request
+  ) {
+    return ApiResponse.onSuccess(CommonSuccessCode.OK,
+        questionService.updateReadingQuestion(memberId, readingQustionId, request));
   }
 }

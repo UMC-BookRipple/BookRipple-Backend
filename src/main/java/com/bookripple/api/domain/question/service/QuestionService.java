@@ -20,4 +20,6 @@ public interface QuestionService {
   QuestionList createAfterReadingQuestion(Long memberId, Long bookId);
 
   Q createDuringReadingQuestion(Long memberId, Long bookId);
+
+  IdRes updateReadingQuestion(Long memberId, Long readingQuestionId, ContentReq request);
 }

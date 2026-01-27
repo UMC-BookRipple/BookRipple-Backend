@@ -173,4 +173,20 @@ public class QuestionServiceImpl implements QuestionService {
     return QuestionConverter.toQ(question);
   }
 
+  @Override
+  @Transactional
+  public IdRes updateReadingQuestion(Long memberId, Long readingQuestionId, ContentReq request) {
+
+    ReadingQuestion readingQuestion = readingQuestionRepository.findById(readingQuestionId)
+        .orElseThrow(() -> new ApiException(QuestionErrorCode.QUESTION_NOT_FOUND));
+
+    if (!readingQuestion.getMember().getId().equals(memberId)) {
+      throw new ApiException(QuestionErrorCode.QUESTION_FORBIDDEN);
+    }
+
+    readingQuestion.update(request.content());
+
+    return GlobalConverter.toIdRes(readingQuestionId);
+  }
+
 }
