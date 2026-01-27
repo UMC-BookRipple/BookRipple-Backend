@@ -1,5 +1,8 @@
 package com.bookripple.api.domain.book.service;
 
+import com.bookripple.api.domain.aladin.client.AladinClient;
+import com.bookripple.api.domain.aladin.dto.AladinSearchResDto;
+import com.bookripple.api.domain.book.converter.BookConverter;
 import com.bookripple.api.domain.book.dto.BookRes;
 import com.bookripple.api.domain.book.dto.BookSearchRes;
 import com.bookripple.api.domain.book.repository.BookRepository;
@@ -12,13 +15,21 @@ import org.springframework.transaction.annotation.Transactional;
 public class BookQueryServiceImpl implements BookQueryService {
 
     private final BookRepository bookRepository;
-    //private final AladinClient aladinClient; -> 외부 api 관련한 파일 어디에 둘지 회의때 논의 후 추가할 예정
+    private final AladinClient aladinClient;
 
     @Override
     @Transactional(readOnly = true)
     public BookSearchRes searchFromAladin(String keyword, int start, int size, String queryType, String searchTarget) {
-        // Aladin 연동 바로 구현 예정
-        return null;
+        // 최소 검증(Controller에서도 하지만, 서비스 단에서도 방어)
+        if (keyword == null || keyword.isBlank()) {
+            throw new IllegalArgumentException("keyword must not be blank");
+        }
+        if (start < 1) start = 1;
+        if (size < 1) size = 10;
+        if (size > 50) size = 50;
+
+        AladinSearchResDto resDto = aladinClient.search(keyword, start, size, queryType, searchTarget);
+        return BookConverter.toBookSearchRes(resDto);
     }
 
     @Override
