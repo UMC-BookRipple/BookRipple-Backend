@@ -6,6 +6,8 @@ import com.bookripple.api.domain.question.dto.QuestionResDto.MyQ;
 import com.bookripple.api.domain.question.dto.QuestionResDto.MyQuestionList;
 import com.bookripple.api.domain.question.dto.QuestionResDto.Q;
 import com.bookripple.api.domain.question.dto.QuestionResDto.QuestionList;
+import com.bookripple.api.domain.question.dto.QuestionResDto.ReadingAiQnA;
+import com.bookripple.api.domain.question.dto.QuestionResDto.ReadingAiQnAList;
 import com.bookripple.api.domain.question.entity.Question;
 import com.bookripple.api.domain.question.entity.ReadingQuestion;
 import com.bookripple.api.domain.question.enums.QuestionType;
@@ -76,6 +78,25 @@ public class QuestionConverter {
         .type(question.getType())
         .content(question.getQuestion())
         .createdAt(question.getCreatedAt())
+        .build();
+  }
+
+  public static ReadingAiQnA toReadingAiQnA(ReadingQuestion question) {
+    return ReadingAiQnA.builder()
+        .answer(question.getAnswer())
+        .id(question.getId())
+        .question(question.getQuestion())
+        .type(question.getType())
+        .updatedAt(question.getUpdatedAt())
+        .build();
+  }
+
+  public static ReadingAiQnAList toReadingAiQnAList(List<ReadingAiQnA> readingAiQnAS,
+      Boolean hasNext, Long lastId) {
+    return ReadingAiQnAList.builder()
+        .readingAiQnAS(readingAiQnAS)
+        .hasNext(hasNext)
+        .lastId(lastId)
         .build();
   }
 }

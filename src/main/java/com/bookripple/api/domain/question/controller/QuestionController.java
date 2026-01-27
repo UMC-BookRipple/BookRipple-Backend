@@ -5,6 +5,7 @@ import com.bookripple.api.common.response.ApiResponse;
 import com.bookripple.api.domain.question.dto.QuestionResDto.MyQuestionList;
 import com.bookripple.api.domain.question.dto.QuestionResDto.Q;
 import com.bookripple.api.domain.question.dto.QuestionResDto.QuestionList;
+import com.bookripple.api.domain.question.dto.QuestionResDto.ReadingAiQnAList;
 import com.bookripple.api.domain.question.service.QuestionService;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
@@ -95,10 +96,21 @@ public class QuestionController {
   @PatchMapping("/reading-questions/{reading-question-id}")
   public ApiResponse<IdRes> updateReadingQuestion(
       @AuthenticationPrincipal Long memberId,
-      @PathVariable("reading-question-id") Long readingQustionId,
+      @PathVariable("reading-question-id") @Min(1) Long readingQuestionId,
       @RequestBody @Validated(ValidationGroups.AnswerGroup.class) ContentReq request
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
-        questionService.updateReadingQuestion(memberId, readingQustionId, request));
+        questionService.updateReadingQuestion(memberId, readingQuestionId, request));
+  }
+
+  @GetMapping("/books/{book-id}/reading-questions")
+  public ApiResponse<ReadingAiQnAList> getReadingAiQnA(
+      @AuthenticationPrincipal Long memberId,
+      @PathVariable("book-id") @Min(1) Long bookId,
+      @RequestParam(required = false) Long lastId,
+      @RequestParam(defaultValue = "3") Integer size
+  ) {
+    return ApiResponse.onSuccess(CommonSuccessCode.OK,
+        questionService.getReadingAiQnAList(memberId, bookId, lastId, size));
   }
 }

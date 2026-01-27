@@ -47,4 +47,24 @@ public class QuestionResDto {
   ) {
 
   }
+
+  @Builder
+  public record ReadingAiQnA(
+      Long id,
+      QuestionType type,
+      String question,
+      String answer,
+      LocalDateTime updatedAt
+  ) {
+
+  }
+
+  @Builder
+  public record ReadingAiQnAList(
+      List<ReadingAiQnA> readingAiQnAS,
+      Boolean hasNext,
+      Long lastId
+  ) {
+
+  }
 }

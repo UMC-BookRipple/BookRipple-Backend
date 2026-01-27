@@ -15,6 +15,8 @@ import com.bookripple.api.domain.question.dto.QuestionResDto.MyQ;
 import com.bookripple.api.domain.question.dto.QuestionResDto.MyQuestionList;
 import com.bookripple.api.domain.question.dto.QuestionResDto.Q;
 import com.bookripple.api.domain.question.dto.QuestionResDto.QuestionList;
+import com.bookripple.api.domain.question.dto.QuestionResDto.ReadingAiQnA;
+import com.bookripple.api.domain.question.dto.QuestionResDto.ReadingAiQnAList;
 import com.bookripple.api.domain.question.entity.Question;
 import com.bookripple.api.domain.question.entity.ReadingQuestion;
 import com.bookripple.api.domain.question.enums.QuestionType;
@@ -189,4 +191,27 @@ public class QuestionServiceImpl implements QuestionService {
     return GlobalConverter.toIdRes(readingQuestionId);
   }
 
+  @Override
+  public ReadingAiQnAList getReadingAiQnAList(Long memberId, Long bookId, Long lastId, int size) {
+
+    Pageable pageable = PageRequest.of(0, size);
+
+    if (lastId == null) {
+      lastId = Long.MAX_VALUE;
+    }
+
+    Slice<ReadingQuestion> readingQuestionSlice = readingQuestionRepository.findByMemberIdAndBookIdAndIdLessThanOrderByIdDesc(
+        memberId, bookId, lastId, pageable);
+
+    List<ReadingAiQnA> readingAiQnAS = readingQuestionSlice.stream()
+        .map(QuestionConverter::toReadingAiQnA)
+        .toList();
+
+    Long nextId = null;
+    if (!readingAiQnAS.isEmpty() && readingQuestionSlice.hasNext()) {
+      nextId = readingAiQnAS.get(readingAiQnAS.size() - 1).id();
+    }
+    return QuestionConverter.toReadingAiQnAList(readingAiQnAS, readingQuestionSlice.hasNext(),
+        nextId);
+  }
 }

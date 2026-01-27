@@ -3,6 +3,7 @@ package com.bookripple.api.domain.question.service;
 import com.bookripple.api.domain.question.dto.QuestionResDto.MyQuestionList;
 import com.bookripple.api.domain.question.dto.QuestionResDto.Q;
 import com.bookripple.api.domain.question.dto.QuestionResDto.QuestionList;
+import com.bookripple.api.domain.question.dto.QuestionResDto.ReadingAiQnAList;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
 
@@ -22,4 +23,6 @@ public interface QuestionService {
   Q createDuringReadingQuestion(Long memberId, Long bookId);
 
   IdRes updateReadingQuestion(Long memberId, Long readingQuestionId, ContentReq request);
+
+  ReadingAiQnAList getReadingAiQnAList(Long memberId, Long bookId, Long lastId, int size);
 }
