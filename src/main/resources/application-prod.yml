@@ -31,3 +31,7 @@ server:
       prefix: access
       suffix: .log
       pattern: '%h %l %u %t "%r" %s %b %D'
+
+aladin:
+  base-url: https://www.aladin.co.kr/ttb/api
+  ttb-key: ${ALADIN_TTB_KEY}

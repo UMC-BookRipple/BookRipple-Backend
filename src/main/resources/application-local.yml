@@ -1,13 +1,16 @@
 spring:
   datasource:
-    url: ${LOCAL_DB_URL:jdbc:mysql://localhost:3306/bookripple}
-    username: ${LOCAL_DB_USER:root}
-    password: ${LOCAL_DB_PW}
-    driver-class-name: ${LOCAL_DB_DRIVER:com.mysql.cj.jdbc.Driver}
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PW}
+    driver-class-name: ${DB_DRIVER:com.mysql.cj.jdbc.Driver}
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
 
 jwt:
   secret: ${JWT_SECRET}
@@ -15,4 +18,21 @@ jwt:
 
 logging:
   level:
-    org.hibernate.SQL: DEBUG
+    root: INFO
+
+
+server:
+  forward-headers-strategy: framework
+  tomcat:
+    basedir: ${APP_DIR:/home/ec2-user/app}/tomcat
+    accesslog:
+      enabled: true
+      directory: ${APP_DIR:/home/ec2-user/app}/logs
+      prefix: access
+      suffix: .log
+      pattern: '%h %l %u %t "%r" %s %b %D'
+
+aladin:
+  api:
+    url: ${ALADIN_URL:https://www.aladin.co.kr/ttb/api}
+    key: ${ALADIN_KEY}
