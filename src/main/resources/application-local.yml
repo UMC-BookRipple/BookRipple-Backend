@@ -35,3 +35,4 @@ logging:
 gemini:
   api:
     key: ${GEMINI_KEY}
+    url: ${GEMINI_URL}

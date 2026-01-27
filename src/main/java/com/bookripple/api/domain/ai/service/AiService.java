@@ -19,11 +19,12 @@ public class AiService {
   private final ObjectMapper objectMapper;
 
   public AiService(RestClient.Builder builder, ObjectMapper objectMapper,
-      @Value("${gemini.api.key}") String apiKey) {
+      @Value("${gemini.api.key}") String apiKey,
+      @Value("${gemini.api.url}") String apiUrl
+  ) {
     this.objectMapper = objectMapper;
     this.restClient = builder
-        .baseUrl(
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent")
+        .baseUrl(apiUrl)
         .defaultHeader("x-goog-api-key", apiKey)
         .defaultHeader("Content-Type", "application/json")
         .build();
@@ -43,7 +44,7 @@ public class AiService {
   }
 
   private GeminiReq createReq(String prompt) {
-    var part = new GeminiReq.Part(prompt + " JSON 포맷으로 응답해줘.");
+    var part = new GeminiReq.Part(prompt);
     var content = new GeminiReq.Content(List.of(part));
     var config = new GeminiReq.GenerationConfig("application/json"); // JSON 모드 활성화
     return new GeminiReq(List.of(content), config);
@@ -65,8 +66,6 @@ public class AiService {
       }
 
       String cleanJson = jsonText.substring(firstBrace, lastBrace + 1);
-
-      System.out.println(cleanJson);
 
       return objectMapper.readValue(cleanJson, AiQuestion.class);
 
