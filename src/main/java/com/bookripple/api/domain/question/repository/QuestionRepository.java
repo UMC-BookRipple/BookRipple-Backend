@@ -1,6 +1,7 @@
 package com.bookripple.api.domain.question.repository;
 
 import com.bookripple.api.domain.question.entity.Question;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -59,4 +60,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
       @Param("lastId") Long lastId,
       Pageable pageable
   );
+
+  Page<Question> findByBookIdAndContentContainingOrderByIdDesc(Long bookId, String keyword,
+      Pageable pageable);
 }
