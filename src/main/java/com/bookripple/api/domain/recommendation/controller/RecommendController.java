@@ -8,8 +8,11 @@ import com.bookripple.api.domain.recommendation.dto.RecommendResDto.RecommendLis
 import com.bookripple.api.domain.recommendation.service.RecommendService;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
-import jakarta.validation.Valid;
+import com.bookripple.api.global.validation.ValidationGroups;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -34,8 +37,8 @@ public class RecommendController {
   @PostMapping("/books/{book-id}/recommendations")
   public ApiResponse<IdRes> createRecommendation(
       @AuthenticationPrincipal Long memberId,
-      @PathVariable("book-id") Long sourceBookId,
-      @RequestBody @Valid Create request
+      @PathVariable("book-id") @Min(1) Long sourceBookId,
+      @RequestBody @Validated(ValidationGroups.RecommendGroup.class) Create request
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.CREATED,
         recommendService.createRecommendation(memberId, sourceBookId, request));
@@ -44,8 +47,8 @@ public class RecommendController {
   @PatchMapping("/recommendations/{recommendation-id}")
   public ApiResponse<IdRes> updateRecommendation(
       @AuthenticationPrincipal Long memberId,
-      @PathVariable("recommendation-id") Long recommendationId,
-      @RequestBody @Valid ContentReq request
+      @PathVariable("recommendation-id") @Min(1) Long recommendationId,
+      @RequestBody @Validated(ValidationGroups.RecommendGroup.class) ContentReq request
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         recommendService.updateRecommendation(memberId, recommendationId, request));
@@ -54,7 +57,7 @@ public class RecommendController {
   @DeleteMapping("/recommendations/{recommendation-id}")
   public ApiResponse<IdRes> deleteRecommendation(
       @AuthenticationPrincipal Long memberId,
-      @PathVariable("recommendation-id") Long recommendationId
+      @PathVariable("recommendation-id") @Min(1) Long recommendationId
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         recommendService.deleteRecommendation(memberId, recommendationId));
@@ -64,8 +67,8 @@ public class RecommendController {
   public ApiResponse<RecommendList> getRecommendations(
       @AuthenticationPrincipal Long memberId,
       @PathVariable("book-id") @Min(1) Long sourceBookId,
-      @RequestParam(required = false) Long lastId,
-      @RequestParam(defaultValue = "3") int size
+      @RequestParam(required = false) @Min(1) Long lastId,
+      @RequestParam(defaultValue = "3") @Max(100) int size
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         recommendService.getRecommendList(memberId, sourceBookId, lastId, size));
@@ -74,9 +77,9 @@ public class RecommendController {
   @GetMapping("/recommendations/me")
   public ApiResponse<MyRecommendList> getMyRecommendations(
       @AuthenticationPrincipal Long memberId,
-      @RequestParam(required = false) String lastSourceBookTitle,
-      @RequestParam(required = false) Long lastId,
-      @RequestParam(defaultValue = "3") int size
+      @RequestParam(required = false) @NotBlank @Size(max = 100) String lastSourceBookTitle,
+      @RequestParam(required = false) @Min(1) Long lastId,
+      @RequestParam(defaultValue = "3") @Max(100) int size
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         recommendService.getMyRecommendList(memberId, lastSourceBookTitle, lastId, size));

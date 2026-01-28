@@ -10,7 +10,10 @@ import com.bookripple.api.domain.question.service.QuestionService;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
 import com.bookripple.api.global.validation.ValidationGroups;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -45,7 +48,7 @@ public class QuestionController {
   @DeleteMapping("/questions/{question-id}")
   public ApiResponse<IdRes> deleteQuestion(
       @AuthenticationPrincipal Long memberId,
-      @PathVariable("question-id") Long questionId
+      @PathVariable("question-id") @Min(1) Long questionId
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         questionService.deleteQuestion(memberId, questionId));
@@ -55,10 +58,10 @@ public class QuestionController {
   public ApiResponse<QuestionList> getQuestion(
       @AuthenticationPrincipal Long memberId,
       @PathVariable("book-id") @Min(1) Long bookId,
-      @RequestParam(required = false) String keyword,
+      @RequestParam(required = false) @NotBlank @Size(max = 50) String keyword,
       @RequestParam(defaultValue = "false") Boolean onlyMine,
-      @RequestParam(required = false) Long lastId,
-      @RequestParam(defaultValue = "3") int size
+      @RequestParam(required = false) @Min(1) Long lastId,
+      @RequestParam(defaultValue = "3") @Max(100) int size
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         questionService.getQuestion(memberId, bookId, keyword, onlyMine, lastId, size));
@@ -67,9 +70,9 @@ public class QuestionController {
   @GetMapping("/questions/me")
   public ApiResponse<MyQuestionList> getMyQuestion(
       @AuthenticationPrincipal Long memberId,
-      @RequestParam(required = false) String lastBookTitle,
-      @RequestParam(required = false) Long lastId,
-      @RequestParam(defaultValue = "3") int size
+      @RequestParam(required = false) @NotBlank @Size(max = 100) String lastBookTitle,
+      @RequestParam(required = false) @Min(1) Long lastId,
+      @RequestParam(defaultValue = "3") @Max(100) int size
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         questionService.getMyQuestion(memberId, lastBookTitle, lastId, size));
@@ -78,7 +81,7 @@ public class QuestionController {
   @PostMapping("/books/{book-id}/questions/ai/after")
   public ApiResponse<QuestionList> createAfterReadingQuestion(
       @AuthenticationPrincipal Long memberId,
-      @PathVariable("book-id") Long bookId
+      @PathVariable("book-id") @Min(1) Long bookId
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         questionService.createAfterReadingQuestion(memberId, bookId));
@@ -87,7 +90,7 @@ public class QuestionController {
   @PostMapping("/books/{book-id}/questions/ai/during")
   public ApiResponse<Q> createDuringReadingQuestion(
       @AuthenticationPrincipal Long memberId,
-      @PathVariable("book-id") Long bookId
+      @PathVariable("book-id") @Min(1) Long bookId
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         questionService.createDuringReadingQuestion(memberId, bookId));
@@ -107,8 +110,8 @@ public class QuestionController {
   public ApiResponse<ReadingAiQnAList> getReadingAiQnA(
       @AuthenticationPrincipal Long memberId,
       @PathVariable("book-id") @Min(1) Long bookId,
-      @RequestParam(required = false) Long lastId,
-      @RequestParam(defaultValue = "3") Integer size
+      @RequestParam(required = false) @Min(1) Long lastId,
+      @RequestParam(defaultValue = "3") @Max(100) Integer size
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         questionService.getReadingAiQnAList(memberId, bookId, lastId, size));

@@ -28,6 +28,9 @@ public class GlobalDto {
       @NotBlank
       @Size(max = 50, message = "질문은 50자를 넘을 수 없습니다.", groups = ValidationGroups.QuestionGroup.class)
       @Size(max = 200, message = "답변은 200자를 넘을 수 없습니다.", groups = ValidationGroups.AnswerGroup.class)
+      @Size(max = 500, message = "감상평은 500자를 넘을 수 없습니다.", groups = ValidationGroups.ReviewGroup.class)
+      @Size(max = 500, message = "추천글은 500자를 넘을 수 없습니다.", groups = ValidationGroups.RecommendGroup.class)
+      @Size(max = 100, message = "메모는 100자를 넘을 수 없습니다.", groups = ValidationGroups.MemoGroup.class)
       String content
   ) {
 
