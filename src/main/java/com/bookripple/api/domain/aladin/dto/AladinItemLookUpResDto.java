@@ -19,9 +19,9 @@ public class AladinItemLookUpResDto {
         private String isbn10;
         private String isbn13;
 
-        private String description; // story 후보
+        private String description; // story
 
-        private SubInfo subInfo;    // pageCount 후보
+        private SubInfo subInfo;    // pageCount
 
         @Getter
         public static class SubInfo {

@@ -1,8 +1,8 @@
 package com.bookripple.api.domain.book.service;
 
-import com.bookripple.api.domain.aladin.client.AladinClient;
 import com.bookripple.api.domain.aladin.dto.AladinItemLookUpResDto;
 import com.bookripple.api.domain.aladin.dto.AladinSearchResDto;
+import com.bookripple.api.domain.aladin.service.AladinService;
 import com.bookripple.api.domain.book.converter.BookConverter;
 import com.bookripple.api.domain.book.dto.BookRes;
 import com.bookripple.api.domain.book.dto.BookSearchRes;
@@ -19,7 +19,7 @@ import java.time.LocalDate;
 public class BookQueryServiceImpl implements BookQueryService {
 
     private final BookRepository bookRepository;
-    private final AladinClient aladinClient;
+    private final AladinService aladinService;
 
     @Override
     @Transactional(readOnly = true)
@@ -32,14 +32,16 @@ public class BookQueryServiceImpl implements BookQueryService {
         if (size < 1) size = 10;
         if (size > 50) size = 50;
 
-        AladinSearchResDto resDto = aladinClient.search(keyword, start, size, queryType, searchTarget);
+        AladinSearchResDto resDto =
+                aladinService.search(keyword, start, size, queryType, searchTarget);
+
         return BookConverter.toBookSearchRes(resDto);
     }
 
     @Override
     @Transactional
     public BookRes getOrCreateByAladinItemId(Long itemId) {
-        return null;
+
         // isbn13 또는 aladinBookId로 Book 조회 후 없으면 Aladin API 통해 도서 정보 받아와서 저장하는 방식 씀
         // 왜냐면 알라딘 쿼리 5000 제한이 있음...
 
@@ -52,7 +54,7 @@ public class BookQueryServiceImpl implements BookQueryService {
         }
 
         // 2) 알라딘 lookup
-        AladinItemLookUpResDto lookUp = aladinClient.lookup(itemId);
+        AladinItemLookUpResDto lookUp = aladinService.lookup(itemId);
         // lookUp 응답 구조에 따라 item 한 건 꺼내야 함
         AladinItemLookUpResDto.Item it = (lookUp == null || lookUp.getItem() == null || lookUp.getItem().isEmpty())
                 ? null
