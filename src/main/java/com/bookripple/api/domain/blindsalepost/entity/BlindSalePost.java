@@ -34,7 +34,7 @@ public class BlindSalePost extends BaseEntity {
     @Column(nullable = false)
     private String subtitle;     // 포스트잇 문구 (부제목)
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String description;  // 상세 판매 문구
 
     @Column(nullable = false)
