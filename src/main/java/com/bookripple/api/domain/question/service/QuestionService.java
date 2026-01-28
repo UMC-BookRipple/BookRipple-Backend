@@ -27,4 +27,12 @@ public interface QuestionService {
   ReadingAiQnAList getReadingAiQnAList(Long memberId, Long bookId, Long lastId, int size);
 
   IdRes deleteReadingAiQnA(Long memberId, Long questionId);
+
+  QuestionList searchQuestion(Long memberId, Long bookId, String query, int page, int size);
+
+  QuestionList getSearchHistory(Long memberId);
+
+  IdRes deleteSearchHistory(Long memberId, Long historyId);
+
+  void deleteAllSearchHistory(Long memberId);
 }
