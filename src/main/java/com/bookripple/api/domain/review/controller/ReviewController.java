@@ -5,6 +5,7 @@ import com.bookripple.api.common.response.ApiResponse;
 import com.bookripple.api.domain.review.dto.ReviewResDto.MyReviewList;
 import com.bookripple.api.domain.review.dto.ReviewResDto.ReviewList;
 import com.bookripple.api.domain.review.service.ReviewService;
+import com.bookripple.api.global.annotation.PreventDuplicate;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdList;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
@@ -34,6 +35,7 @@ public class ReviewController {
 
   private final ReviewService reviewService;
 
+  @PreventDuplicate
   @PostMapping("/books/{book-id}/reviews")
   public ApiResponse<IdRes> createReview(
       @PathVariable("book-id") @Min(1) Long bookId,
@@ -44,6 +46,7 @@ public class ReviewController {
         reviewService.createReview(bookId, memberId, request));
   }
 
+  @PreventDuplicate
   @DeleteMapping("/reviews/{review-id}")
   public ApiResponse<IdRes> deleteReview(
       @AuthenticationPrincipal Long memberId,
@@ -53,6 +56,7 @@ public class ReviewController {
         reviewService.deleteReview(reviewId, memberId));
   }
 
+  @PreventDuplicate
   @PatchMapping("/reviews/{review-id}")
   public ApiResponse<IdRes> updateReview(
       @PathVariable("review-id") @Min(1) Long reviewId,
@@ -85,6 +89,7 @@ public class ReviewController {
         reviewService.getMyReviews(memberId, lastBookTitle, lastId, size));
   }
 
+  @PreventDuplicate
   @PostMapping("/reviews/me/batch-delete")
   public ApiResponse<Void> deleteMyReviews(
       @AuthenticationPrincipal Long memberId,

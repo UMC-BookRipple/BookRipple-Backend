@@ -5,6 +5,7 @@ import com.bookripple.api.common.response.ApiResponse;
 import com.bookripple.api.domain.question.dto.AnswerResDto.AnswerList;
 import com.bookripple.api.domain.question.dto.AnswerResDto.MyAnswerList;
 import com.bookripple.api.domain.question.service.AnswerService;
+import com.bookripple.api.global.annotation.PreventDuplicate;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
 import com.bookripple.api.global.validation.ValidationGroups;
@@ -31,6 +32,7 @@ public class AnswerController {
 
   private final AnswerService answerService;
 
+  @PreventDuplicate
   @PostMapping("/questions/{question-id}/answers")
   public ApiResponse<IdRes> createAnswer(
       @AuthenticationPrincipal Long memberId,
@@ -41,6 +43,7 @@ public class AnswerController {
         answerService.createAnswer(questionId, memberId, request));
   }
 
+  @PreventDuplicate
   @PatchMapping("/answers/{answer-id}")
   public ApiResponse<IdRes> updateAnswer(
       @AuthenticationPrincipal Long memberId,
@@ -51,6 +54,7 @@ public class AnswerController {
         answerService.updateAnswer(answerId, memberId, request));
   }
 
+  @PreventDuplicate
   @DeleteMapping("/answers/{answer-id}")
   public ApiResponse<IdRes> deleteAnswer(
       @AuthenticationPrincipal Long memberId,
