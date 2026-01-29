@@ -5,6 +5,7 @@ import com.bookripple.api.domain.question.dto.QuestionResDto.Q;
 import com.bookripple.api.domain.question.dto.QuestionResDto.QuestionList;
 import com.bookripple.api.domain.question.dto.QuestionResDto.ReadingAiQnAList;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
+import com.bookripple.api.global.dto.GlobalDto.IdList;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
 
 public interface QuestionService {
@@ -35,4 +36,6 @@ public interface QuestionService {
   IdRes deleteSearchHistory(Long memberId, Long historyId);
 
   void deleteAllSearchHistory(Long memberId);
+
+  void deleteMyQuestions(Long memberId, IdList request);
 }
