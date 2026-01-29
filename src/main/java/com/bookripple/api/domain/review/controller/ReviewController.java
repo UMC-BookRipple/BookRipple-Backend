@@ -6,8 +6,10 @@ import com.bookripple.api.domain.review.dto.ReviewResDto.MyReviewList;
 import com.bookripple.api.domain.review.dto.ReviewResDto.ReviewList;
 import com.bookripple.api.domain.review.service.ReviewService;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
+import com.bookripple.api.global.dto.GlobalDto.IdList;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
 import com.bookripple.api.global.validation.ValidationGroups;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
@@ -81,5 +83,14 @@ public class ReviewController {
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         reviewService.getMyReviews(memberId, lastBookTitle, lastId, size));
+  }
+
+  @PostMapping("/reviews/me/batch-delete")
+  public ApiResponse<Void> deleteMyReviews(
+      @AuthenticationPrincipal Long memberId,
+      @RequestBody @Valid IdList request
+  ) {
+    reviewService.deleteMyReviews(memberId, request);
+    return ApiResponse.onSuccess(CommonSuccessCode.NO_CONTENT, null);
   }
 }
