@@ -38,4 +38,5 @@ public class PurchaseRequest extends BaseEntity {
     public void accept() {
         this.status = PurchaseStatus.ACCEPTED;
     }
+    public void updateStatus(PurchaseStatus status) { this.status = status; }
 }

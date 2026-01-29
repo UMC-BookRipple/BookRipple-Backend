@@ -40,5 +40,5 @@ public class Notification extends BaseEntity {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Member receiver;
 
-
+    public void markRead() { this.isRead = true; }
 }
