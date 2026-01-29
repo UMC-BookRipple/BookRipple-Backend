@@ -44,8 +44,9 @@ public class Member extends BaseEntity {
   @Column(nullable = false)
   private LocalDate birthDate;
 
+  @Builder.Default
   @Column(nullable = false)
-  private Boolean isCertified;  // 이메일 인증 여부
+  private Boolean isCertified = false;  // 이메일 인증 여부
 
   @Column(nullable = false)
   private Boolean isRequiredAgreed; // 필수약관동의 여부
