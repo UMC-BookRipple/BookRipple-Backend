@@ -54,17 +54,20 @@ public class Member extends BaseEntity {
   @Column(nullable = false)
   private Boolean isOptionalAgreed; // 선택약관동의 여부
 
+  @Builder.Default
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
-  private MemberStatus status; // ACTIVE, SLEEP, QUIT
+  private MemberStatus status = MemberStatus.ACTIVE; // ACTIVE, SLEEP, QUIT
 
+  @Builder.Default
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
-  private LoginType loginType; // LOCAL, KAKAO, GUEST
+  private LoginType loginType = LoginType.LOCAL; // LOCAL, KAKAO, GUEST
 
+  @Builder.Default
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
-  private MemberRole role; // USER, ADMIN
+  private MemberRole role = MemberRole.USER; // USER, ADMIN
 
   public void certify() {
     this.isCertified = true;
