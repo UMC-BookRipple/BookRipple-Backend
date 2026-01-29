@@ -123,6 +123,25 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
     return PurchaseRequestConverter.toDecision(purchaseRequest);
   }
 
+  @Override
+  @Transactional
+  public PurchaseRequestResDto.Decision startShipping(Long memberId, Long purchaseRequestId) {
+    PurchaseRequest purchaseRequest = getPurchaseRequest(purchaseRequestId);
+    validateSeller(memberId, purchaseRequest);
+    validateStatus(purchaseRequest, PurchaseStatus.ACCEPTED);
+
+    purchaseRequest.updateStatus(PurchaseStatus.SHIPPING);
+
+    notificationService.create(
+        purchaseRequest.getMember(),
+        NotificationType.SHIPPING_STARTED,
+        SHIPPING_STARTED_CONTENT,
+        toBlindSalePostUrl(purchaseRequest.getBlindSalePost().getId())
+    );
+
+    return PurchaseRequestConverter.toDecision(purchaseRequest);
+  }
+
 
   private PurchaseRequest getPurchaseRequest(Long purchaseRequestId) {
     return purchaseRequestRepository.findById(purchaseRequestId)
