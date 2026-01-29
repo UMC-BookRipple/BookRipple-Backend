@@ -1,6 +1,7 @@
 package com.bookripple.api.domain.review.service;
 
 import com.bookripple.api.common.code.BookErrorCode;
+import com.bookripple.api.common.code.CommonErrorCode;
 import com.bookripple.api.common.code.ReviewErrorCode;
 import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.domain.book.entity.Book;
@@ -16,6 +17,7 @@ import com.bookripple.api.domain.review.entity.Review;
 import com.bookripple.api.domain.review.repository.ReviewRepository;
 import com.bookripple.api.global.converter.GlobalConverter;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
+import com.bookripple.api.global.dto.GlobalDto.IdList;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
 import jakarta.transaction.Transactional;
 import java.util.List;
@@ -78,7 +80,7 @@ public class ReviewServiceImpl implements ReviewService {
 
   @Override
   public ReviewList getReviews(Long bookId, Long memberId, Long lastId, int size) {
-    
+
     if (!bookRepository.existsById(bookId)) {
       throw new ApiException(BookErrorCode.NO_BOOK);
     }
@@ -124,4 +126,15 @@ public class ReviewServiceImpl implements ReviewService {
     return ReviewConverter.toMyReviewList(myReviewList, nextBookTitle, nextId,
         reviewSlice.hasNext());
   }
+
+  @Override
+  @Transactional
+  public void deleteMyReviews(Long memberId, IdList request) {
+
+    if (request.idList() == null || request.idList().isEmpty()) {
+      throw new ApiException(CommonErrorCode.BAD_REQUEST);
+    }
+    reviewRepository.deleteMyReviews(memberId, request.idList());
+  }
+
 }

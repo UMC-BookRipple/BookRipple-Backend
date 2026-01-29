@@ -1,9 +1,11 @@
 package com.bookripple.api.domain.review.repository;
 
 import com.bookripple.api.domain.review.entity.Review;
+import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -39,4 +41,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
       Pageable pageable
   );
 
+  @Modifying(clearAutomatically = true)
+  @Query("DELETE FROM Review r WHERE r.member.id = :memberId AND r.id IN :ids")
+  void deleteMyReviews(@Param("memberId") Long memberId, @Param("ids") List<Long> ids);
 }

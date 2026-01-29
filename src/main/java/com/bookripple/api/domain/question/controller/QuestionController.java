@@ -8,8 +8,10 @@ import com.bookripple.api.domain.question.dto.QuestionResDto.QuestionList;
 import com.bookripple.api.domain.question.dto.QuestionResDto.ReadingAiQnAList;
 import com.bookripple.api.domain.question.service.QuestionService;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
+import com.bookripple.api.global.dto.GlobalDto.IdList;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
 import com.bookripple.api.global.validation.ValidationGroups;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -163,4 +165,12 @@ public class QuestionController {
     return ApiResponse.onSuccess(CommonSuccessCode.OK, null);
   }
 
+  @PostMapping("/questions/me/batch-delete")
+  public ApiResponse<Void> deleteMyRecommendations(
+      @AuthenticationPrincipal Long memberId,
+      @RequestBody @Valid IdList request
+  ) {
+    questionService.deleteMyQuestions(memberId, request);
+    return ApiResponse.onSuccess(CommonSuccessCode.NO_CONTENT, null);
+  }
 }
