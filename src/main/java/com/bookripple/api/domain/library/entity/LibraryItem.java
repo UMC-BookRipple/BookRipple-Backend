@@ -1,0 +1,41 @@
+package com.bookripple.api.domain.library.entity;
+
+import com.bookripple.api.domain.book.entity.Book;
+import com.bookripple.api.domain.library.enums.LibraryStatus;
+import com.bookripple.api.domain.member.entity.Member;
+import com.bookripple.api.global.entity.BaseEntity;
+import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(
+        name = "library_item",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_library_member_book", columnNames = {"member_id", "book_id"})
+        }
+)
+public class LibraryItem extends BaseEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "book_id", nullable = false)
+    private Book book;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private LibraryStatus status;
+
+    // 필요할 수도 있으니 일단 넣어둠-> 진행률&날짜
+    private Integer progressPercent; // 0~100
+    private LocalDateTime startedAt;
+    private LocalDateTime completedAt;
+
+}
