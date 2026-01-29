@@ -2,7 +2,9 @@ package com.bookripple.api.global.dto;
 
 import com.bookripple.api.global.validation.ValidationGroups;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
+import java.util.List;
 import lombok.Builder;
 
 public class GlobalDto {
@@ -32,6 +34,13 @@ public class GlobalDto {
       @Size(max = 500, message = "추천글은 500자를 넘을 수 없습니다.", groups = ValidationGroups.RecommendGroup.class)
       @Size(max = 100, message = "메모는 100자를 넘을 수 없습니다.", groups = ValidationGroups.MemoGroup.class)
       String content
+  ) {
+
+  }
+
+  public record IdList(
+      @NotEmpty(message = "삭제할 ID는 최소 1개 이상이어야 합니다.")
+      List<Long> idList
   ) {
 
   }
