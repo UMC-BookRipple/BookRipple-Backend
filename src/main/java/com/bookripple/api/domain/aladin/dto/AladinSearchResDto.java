@@ -19,7 +19,6 @@ public class AladinSearchResDto {
         private String publisher;
         private String pubDate;     // "yyyy-MM-dd"
         private String cover;
-        private String isbn10;
         private String isbn13;
     }
 }

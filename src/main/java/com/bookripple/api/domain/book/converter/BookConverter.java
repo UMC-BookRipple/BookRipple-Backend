@@ -71,7 +71,6 @@ public class BookConverter {
                 .publisher(it.getPublisher())
                 .coverUrl(it.getCover())
                 .pubDate(it.getPubDate())
-                .isbn10(it.getIsbn10())
                 .isbn13(it.getIsbn13())
                 .build();
     }
