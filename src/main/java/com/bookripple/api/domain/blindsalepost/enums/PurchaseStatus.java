@@ -7,5 +7,5 @@ public enum PurchaseStatus {
     PAYMENT_COMPLETED, // 결제 완료 (배송 대기)
     SHIPPING,   // 배송 중
     SHIPPED,    // 배송 완료
-    CANCELLED   // 요청 취소
+    CANCELED   // 요청 취소
 }
