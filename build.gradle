@@ -48,6 +48,9 @@ dependencies {
     // Swagger
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-api:2.8.13'
+
+    // preventDuplicate
+    implementation 'com.github.ben-manes.caffeine:caffeine'
 }
 
 tasks.named('test') {
