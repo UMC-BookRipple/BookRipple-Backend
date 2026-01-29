@@ -1,7 +1,10 @@
 package com.bookripple.api.domain.notification.entity;
 
+import static com.bookripple.api.domain.notification.enums.NotificationType.TRADE_REQUESTED;
+
 import com.bookripple.api.domain.member.entity.Member;
 import com.bookripple.api.domain.notification.enums.NotificationType;
+import com.bookripple.api.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
@@ -13,7 +16,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Builder
-public class Notification {
+public class Notification extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,11 +27,13 @@ public class Notification {
     private String url;
 
     @Column(nullable = false)
-    private Boolean isRead;
+    @Builder.Default
+    private Boolean isRead = false;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private NotificationType notificationType;
+    @Builder.Default
+    private NotificationType notificationType = TRADE_REQUESTED;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "receiver_id", nullable = false)
