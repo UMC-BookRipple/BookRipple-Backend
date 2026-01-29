@@ -52,7 +52,7 @@ public class AuthController {
   public ResponseEntity<ApiResponse<Boolean>> checkDuplicateLoginId(
       @RequestParam("loginId") String loginId
   ) {
-    boolean isAvailable = !memberRepository.existsByLoginId(loginId);
+    boolean isAvailable = authService.checkDuplicateLoginId(loginId);
     return ResponseEntity.ok(ApiResponse.onSuccess(CommonSuccessCode.OK, isAvailable));
   }
 }
