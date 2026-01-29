@@ -12,4 +12,15 @@ public class ValidationGroups {
 
   }
 
+  public interface ReviewGroup extends Default {
+
+  }
+
+  public interface MemoGroup extends Default {
+
+  }
+
+  public interface RecommendGroup extends Default {
+
+  }
 }

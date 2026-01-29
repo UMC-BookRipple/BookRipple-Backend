@@ -7,8 +7,10 @@ import com.bookripple.api.domain.review.dto.ReviewResDto.ReviewList;
 import com.bookripple.api.domain.review.service.ReviewService;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
-import jakarta.validation.Valid;
+import com.bookripple.api.global.validation.ValidationGroups;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -34,7 +36,7 @@ public class ReviewController {
   public ApiResponse<IdRes> createReview(
       @PathVariable("book-id") @Min(1) Long bookId,
       @AuthenticationPrincipal Long memberId,
-      @Valid @RequestBody ContentReq request
+      @Validated(ValidationGroups.ReviewGroup.class) @RequestBody ContentReq request
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.CREATED,
         reviewService.createReview(bookId, memberId, request));
@@ -43,7 +45,7 @@ public class ReviewController {
   @DeleteMapping("/reviews/{review-id}")
   public ApiResponse<IdRes> deleteReview(
       @AuthenticationPrincipal Long memberId,
-      @PathVariable("review-id") Long reviewId
+      @PathVariable("review-id") @Min(1) Long reviewId
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         reviewService.deleteReview(reviewId, memberId));
@@ -53,7 +55,7 @@ public class ReviewController {
   public ApiResponse<IdRes> updateReview(
       @PathVariable("review-id") @Min(1) Long reviewId,
       @AuthenticationPrincipal Long memberId,
-      @Valid @RequestBody ContentReq request
+      @Validated(ValidationGroups.ReviewGroup.class) @RequestBody ContentReq request
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         reviewService.updateReview(reviewId, memberId, request));
@@ -63,8 +65,8 @@ public class ReviewController {
   public ApiResponse<ReviewList> getReviews(
       @PathVariable("book-id") @Min(1) Long bookId,
       @AuthenticationPrincipal Long memberId,
-      @RequestParam(required = false) Long lastId,
-      @RequestParam(defaultValue = "3") int size
+      @RequestParam(required = false) @Min(1) Long lastId,
+      @RequestParam(defaultValue = "3") @Max(100) int size
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         reviewService.getReviews(bookId, memberId, lastId, size));
@@ -73,9 +75,9 @@ public class ReviewController {
   @GetMapping("/reviews/me")
   public ApiResponse<MyReviewList> getMyReviews(
       @AuthenticationPrincipal Long memberId,
-      @RequestParam(required = false) String lastBookTitle,
-      @RequestParam(required = false) Long lastId,
-      @RequestParam(defaultValue = "3") int size
+      @RequestParam(required = false) @Size(max = 100) String lastBookTitle,
+      @RequestParam(required = false) @Min(1) Long lastId,
+      @RequestParam(defaultValue = "3") @Max(100) int size
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         reviewService.getMyReviews(memberId, lastBookTitle, lastId, size));

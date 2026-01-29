@@ -30,7 +30,7 @@ public class Review extends BaseEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false)
+  @Column(nullable = false, length = 500)
   private String content;
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -43,6 +43,5 @@ public class Review extends BaseEntity {
 
   public void update(String content) {
     this.content = content;
-
   }
 }

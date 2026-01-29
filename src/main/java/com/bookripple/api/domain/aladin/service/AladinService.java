@@ -23,13 +23,14 @@ public class AladinService {
                 .build();
     }
 
+    //1. 알라딘 검색 API
     public AladinSearchResDto search(String keyword, int start, int size, String queryType, String searchTarget) {
-        validateKeyword(keyword);
 
+        validateKeyword(keyword);
         int safeStart = Math.max(start, 1);
         int safeSize = clamp(size, 1, 50);
 
-        // /ttb/api/ItemSearch.aspx (base-url에 /ttb/api 포함 여부에 따라 path 조정 필요)
+        // /ttb/api/ItemSearch.aspx url 빌드
         return client().get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/ItemSearch.aspx")
@@ -46,23 +47,30 @@ public class AladinService {
                 .body(AladinSearchResDto.class);
     }
 
-    public AladinItemLookUpResDto lookup(Long aladinItemId) {
-        if (aladinItemId == null) {
-            throw new IllegalArgumentException("aladinItemId must not be null");
-        }
 
-        return client().get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/ItemLookUp.aspx")
-                        .queryParam("ttbkey", props.getTtbKey())
-                        .queryParam("ItemIdType", "ItemId")
-                        .queryParam("ItemId", aladinItemId)
-                        .queryParam("output", props.getOutput())
-                        .queryParam("Version", props.getVersion())
-                        .build())
-                .retrieve()
-                .body(AladinItemLookUpResDto.class);
+    //2. 알라딘 도서 상세 조회 API
+    public AladinItemLookUpResDto lookup(Long itemId, String optResult) {
+        if (itemId == null) throw new IllegalArgumentException("itemId must not be null");
+
+        var req = client().get().uri(uriBuilder -> {
+            var uri = uriBuilder
+                    .path("/ItemLookUp.aspx")
+                    .queryParam("ttbkey", props.getTtbKey())
+                    .queryParam("ItemIdType", "ItemId")
+                    .queryParam("ItemId", itemId)
+                    .queryParam("output", props.getOutput())
+                    .queryParam("Version", props.getVersion());
+
+            if (StringUtils.hasText(optResult)) {
+                uri.queryParam("OptResult", optResult); // ebookList,usedList,reviewList 등
+            }
+
+            return uri.build();
+        });
+
+        return req.retrieve().body(AladinItemLookUpResDto.class);
     }
+
 
     private void validateKeyword(String keyword) {
         if (!StringUtils.hasText(keyword)) {

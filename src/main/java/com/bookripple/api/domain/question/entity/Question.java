@@ -2,8 +2,8 @@ package com.bookripple.api.domain.question.entity;
 
 import com.bookripple.api.domain.book.entity.Book;
 import com.bookripple.api.domain.member.entity.Member;
+import com.bookripple.api.domain.question.enums.QuestionType;
 import com.bookripple.api.global.entity.BaseEntity;
-import com.bookripple.api.global.enums.QuestionType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

@@ -1,6 +1,7 @@
 package com.bookripple.api.domain.auth.service;
 
 import com.bookripple.api.common.code.CommonErrorCode;
+import com.bookripple.api.common.code.CommonSuccessCode;
 import com.bookripple.api.common.error.ApiException;
 
 import com.bookripple.api.global.dto.GlobalDto;
@@ -42,7 +43,6 @@ public class AuthService {
         .name(request.getName())
         .email(request.getEmail())
         .birthDate(request.getBirthDate())
-        .loginType(LoginType.LOCAL)
         .isRequiredAgreed(request.getIsRequiredAgreed())
         .isOptionalAgreed(request.getIsOptionalAgreed())
         .build();
@@ -76,7 +76,16 @@ public class AuthService {
 
   // 아이디 중복 여부 확인
   public boolean checkDuplicateLoginId(String loginId) {
-    return !memberRepository.existsByLoginId(loginId);
+    boolean isAvailable = !memberRepository.existsByLoginId(loginId);
+
+    if (!isAvailable) {
+      throw new ApiException(
+          CommonErrorCode.BAD_REQUEST,
+          "이미 사용 중인 로그인 아이디입니다."
+      );
+    }
+
+    return true;
   }
 
   // TODO: DB 연동 전 임시 mock member (제거 예정)

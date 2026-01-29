@@ -1,9 +1,13 @@
-package com.bookripple.api.domain.review.entity;
+package com.bookripple.api.domain.question.entity;
 
+import com.bookripple.api.domain.book.entity.Book;
 import com.bookripple.api.domain.member.entity.Member;
+import com.bookripple.api.domain.question.enums.QuestionType;
 import com.bookripple.api.global.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,35 +20,39 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
-@Table(name = "review_memo")
+@Table(name = "reading_question")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Builder
-public class ReviewMemo extends BaseEntity {
+public class ReadingQuestion extends BaseEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false, length = 100)
-  private String content;
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private QuestionType type;
+
+  @Column(nullable = false, length = 50)
+  private String question;
+
+  @Column(length = 200)
+  private String answer;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "member_id")
-  @OnDelete(action = OnDeleteAction.CASCADE)
   private Member member;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "review_id")
-  @OnDelete(action = OnDeleteAction.CASCADE)
-  private Review review;
+  @JoinColumn(name = "book_id")
+  private Book book;
 
-  public void update(String content) {
-    this.content = content;
+  public void update(String answer) {
+    this.answer = answer;
   }
+
 }

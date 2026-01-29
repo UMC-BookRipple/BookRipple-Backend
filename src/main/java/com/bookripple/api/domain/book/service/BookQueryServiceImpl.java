@@ -21,6 +21,8 @@ public class BookQueryServiceImpl implements BookQueryService {
     private final BookRepository bookRepository;
     private final AladinService aladinService;
 
+
+    //1 알라딘 검색
     @Override
     @Transactional(readOnly = true)
     public BookSearchRes searchFromAladin(String keyword, int start, int size, String queryType, String searchTarget) {
@@ -38,33 +40,33 @@ public class BookQueryServiceImpl implements BookQueryService {
         return BookConverter.toBookSearchRes(resDto);
     }
 
+    //2. 알라딘 도서 상세 조회 및 저장
     @Override
     @Transactional
     public BookRes getOrCreateByAladinItemId(Long itemId) {
-
-        // isbn13 또는 aladinBookId로 Book 조회 후 없으면 Aladin API 통해 도서 정보 받아와서 저장하는 방식 씀
-        // 왜냐면 알라딘 쿼리 5000 제한이 있음...
-
         if (itemId == null) throw new IllegalArgumentException("aladinItemId must not be null");
 
         // 1) 캐시 히트
-        Book cached = bookRepository.findByAladinBookId(itemId).orElse(null);
-        if (cached != null) {
-            return BookConverter.toBookRes(cached);
-        }
+        return bookRepository.findByAladinBookId(itemId)
+                .map(BookConverter::toBookRes)
+                .orElseGet(() -> createFromAladin(itemId));
+    }
 
-        // 2) 알라딘 lookup
-        AladinItemLookUpResDto lookUp = aladinService.lookup(itemId);
-        // lookUp 응답 구조에 따라 item 한 건 꺼내야 함
-        AladinItemLookUpResDto.Item it = (lookUp == null || lookUp.getItem() == null || lookUp.getItem().isEmpty())
-                ? null
-                : lookUp.getItem().get(0);
+    private BookRes createFromAladin(Long itemId) {
+        AladinItemLookUpResDto lookUp = aladinService.lookup(itemId, null);
+
+        AladinItemLookUpResDto.Item it =
+                (lookUp == null || lookUp.getItem() == null || lookUp.getItem().isEmpty())
+                        ? null
+                        : lookUp.getItem().get(0);
 
         if (it == null) {
             throw new IllegalStateException("Aladin lookup returned empty result");
         }
 
-        // 3) Book 생성/저장 (1차: 갱신 정책 없이 없으면 저장)
+        // (선택) isbn13로 중복 탐지하고 싶으면 여기서 findByIsbn13 추가
+        // 지금은 “없으면 저장”만 한다고 했으니 생략 가능
+
         Book book = Book.builder()
                 .aladinBookId(it.getItemId())
                 .title(it.getTitle())
@@ -80,22 +82,12 @@ public class BookQueryServiceImpl implements BookQueryService {
 
         Book saved = bookRepository.save(book);
         return BookConverter.toBookRes(saved);
-
     }
 
+    // "yyyy-MM-dd" 형식의 문자열을 LocalDate로 변환
     private LocalDate parsePublishedAt(String pubDate) {
         if (pubDate == null || pubDate.isBlank()) return null;
-        try {
-            if (pubDate.contains("-")) {
-                return LocalDate.parse(pubDate); // yyyy-MM-dd
-            }
-            if (pubDate.length() == 8) {
-                int y = Integer.parseInt(pubDate.substring(0, 4));
-                int m = Integer.parseInt(pubDate.substring(4, 6));
-                int d = Integer.parseInt(pubDate.substring(6, 8));
-                return LocalDate.of(y, m, d);
-            }
-        } catch (Exception ignored) {}
-        return null;
+        return LocalDate.parse(pubDate); // yyyy-MM-dd
     }
+
 }

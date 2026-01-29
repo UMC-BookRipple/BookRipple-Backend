@@ -17,7 +17,7 @@ public class AladinSearchResDto {
         private String title;
         private String author;
         private String publisher;
-        private String pubDate;     // "yyyy-MM-dd" or "yyyyMMdd"
+        private String pubDate;     // "yyyy-MM-dd"
         private String cover;
         private String isbn10;
         private String isbn13;

@@ -1,16 +1,28 @@
 spring:
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USER}
-    password: ${DB_PW}
-    driver-class-name: ${DB_DRIVER:com.mysql.cj.jdbc.Driver}
+    url: ${LOCAL_DB_URL}
+    username: ${LOCAL_DB_USER}
+    password: ${LOCAL_DB_PW}
+    driver-class-name: ${LOCAL_DB_DRIVER:com.mysql.cj.jdbc.Driver}
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: false
+    show-sql: true
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
     properties:
-      hibernate:
-        format_sql: false
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+    protocol: smtp
+    default-encoding: UTF-8
 
 jwt:
   secret: ${JWT_SECRET}
@@ -18,21 +30,16 @@ jwt:
 
 logging:
   level:
-    root: INFO
+    org.hibernate.SQL: DEBUG
 
+gemini:
+  api:
+    key: ${GEMINI_KEY}
+    url: ${GEMINI_URL}
 
-server:
-  forward-headers-strategy: framework
-  tomcat:
-    basedir: ${APP_DIR:/home/ec2-user/app}/tomcat
-    accesslog:
-      enabled: true
-      directory: ${APP_DIR:/home/ec2-user/app}/logs
-      prefix: access
-      suffix: .log
-      pattern: '%h %l %u %t "%r" %s %b %D'
 
 aladin:
-  api:
-    url: ${ALADIN_URL:https://www.aladin.co.kr/ttb/api}
-    key: ${ALADIN_KEY}
+  base-url: ${ALADIN_BASE_URL}
+  ttb-key: ${ALADIN_TTB_KEY}
+  output: js
+  version: 20131101
