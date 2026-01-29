@@ -10,6 +10,7 @@ import com.bookripple.api.domain.question.dto.QuestionResDto.ReadingAiQnA;
 import com.bookripple.api.domain.question.dto.QuestionResDto.ReadingAiQnAList;
 import com.bookripple.api.domain.question.entity.Question;
 import com.bookripple.api.domain.question.entity.ReadingQuestion;
+import com.bookripple.api.domain.question.entity.SearchQuestionLog;
 import com.bookripple.api.domain.question.enums.QuestionType;
 import java.util.List;
 
@@ -99,4 +100,13 @@ public class QuestionConverter {
         .lastId(lastId)
         .build();
   }
+
+  public static Q toQL(SearchQuestionLog searchQuestionLog) {
+    return Q.builder()
+        .id(searchQuestionLog.getId())
+        .content(searchQuestionLog.getHistory())
+        .createdAt(searchQuestionLog.getCreatedAt())
+        .build();
+  }
+
 }

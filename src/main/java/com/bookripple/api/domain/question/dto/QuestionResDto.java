@@ -67,4 +67,20 @@ public class QuestionResDto {
   ) {
 
   }
+
+  @Builder
+  public record History(
+      String keyword,
+      LocalDateTime createdAt
+  ){
+
+  }
+
+  @Builder
+  public record HistoryList(
+      List<History> historyList
+  ){
+
+  }
+
 }

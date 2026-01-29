@@ -1,6 +1,7 @@
 package com.bookripple.api.domain.question.service;
 
 import com.bookripple.api.common.code.BookErrorCode;
+import com.bookripple.api.common.code.CommonErrorCode;
 import com.bookripple.api.common.code.QuestionErrorCode;
 import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.domain.ai.dto.AiResDto.AiQuestion;
@@ -19,18 +20,18 @@ import com.bookripple.api.domain.question.dto.QuestionResDto.ReadingAiQnA;
 import com.bookripple.api.domain.question.dto.QuestionResDto.ReadingAiQnAList;
 import com.bookripple.api.domain.question.entity.Question;
 import com.bookripple.api.domain.question.entity.ReadingQuestion;
+import com.bookripple.api.domain.question.entity.SearchQuestionLog;
 import com.bookripple.api.domain.question.enums.QuestionType;
 import com.bookripple.api.domain.question.repository.QuestionRepository;
 import com.bookripple.api.domain.question.repository.ReadingQuestionRepository;
+import com.bookripple.api.domain.question.repository.SearchQuestionLogRepository;
 import com.bookripple.api.global.converter.GlobalConverter;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -43,6 +44,7 @@ public class QuestionServiceImpl implements QuestionService {
   private final QuestionRepository questionRepository;
   private final AiService aiService;
   private final ReadingQuestionRepository readingQuestionRepository;
+  private final SearchQuestionLogRepository searchQuestionLogRepository;
 
   @Override
   @Transactional
@@ -230,5 +232,78 @@ public class QuestionServiceImpl implements QuestionService {
     return GlobalConverter.toIdRes(questionId);
   }
 
+  @Override
+  @Transactional
+  public QuestionList searchQuestion(Long memberId, Long bookId, String query, int page, int size) {
+    if (!StringUtils.hasText(query)) {
+      throw new ApiException(CommonErrorCode.BAD_REQUEST);
+    }
+
+    String keyword = query.trim();
+
+    Book book = bookRepository.findById(bookId)
+            .orElseThrow(() -> new ApiException(BookErrorCode.NO_BOOK));
+
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+
+    Page<Question> questionPage = questionRepository.findByBookIdAndContentContainingOrderByIdDesc(
+            bookId, keyword, pageable);
+
+    List<Q> questionList = questionPage.stream()
+            .map(QuestionConverter::toQ)
+            .toList();
+
+    Long lastId = null;
+    if (!questionList.isEmpty()) {
+      lastId = questionList.get(questionList.size() - 1).id();
+    }
+
+    Member member = memberRepository.getReferenceById(memberId);
+    SearchQuestionLog searchQuestionLog = SearchQuestionLog.builder()
+            .book(book)
+            .member(member)
+            .history(keyword)
+            .build();
+    searchQuestionLogRepository.save(searchQuestionLog);
+
+    return QuestionConverter.toQuestionList(questionList, lastId, questionPage.hasNext(),
+            questionPage.getTotalElements());
+  }
+
+  @Override
+  public QuestionList getSearchHistory(Long memberId) {
+    List<Q> questionList = searchQuestionLogRepository.findAllByMemberIdOrderByCreatedAtDesc(
+                    memberId)
+            .stream()
+            .map(QuestionConverter::toQL)
+            .toList();
+
+    Long lastId = null;
+    if (!questionList.isEmpty()) {
+      lastId = questionList.get(questionList.size() - 1).id();
+    }
+
+    return QuestionConverter.toQuestionList(questionList, lastId, false, questionList.size());
+  }
+
+  @Override
+  @Transactional
+  public IdRes deleteSearchHistory(Long memberId, Long historyId) {
+    SearchQuestionLog searchQuestionLog = searchQuestionLogRepository.findById(historyId)
+            .orElseThrow(() -> new ApiException(CommonErrorCode.NOT_FOUND));
+
+    if (!searchQuestionLog.getMember().getId().equals(memberId)) {
+      throw new ApiException(CommonErrorCode.FORBIDDEN);
+    }
+
+    searchQuestionLogRepository.delete(searchQuestionLog);
+    return GlobalConverter.toIdRes(historyId);
+  }
+
+  @Override
+  @Transactional
+  public void deleteAllSearchHistory(Long memberId) {
+    searchQuestionLogRepository.deleteAllByMemberId(memberId);
+  }
 
 }

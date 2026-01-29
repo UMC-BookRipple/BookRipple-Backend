@@ -126,4 +126,41 @@ public class QuestionController {
         questionService.deleteReadingAiQnA(memberId, readingQuestionId));
   }
 
+  @GetMapping("/books/{book-id}/search")
+  public ApiResponse<QuestionList> searchQuestion(
+      @AuthenticationPrincipal Long memberId,
+      @PathVariable("book-id") @Min(1) Long bookId,
+      @RequestParam String query,
+      @RequestParam(defaultValue = "0") @Min(0) int page,
+      @RequestParam(defaultValue = "20") @Min(1) int size
+  ) {
+    return ApiResponse.onSuccess(CommonSuccessCode.OK,
+        questionService.searchQuestion(memberId, bookId, query, page, size));
+  }
+
+  @GetMapping("/community/search/history")
+  public ApiResponse<QuestionList> getSearchHistory(
+      @AuthenticationPrincipal Long memberId
+  ) {
+    return ApiResponse.onSuccess(CommonSuccessCode.OK,
+        questionService.getSearchHistory(memberId));
+  }
+
+  @DeleteMapping("/community/search/history/{history-id}")
+  public ApiResponse<IdRes> deleteSearchHistory(
+      @AuthenticationPrincipal Long memberId,
+      @PathVariable("history-id") @Min(1) Long historyId
+  ) {
+    return ApiResponse.onSuccess(CommonSuccessCode.OK,
+        questionService.deleteSearchHistory(memberId, historyId));
+  }
+
+  @DeleteMapping("/community/search/history")
+  public ApiResponse<Void> deleteAllSearchHistory(
+      @AuthenticationPrincipal Long memberId
+  ) {
+    questionService.deleteAllSearchHistory(memberId);
+    return ApiResponse.onSuccess(CommonSuccessCode.OK, null);
+  }
+
 }
