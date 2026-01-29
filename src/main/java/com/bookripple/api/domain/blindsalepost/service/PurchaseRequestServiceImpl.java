@@ -63,8 +63,46 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
     return PurchaseRequestConverter.toCreate(purchaseRequest);
   }
 
+  @Override
+  @Transactional
+  public PurchaseRequestResDto.Decision cancelPurchaseRequest(Long memberId,
+      Long purchaseRequestId) {
+    PurchaseRequest purchaseRequest = getPurchaseRequest(purchaseRequestId);
+    validateBuyer(memberId, purchaseRequest);
+    validateStatus(purchaseRequest, PurchaseStatus.WAITING);
+
+    purchaseRequest.updateStatus(PurchaseStatus.CANCELED);
+
+    notificationService.create(
+        purchaseRequest.getBlindSalePost().getMember(),
+        NotificationType.TRADE_CANCELED,
+        TRADE_CANCELED_CONTENT,
+        toBlindSalePostUrl(purchaseRequest.getBlindSalePost().getId())
+    );
+
+    return PurchaseRequestConverter.toDecision(purchaseRequest);
+  }
 
 
+  private PurchaseRequest getPurchaseRequest(Long purchaseRequestId) {
+    return purchaseRequestRepository.findById(purchaseRequestId)
+        .orElseThrow(
+            () -> new ApiException(PurchaseRequestErrorCode.PURCHASE_REQUEST_NOT_FOUND));
+  }
+
+  private void validateBuyer(Long memberId, PurchaseRequest purchaseRequest) {
+    if (!purchaseRequest.getMember().getId().equals(memberId)) {
+      throw new ApiException(PurchaseRequestErrorCode.BUYER_FORBIDDEN);
+    }
+  }
+
+  private void validateStatus(PurchaseRequest purchaseRequest, PurchaseStatus... allowedStatus) {
+    boolean match = Arrays.stream(allowedStatus)
+        .anyMatch(status -> status == purchaseRequest.getStatus());
+    if (!match) {
+      throw new ApiException(PurchaseRequestErrorCode.INVALID_STATUS);
+    }
+  }
 
   private String toBlindSalePostUrl(Long blindSalePostId) {
     return "/blind-sale-posts/" + blindSalePostId;
