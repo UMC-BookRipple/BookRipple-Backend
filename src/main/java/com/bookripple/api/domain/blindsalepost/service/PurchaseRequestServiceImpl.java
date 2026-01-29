@@ -83,6 +83,46 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
     return PurchaseRequestConverter.toDecision(purchaseRequest);
   }
 
+  @Override
+  @Transactional
+  public PurchaseRequestResDto.Decision approvePurchaseRequest(Long memberId,
+      Long purchaseRequestId) {
+    PurchaseRequest purchaseRequest = getPurchaseRequest(purchaseRequestId);
+    validateSeller(memberId, purchaseRequest);
+    validateStatus(purchaseRequest, PurchaseStatus.WAITING);
+
+    purchaseRequest.updateStatus(PurchaseStatus.ACCEPTED);
+
+    notificationService.create(
+        purchaseRequest.getMember(),
+        NotificationType.TRADE_APPROVED,
+        TRADE_APPROVED_CONTENT,
+        toBlindSalePostUrl(purchaseRequest.getBlindSalePost().getId())
+    );
+
+    return PurchaseRequestConverter.toDecision(purchaseRequest);
+  }
+
+  @Override
+  @Transactional
+  public PurchaseRequestResDto.Decision rejectPurchaseRequest(Long memberId,
+      Long purchaseRequestId) {
+    PurchaseRequest purchaseRequest = getPurchaseRequest(purchaseRequestId);
+    validateSeller(memberId, purchaseRequest);
+    validateStatus(purchaseRequest, PurchaseStatus.WAITING);
+
+    purchaseRequest.updateStatus(PurchaseStatus.REJECTED);
+
+    notificationService.create(
+        purchaseRequest.getMember(),
+        NotificationType.TRADE_REJECTED,
+        TRADE_REJECTED_CONTENT,
+        toBlindSalePostUrl(purchaseRequest.getBlindSalePost().getId())
+    );
+
+    return PurchaseRequestConverter.toDecision(purchaseRequest);
+  }
+
 
   private PurchaseRequest getPurchaseRequest(Long purchaseRequestId) {
     return purchaseRequestRepository.findById(purchaseRequestId)
@@ -93,6 +133,12 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
   private void validateBuyer(Long memberId, PurchaseRequest purchaseRequest) {
     if (!purchaseRequest.getMember().getId().equals(memberId)) {
       throw new ApiException(PurchaseRequestErrorCode.BUYER_FORBIDDEN);
+    }
+  }
+
+  private void validateSeller(Long memberId, PurchaseRequest purchaseRequest) {
+    if (!purchaseRequest.getBlindSalePost().getMember().getId().equals(memberId)) {
+      throw new ApiException(PurchaseRequestErrorCode.SELLER_FORBIDDEN);
     }
   }
 
