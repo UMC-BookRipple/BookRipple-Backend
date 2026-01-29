@@ -6,9 +6,11 @@ import com.bookripple.api.domain.recommendation.dto.RecommendReqDto.Create;
 import com.bookripple.api.domain.recommendation.dto.RecommendResDto.MyRecommendList;
 import com.bookripple.api.domain.recommendation.dto.RecommendResDto.RecommendList;
 import com.bookripple.api.domain.recommendation.service.RecommendService;
+import com.bookripple.api.global.dto.GlobalDto;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
 import com.bookripple.api.global.validation.ValidationGroups;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -83,5 +85,14 @@ public class RecommendController {
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         recommendService.getMyRecommendList(memberId, lastSourceBookTitle, lastId, size));
+  }
+
+  @PostMapping("/recommendations/me/batch-delete")
+  public ApiResponse<Void> deleteMyRecommendations(
+      @AuthenticationPrincipal Long memberId,
+      @RequestBody @Valid GlobalDto.IdList request
+  ) {
+    recommendService.deleteMyRecommendations(memberId, request);
+    return ApiResponse.onSuccess(CommonSuccessCode.NO_CONTENT, null);
   }
 }

@@ -1,9 +1,11 @@
 package com.bookripple.api.domain.recommendation.repository;
 
 import com.bookripple.api.domain.recommendation.entity.Recommendation;
+import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -40,4 +42,8 @@ public interface RecommendRepository extends JpaRepository<Recommendation, Long>
       @Param("lastId") Long lastId,
       Pageable pageable
   );
+
+  @Modifying(clearAutomatically = true)
+  @Query("DELETE FROM Recommendation rec WHERE rec.member.id = :memberId AND rec.id IN :ids")
+  void deleteMyRecommendations(@Param("memberId") Long memberId, @Param("ids") List<Long> ids);
 }
