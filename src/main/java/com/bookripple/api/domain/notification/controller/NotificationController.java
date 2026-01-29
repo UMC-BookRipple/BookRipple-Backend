@@ -30,7 +30,7 @@ public class NotificationController {
   public ApiResponse<NotificationList> getNotifications(
       @AuthenticationPrincipal Long memberId,
       @RequestParam(required = false) @Min(1) Long lastId,
-      @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size
+      @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         notificationQueryService.getNotifications(memberId, lastId, size));
