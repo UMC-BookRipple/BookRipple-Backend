@@ -6,9 +6,12 @@ import com.bookripple.api.domain.recommendation.dto.RecommendReqDto.Create;
 import com.bookripple.api.domain.recommendation.dto.RecommendResDto.MyRecommendList;
 import com.bookripple.api.domain.recommendation.dto.RecommendResDto.RecommendList;
 import com.bookripple.api.domain.recommendation.service.RecommendService;
+import com.bookripple.api.global.annotation.PreventDuplicate;
+import com.bookripple.api.global.dto.GlobalDto;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
 import com.bookripple.api.global.validation.ValidationGroups;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -34,6 +37,7 @@ public class RecommendController {
 
   private final RecommendService recommendService;
 
+  @PreventDuplicate
   @PostMapping("/books/{book-id}/recommendations")
   public ApiResponse<IdRes> createRecommendation(
       @AuthenticationPrincipal Long memberId,
@@ -44,6 +48,7 @@ public class RecommendController {
         recommendService.createRecommendation(memberId, sourceBookId, request));
   }
 
+  @PreventDuplicate
   @PatchMapping("/recommendations/{recommendation-id}")
   public ApiResponse<IdRes> updateRecommendation(
       @AuthenticationPrincipal Long memberId,
@@ -54,6 +59,7 @@ public class RecommendController {
         recommendService.updateRecommendation(memberId, recommendationId, request));
   }
 
+  @PreventDuplicate
   @DeleteMapping("/recommendations/{recommendation-id}")
   public ApiResponse<IdRes> deleteRecommendation(
       @AuthenticationPrincipal Long memberId,
@@ -83,5 +89,15 @@ public class RecommendController {
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
         recommendService.getMyRecommendList(memberId, lastSourceBookTitle, lastId, size));
+  }
+
+  @PreventDuplicate
+  @PostMapping("/recommendations/me/batch-delete")
+  public ApiResponse<Void> deleteMyRecommendations(
+      @AuthenticationPrincipal Long memberId,
+      @RequestBody @Valid GlobalDto.IdList request
+  ) {
+    recommendService.deleteMyRecommendations(memberId, request);
+    return ApiResponse.onSuccess(CommonSuccessCode.NO_CONTENT, null);
   }
 }

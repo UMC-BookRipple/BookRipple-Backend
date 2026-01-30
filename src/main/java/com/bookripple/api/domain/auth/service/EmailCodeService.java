@@ -4,13 +4,12 @@ import com.bookripple.api.common.code.CommonErrorCode;
 import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.domain.auth.util.EmailSender;
 import com.bookripple.api.domain.auth.util.VerificationCodeStore;
-import com.bookripple.api.domain.member.entity.Member;
-import com.bookripple.api.domain.member.repository.MemberRepository;
-import jakarta.transaction.Transactional;
+import com.bookripple.api.domain.verification.email.enums.EmailVerificationPurpose;
+import com.bookripple.api.domain.verification.email.service.EmailVerificationService;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.Random;
 
 @Service
@@ -19,31 +18,40 @@ public class EmailCodeService {
 
   private final EmailSender emailSender;
   private final VerificationCodeStore codeStore;
-  private final MemberRepository memberRepository;
+  private final EmailVerificationService emailVerificationService;
 
-  // 인증코드 생성 및 이메일 발송
-  public void sendVerificationCode(String email) {
+  public LocalDateTime sendVerificationCode(String email, EmailVerificationPurpose purpose) {
     String code = generateCode();
+    String key = generateKey(email, purpose);
+
     emailSender.send(email, "BookRipple 인증코드", "인증코드: " + code);
-    codeStore.save(email, code);
+    codeStore.save(key, code);
+
+    return emailVerificationService.createOrRefresh(email, purpose);
   }
 
-  // 인증코드 검증 및 이메일 인증 처리
-  @Transactional
-  public void verifyCode(String email, String inputCode) {
-    String savedCode = codeStore.get(email)
-        .orElseThrow(() -> new ApiException(CommonErrorCode.NOT_FOUND, "인증코드를 찾을 수 없습니다."));
+  public void verifyCode(String email, String inputCode, EmailVerificationPurpose purpose) {
+    String key = generateKey(email, purpose);
+
+    String savedCode = codeStore.get(key)
+        .orElseThrow(() -> new ApiException(
+            CommonErrorCode.NOT_FOUND,
+            "인증코드를 찾을 수 없습니다."
+        ));
 
     if (!savedCode.equals(inputCode)) {
-      throw new ApiException(CommonErrorCode.BAD_REQUEST, "인증코드가 일치하지 않습니다.");
+      throw new ApiException(
+          CommonErrorCode.BAD_REQUEST,
+          "인증코드가 일치하지 않습니다."
+      );
     }
 
-    // 인증 처리 (isCertified = true)
-    Optional<Member> optionalMember = memberRepository.findByEmail(email);
-    optionalMember.ifPresent(Member::certify);
+    emailVerificationService.markVerified(email, purpose);
+    codeStore.remove(key);
+  }
 
-    // 인증 성공 시 저장된 인증코드 제거
-    codeStore.remove(email);
+  private String generateKey(String email, EmailVerificationPurpose purpose) {
+    return email + ":" + purpose.name();
   }
 
   private String generateCode() {

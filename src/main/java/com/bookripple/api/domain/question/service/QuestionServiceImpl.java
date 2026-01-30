@@ -27,11 +27,16 @@ import com.bookripple.api.domain.question.repository.ReadingQuestionRepository;
 import com.bookripple.api.domain.question.repository.SearchQuestionLogRepository;
 import com.bookripple.api.global.converter.GlobalConverter;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
+import com.bookripple.api.global.dto.GlobalDto.IdList;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -242,16 +247,16 @@ public class QuestionServiceImpl implements QuestionService {
     String keyword = query.trim();
 
     Book book = bookRepository.findById(bookId)
-            .orElseThrow(() -> new ApiException(BookErrorCode.NO_BOOK));
+        .orElseThrow(() -> new ApiException(BookErrorCode.NO_BOOK));
 
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
 
     Page<Question> questionPage = questionRepository.findByBookIdAndContentContainingOrderByIdDesc(
-            bookId, keyword, pageable);
+        bookId, keyword, pageable);
 
     List<Q> questionList = questionPage.stream()
-            .map(QuestionConverter::toQ)
-            .toList();
+        .map(QuestionConverter::toQ)
+        .toList();
 
     Long lastId = null;
     if (!questionList.isEmpty()) {
@@ -260,23 +265,23 @@ public class QuestionServiceImpl implements QuestionService {
 
     Member member = memberRepository.getReferenceById(memberId);
     SearchQuestionLog searchQuestionLog = SearchQuestionLog.builder()
-            .book(book)
-            .member(member)
-            .history(keyword)
-            .build();
+        .book(book)
+        .member(member)
+        .history(keyword)
+        .build();
     searchQuestionLogRepository.save(searchQuestionLog);
 
     return QuestionConverter.toQuestionList(questionList, lastId, questionPage.hasNext(),
-            questionPage.getTotalElements());
+        questionPage.getTotalElements());
   }
 
   @Override
   public QuestionList getSearchHistory(Long memberId) {
     List<Q> questionList = searchQuestionLogRepository.findAllByMemberIdOrderByCreatedAtDesc(
-                    memberId)
-            .stream()
-            .map(QuestionConverter::toQL)
-            .toList();
+            memberId)
+        .stream()
+        .map(QuestionConverter::toQL)
+        .toList();
 
     Long lastId = null;
     if (!questionList.isEmpty()) {
@@ -290,7 +295,7 @@ public class QuestionServiceImpl implements QuestionService {
   @Transactional
   public IdRes deleteSearchHistory(Long memberId, Long historyId) {
     SearchQuestionLog searchQuestionLog = searchQuestionLogRepository.findById(historyId)
-            .orElseThrow(() -> new ApiException(CommonErrorCode.NOT_FOUND));
+        .orElseThrow(() -> new ApiException(CommonErrorCode.NOT_FOUND));
 
     if (!searchQuestionLog.getMember().getId().equals(memberId)) {
       throw new ApiException(CommonErrorCode.FORBIDDEN);
@@ -306,4 +311,12 @@ public class QuestionServiceImpl implements QuestionService {
     searchQuestionLogRepository.deleteAllByMemberId(memberId);
   }
 
+  @Override
+  @Transactional
+  public void deleteMyQuestions(Long memberId, IdList request) {
+    if (request.idList() == null || request.idList().isEmpty()) {
+      throw new ApiException(CommonErrorCode.BAD_REQUEST);
+    }
+    questionRepository.deleteMyQuestions(memberId, request.idList());
+  }
 }

@@ -72,5 +72,12 @@ public class AuthReqDto {
     private String email;
     private String code;
   }
+
+  @Getter
+  @NoArgsConstructor
+  public static class PasswordReset{
+    private String email;
+    private String newPassword;
+  }
 }
 

@@ -2,21 +2,14 @@ package com.bookripple.api.domain.auth.controller;
 
 import com.bookripple.api.common.code.CommonSuccessCode;
 import com.bookripple.api.common.response.ApiResponse;
-import com.bookripple.api.global.dto.GlobalDto;
 import com.bookripple.api.domain.auth.dto.AuthReqDto;
 import com.bookripple.api.domain.auth.dto.AuthResDto;
-import com.bookripple.api.domain.auth.dto.AuthResDto.Login;
 import com.bookripple.api.domain.auth.service.AuthService;
-import com.bookripple.api.domain.member.repository.MemberRepository;
+import com.bookripple.api.global.dto.GlobalDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,10 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
   private final AuthService authService;
-  private final MemberRepository memberRepository;
 
+  /**
+   * 로컬 로그인
+   */
   @PostMapping("/login/local")
-  public ResponseEntity<ApiResponse<Login>> login(
+  public ResponseEntity<ApiResponse<AuthResDto.Login>> login(
       @RequestBody @Valid AuthReqDto.Login request) {
 
     AuthResDto.Login result = authService.localLogin(request);
@@ -37,6 +32,9 @@ public class AuthController {
         .body(ApiResponse.onSuccess(CommonSuccessCode.OK, result));
   }
 
+  /**
+   * 로컬 회원가입
+   */
   @PostMapping("/signup")
   public ResponseEntity<ApiResponse<GlobalDto.IdRes>> signup(
       @RequestBody @Valid AuthReqDto.Signup request) {
@@ -48,11 +46,54 @@ public class AuthController {
         .body(ApiResponse.onSuccess(CommonSuccessCode.OK, result));
   }
 
+  /**
+   * 아이디 중복 확인
+   */
   @GetMapping("/check-id")
   public ResponseEntity<ApiResponse<Boolean>> checkDuplicateLoginId(
       @RequestParam("loginId") String loginId
   ) {
-    boolean isAvailable = authService.checkDuplicateLoginId(loginId);
+    boolean isAvailable = authService.isLoginIdAvailable(loginId);
     return ResponseEntity.ok(ApiResponse.onSuccess(CommonSuccessCode.OK, isAvailable));
+  }
+
+  /**
+   * 게스트 로그인 Stub
+   */
+  @PostMapping("/login/guest")
+  public ResponseEntity<ApiResponse<AuthResDto.Login>> guestLogin() {
+    AuthResDto.Login result = AuthResDto.Login.builder()
+        .memberId(0L)
+        .accessToken("GUEST_TOKEN")
+        .build();
+
+    return ResponseEntity.ok(
+        ApiResponse.onSuccess(CommonSuccessCode.OK, result)
+    );
+  }
+
+  /**
+   * 카카오 로그인 Stub
+   */
+  @PostMapping("/kakao")
+  public ResponseEntity<ApiResponse<AuthResDto.Login>> kakaoLogin() {
+    AuthResDto.Login result = AuthResDto.Login.builder()
+        .memberId(0L)
+        .accessToken("KAKAO_DUMMY_TOKEN")
+        .build();
+
+    return ResponseEntity.ok(
+        ApiResponse.onSuccess(CommonSuccessCode.OK, result)
+    );
+  }
+
+  /**
+   * 로그아웃 Stub
+   */
+  @PostMapping("/logout")
+  public ResponseEntity<ApiResponse<String>> logout() {
+    return ResponseEntity.ok(
+        ApiResponse.onSuccess(CommonSuccessCode.OK, "로그아웃 되었습니다.")
+    );
   }
 }

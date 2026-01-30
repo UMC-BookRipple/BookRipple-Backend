@@ -1,15 +1,15 @@
 package com.bookripple.api.domain.auth.service;
 
 import com.bookripple.api.common.code.CommonErrorCode;
-import com.bookripple.api.common.code.CommonSuccessCode;
 import com.bookripple.api.common.error.ApiException;
-
-import com.bookripple.api.global.dto.GlobalDto;
 import com.bookripple.api.domain.auth.dto.AuthReqDto;
 import com.bookripple.api.domain.auth.dto.AuthResDto;
 import com.bookripple.api.domain.member.entity.Member;
 import com.bookripple.api.domain.member.enums.LoginType;
 import com.bookripple.api.domain.member.repository.MemberRepository;
+import com.bookripple.api.domain.verification.email.service.EmailVerificationService;
+import com.bookripple.api.domain.verification.email.enums.EmailVerificationPurpose;
+import com.bookripple.api.global.dto.GlobalDto;
 import com.bookripple.api.global.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,18 +22,22 @@ public class AuthService {
 
   private final MemberRepository memberRepository;
   private final PasswordEncoder passwordEncoder;
-
   private final JwtTokenProvider jwtTokenProvider;
+  private final EmailVerificationService emailVerificationService;
 
+  /**
+   * 회원가입
+   */
   @Transactional
   public GlobalDto.IdRes signup(AuthReqDto.Signup request) {
 
-    if (!checkDuplicateLoginId(request.getLoginId())) {
-      throw new ApiException(
-          CommonErrorCode.BAD_REQUEST,
-          "이미 사용 중인 로그인 아이디입니다."
-      );
-    }
+    validateDuplicateLoginId(request.getLoginId());
+
+    // 🔥 이메일 인증 완료 여부 검증 (회원가입 목적)
+    emailVerificationService.validateVerified(
+        request.getEmail(),
+        EmailVerificationPurpose.SIGN_UP
+    );
 
     String encodedPassword = passwordEncoder.encode(request.getPassword());
 
@@ -45,6 +49,8 @@ public class AuthService {
         .birthDate(request.getBirthDate())
         .isRequiredAgreed(request.getIsRequiredAgreed())
         .isOptionalAgreed(request.getIsOptionalAgreed())
+        .isCertified(true) // 가입 이후 상태
+        .loginType(LoginType.LOCAL)
         .build();
 
     Member savedMember = memberRepository.save(member);
@@ -52,19 +58,24 @@ public class AuthService {
     return new GlobalDto.IdRes(savedMember.getId());
   }
 
+
+  /**
+   * 로컬 로그인
+   */
   @Transactional(readOnly = true)
   public AuthResDto.Login localLogin(AuthReqDto.Login request) {
 
-//    // TODO: DB 연동 전 임시 mock member (제거 예정)
-//    Member member = getMockMember(request.getLoginId());
-
-    Member member =
-        memberRepository
-            .findByLoginId(request.getLoginId())
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 로그인 아이디입니다."));
+    Member member = memberRepository.findByLoginId(request.getLoginId())
+        .orElseThrow(() -> new ApiException(
+            CommonErrorCode.NOT_FOUND,
+            "존재하지 않는 로그인 아이디입니다."
+        ));
 
     validateLocalMember(member);
     validatePassword(request.getPassword(), member.getPassword());
+
+    // TODO: 이메일 인증 여부 로그인 정책 결정
+    // if (!member.getIsCertified()) { ... }
 
     String accessToken = jwtTokenProvider.createAccessToken(member.getId(), "USER");
 
@@ -74,28 +85,24 @@ public class AuthService {
         .build();
   }
 
-  // 아이디 중복 여부 확인
-  public boolean checkDuplicateLoginId(String loginId) {
-    boolean isAvailable = !memberRepository.existsByLoginId(loginId);
+  /**
+   * 아이디 중복 여부 조회 (Controller 용)
+   */
+  @Transactional(readOnly = true)
+  public boolean isLoginIdAvailable(String loginId) {
+    return !memberRepository.existsByLoginId(loginId);
+  }
 
-    if (!isAvailable) {
+  /**
+   * 아이디 중복 검증 (Service 내부용)
+   */
+  private void validateDuplicateLoginId(String loginId) {
+    if (memberRepository.existsByLoginId(loginId)) {
       throw new ApiException(
-          CommonErrorCode.BAD_REQUEST,
+          CommonErrorCode.CONFLICT,
           "이미 사용 중인 로그인 아이디입니다."
       );
     }
-
-    return true;
-  }
-
-  // TODO: DB 연동 전 임시 mock member (제거 예정)
-  private Member getMockMember(String loginId) {
-    return Member.builder()
-        .id(1L)
-        .loginId(loginId)
-        .password(passwordEncoder.encode("1234"))
-        .loginType(LoginType.LOCAL)
-        .build();
   }
 
   private void validateLocalMember(Member member) {
@@ -108,8 +115,7 @@ public class AuthService {
   }
 
   private void validatePassword(String rawPassword, String encodedPassword) {
-    if (encodedPassword == null
-        || !passwordEncoder.matches(rawPassword, encodedPassword)) {
+    if (encodedPassword == null || !passwordEncoder.matches(rawPassword, encodedPassword)) {
       throw new ApiException(
           CommonErrorCode.UNAUTHORIZED,
           "비밀번호가 올바르지 않습니다."

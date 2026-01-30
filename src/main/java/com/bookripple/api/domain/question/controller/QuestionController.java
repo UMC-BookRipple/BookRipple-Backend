@@ -7,9 +7,12 @@ import com.bookripple.api.domain.question.dto.QuestionResDto.Q;
 import com.bookripple.api.domain.question.dto.QuestionResDto.QuestionList;
 import com.bookripple.api.domain.question.dto.QuestionResDto.ReadingAiQnAList;
 import com.bookripple.api.domain.question.service.QuestionService;
+import com.bookripple.api.global.annotation.PreventDuplicate;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
+import com.bookripple.api.global.dto.GlobalDto.IdList;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
 import com.bookripple.api.global.validation.ValidationGroups;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -35,6 +38,7 @@ public class QuestionController {
 
   private final QuestionService questionService;
 
+  @PreventDuplicate
   @PostMapping("/books/{book-id}/questions")
   public ApiResponse<IdRes> createQuestion(
       @AuthenticationPrincipal Long memberId,
@@ -45,6 +49,7 @@ public class QuestionController {
         questionService.createQuestion(memberId, bookId, request));
   }
 
+  @PreventDuplicate
   @DeleteMapping("/questions/{question-id}")
   public ApiResponse<IdRes> deleteQuestion(
       @AuthenticationPrincipal Long memberId,
@@ -78,6 +83,7 @@ public class QuestionController {
         questionService.getMyQuestion(memberId, lastBookTitle, lastId, size));
   }
 
+  @PreventDuplicate
   @PostMapping("/books/{book-id}/questions/ai/after")
   public ApiResponse<QuestionList> createAfterReadingQuestion(
       @AuthenticationPrincipal Long memberId,
@@ -87,6 +93,7 @@ public class QuestionController {
         questionService.createAfterReadingQuestion(memberId, bookId));
   }
 
+  @PreventDuplicate
   @PostMapping("/books/{book-id}/questions/ai/during")
   public ApiResponse<Q> createDuringReadingQuestion(
       @AuthenticationPrincipal Long memberId,
@@ -96,6 +103,7 @@ public class QuestionController {
         questionService.createDuringReadingQuestion(memberId, bookId));
   }
 
+  @PreventDuplicate
   @PatchMapping("/reading-questions/{reading-question-id}")
   public ApiResponse<IdRes> updateReadingQuestion(
       @AuthenticationPrincipal Long memberId,
@@ -117,6 +125,7 @@ public class QuestionController {
         questionService.getReadingAiQnAList(memberId, bookId, lastId, size));
   }
 
+  @PreventDuplicate
   @DeleteMapping("/reading-questions/{reading-question-id}")
   public ApiResponse<IdRes> deleteReadingAiQnA(
       @AuthenticationPrincipal Long memberId,
@@ -146,6 +155,7 @@ public class QuestionController {
         questionService.getSearchHistory(memberId));
   }
 
+  @PreventDuplicate
   @DeleteMapping("/community/search/history/{history-id}")
   public ApiResponse<IdRes> deleteSearchHistory(
       @AuthenticationPrincipal Long memberId,
@@ -155,6 +165,7 @@ public class QuestionController {
         questionService.deleteSearchHistory(memberId, historyId));
   }
 
+  @PreventDuplicate
   @DeleteMapping("/community/search/history")
   public ApiResponse<Void> deleteAllSearchHistory(
       @AuthenticationPrincipal Long memberId
@@ -163,4 +174,13 @@ public class QuestionController {
     return ApiResponse.onSuccess(CommonSuccessCode.OK, null);
   }
 
+  @PreventDuplicate
+  @PostMapping("/questions/me/batch-delete")
+  public ApiResponse<Void> deleteMyRecommendations(
+      @AuthenticationPrincipal Long memberId,
+      @RequestBody @Valid IdList request
+  ) {
+    questionService.deleteMyQuestions(memberId, request);
+    return ApiResponse.onSuccess(CommonSuccessCode.NO_CONTENT, null);
+  }
 }

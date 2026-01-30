@@ -26,18 +26,28 @@ public class SecurityConfig {
     http
         .csrf(csrf -> csrf.disable())
         .sessionManagement(
-            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(
-            auth ->
-                auth
-                    .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers(
+            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        )
+        .authorizeHttpRequests(auth -> auth
+
+                    .requestMatchers(
+                        "/api/v1/auth/login/**",
+                        "/api/v1/auth/signup",
+                        "/api/v1/auth/check-id",
+                        "/api/v1/auth/email/**",
+                        "/api/v1/auth/find-id/**",
+                        "/api/v1/auth/find-pw/**"
+                    ).permitAll()
+
+                    .requestMatchers(
                         "/swagger-ui/**",
-                        "/v3/api-docs/**",
                         "/swagger-ui.html",
-                            "/health")
+                        "/v3/api-docs/**",
+                        "/health")
                     .permitAll()
-                    .anyRequest().authenticated())
+
+                    .anyRequest().authenticated()
+        )
         .exceptionHandling(
             exception ->
                 exception

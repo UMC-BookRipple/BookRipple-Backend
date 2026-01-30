@@ -1,6 +1,7 @@
 package com.bookripple.api.domain.recommendation.service;
 
 import com.bookripple.api.common.code.BookErrorCode;
+import com.bookripple.api.common.code.CommonErrorCode;
 import com.bookripple.api.common.code.RecommendErrorCode;
 import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.domain.book.entity.Book;
@@ -17,6 +18,7 @@ import com.bookripple.api.domain.recommendation.entity.Recommendation;
 import com.bookripple.api.domain.recommendation.repository.RecommendRepository;
 import com.bookripple.api.global.converter.GlobalConverter;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
+import com.bookripple.api.global.dto.GlobalDto.IdList;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
 import jakarta.transaction.Transactional;
 import java.util.List;
@@ -136,4 +138,12 @@ public class RecommendServiceImpl implements RecommendService {
         myRecommendSlice.hasNext());
   }
 
+  @Override
+  @Transactional
+  public void deleteMyRecommendations(Long memberId, IdList request) {
+    if (request.idList() == null || request.idList().isEmpty()) {
+      throw new ApiException(CommonErrorCode.BAD_REQUEST);
+    }
+    recommendRepository.deleteMyRecommendations(memberId, request.idList());
+  }
 }
