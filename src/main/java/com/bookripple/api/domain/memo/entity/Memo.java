@@ -20,6 +20,9 @@ public class Memo extends BaseEntity {
     @Column(columnDefinition = "text")
     private String context;
 
+    @Column(columnDefinition = "text", length = 100)
+    private String memoTitle;
+
     @Column(nullable = false, columnDefinition = "text")
     private String page;
 
@@ -31,4 +34,10 @@ public class Memo extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
+
+    public void update(String context, String memoTitle, String page) {
+        if (context != null) this.context = context;
+        if (memoTitle != null) this.memoTitle = memoTitle;
+        if (page != null) this.page = page;
+    }
 }
