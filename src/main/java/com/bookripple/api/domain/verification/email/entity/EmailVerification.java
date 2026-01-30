@@ -43,4 +43,9 @@ public class EmailVerification {
   public boolean isValid() {
     return verified && expiredAt.isAfter(LocalDateTime.now());
   }
+
+  public void refresh(LocalDateTime expiredAt) {
+    this.verified = false;
+    this.expiredAt = expiredAt;
+  }
 }
