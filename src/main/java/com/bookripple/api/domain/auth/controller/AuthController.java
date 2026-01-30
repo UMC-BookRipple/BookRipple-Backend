@@ -56,4 +56,44 @@ public class AuthController {
     boolean isAvailable = authService.isLoginIdAvailable(loginId);
     return ResponseEntity.ok(ApiResponse.onSuccess(CommonSuccessCode.OK, isAvailable));
   }
+
+  /**
+   * 게스트 로그인 Stub
+   */
+  @PostMapping("/login/guest")
+  public ResponseEntity<ApiResponse<AuthResDto.Login>> guestLogin() {
+    AuthResDto.Login result = AuthResDto.Login.builder()
+        .memberId(0L)
+        .accessToken("GUEST_TOKEN")
+        .build();
+
+    return ResponseEntity.ok(
+        ApiResponse.onSuccess(CommonSuccessCode.OK, result)
+    );
+  }
+
+  /**
+   * 카카오 로그인 Stub
+   */
+  @PostMapping("/kakao")
+  public ResponseEntity<ApiResponse<AuthResDto.Login>> kakaoLogin() {
+    AuthResDto.Login result = AuthResDto.Login.builder()
+        .memberId(0L)
+        .accessToken("KAKAO_DUMMY_TOKEN")
+        .build();
+
+    return ResponseEntity.ok(
+        ApiResponse.onSuccess(CommonSuccessCode.OK, result)
+    );
+  }
+
+  /**
+   * 로그아웃 Stub
+   */
+  @PostMapping("/logout")
+  public ResponseEntity<ApiResponse<String>> logout() {
+    return ResponseEntity.ok(
+        ApiResponse.onSuccess(CommonSuccessCode.OK, "로그아웃 되었습니다.")
+    );
+  }
 }
