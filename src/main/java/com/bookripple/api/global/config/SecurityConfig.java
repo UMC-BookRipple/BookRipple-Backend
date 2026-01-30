@@ -46,7 +46,7 @@ public class SecurityConfig {
                         "/health")
                     .permitAll()
 
-                    .anyRequest().denyAll()
+                    .anyRequest().authenticated()
         )
         .exceptionHandling(
             exception ->
