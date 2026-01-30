@@ -22,7 +22,7 @@ public class BookSearchController {
     private final BookQueryService bookQueryService;
 
     // 1) 알라딘 검색 API
-    @GetMapping("/search")
+    @GetMapping("/aladin/search")
     public ApiResponse<BookSearchRes> search(
             @RequestParam @NotBlank @Size(max = 100) String keyword,
             @RequestParam(defaultValue = "1") int start,

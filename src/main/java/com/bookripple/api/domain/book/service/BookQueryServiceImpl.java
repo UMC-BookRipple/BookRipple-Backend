@@ -1,32 +1,93 @@
 package com.bookripple.api.domain.book.service;
 
+import com.bookripple.api.domain.aladin.dto.AladinItemLookUpResDto;
+import com.bookripple.api.domain.aladin.dto.AladinSearchResDto;
+import com.bookripple.api.domain.aladin.service.AladinService;
+import com.bookripple.api.domain.book.converter.BookConverter;
 import com.bookripple.api.domain.book.dto.BookRes;
 import com.bookripple.api.domain.book.dto.BookSearchRes;
+import com.bookripple.api.domain.book.entity.Book;
 import com.bookripple.api.domain.book.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
 public class BookQueryServiceImpl implements BookQueryService {
 
     private final BookRepository bookRepository;
-    //private final AladinClient aladinClient; -> 외부 api 관련한 파일 어디에 둘지 회의때 논의 후 추가할 예정
+    private final AladinService aladinService;
 
+
+    //1 알라딘 검색
     @Override
     @Transactional(readOnly = true)
     public BookSearchRes searchFromAladin(String keyword, int start, int size, String queryType, String searchTarget) {
-        // Aladin 연동 바로 구현 예정
-        return null;
+        // 최소 검증
+        if (keyword == null || keyword.isBlank()) {
+            throw new IllegalArgumentException("keyword must not be blank");
+        }
+        if (start < 1) start = 1;
+        if (size < 1) size = 10;
+        if (size > 50) size = 50;
+
+        AladinSearchResDto resDto =
+                aladinService.search(keyword, start, size, queryType, searchTarget);
+
+        return BookConverter.toBookSearchRes(resDto);
     }
 
+    //2. 알라딘 도서 상세 조회 및 저장
     @Override
     @Transactional
     public BookRes getOrCreateByAladinItemId(Long itemId) {
-        return null;
-        // Aladin 도서 상세 조회는 외부 API 연동 후 구현 예정
-        // isbn13 또는 aladinBookId로 Book 조회 후 없으면 Aladin API 통해 도서 정보 받아와서 저장하는 방식 쓸 예정
-        // 왜냐면 알라딘 쿼리 5000 제한이 있음...
+        if (itemId == null) throw new IllegalArgumentException("aladinItemId must not be null");
+
+        // 1) 캐시 히트
+        return bookRepository.findByAladinBookId(itemId)
+                .map(BookConverter::toBookRes)
+                .orElseGet(() -> createFromAladin(itemId));
     }
+
+    private BookRes createFromAladin(Long itemId) {
+        AladinItemLookUpResDto lookUp = aladinService.lookup(itemId, null);
+
+        AladinItemLookUpResDto.Item it =
+                (lookUp == null || lookUp.getItem() == null || lookUp.getItem().isEmpty())
+                        ? null
+                        : lookUp.getItem().get(0);
+
+        if (it == null) {
+            throw new IllegalStateException("Aladin lookup returned empty result");
+        }
+
+        // (선택) isbn13로 중복 탐지하고 싶으면 여기서 findByIsbn13 추가
+        // 지금은 “없으면 저장”만 한다고 했으니 생략 가능
+
+        Book book = Book.builder()
+                .aladinBookId(it.getItemId())
+                .title(it.getTitle())
+                .author(it.getAuthor())
+                .publisher(it.getPublisher())
+                .bookCover(it.getCover())
+                .isbn10(it.getIsbn10())
+                .isbn13(it.getIsbn13())
+                .publishedAt(parsePublishedAt(it.getPubDate()))
+                .totalPage(it.getSubInfo() != null ? it.getSubInfo().getItemPage() : null)
+                .story(it.getDescription())
+                .build();
+
+        Book saved = bookRepository.save(book);
+        return BookConverter.toBookRes(saved);
+    }
+
+    // "yyyy-MM-dd" 형식의 문자열을 LocalDate로 변환
+    private LocalDate parsePublishedAt(String pubDate) {
+        if (pubDate == null || pubDate.isBlank()) return null;
+        return LocalDate.parse(pubDate); // yyyy-MM-dd
+    }
+
 }
