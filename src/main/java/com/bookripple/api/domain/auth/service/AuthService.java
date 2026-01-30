@@ -7,6 +7,8 @@ import com.bookripple.api.domain.auth.dto.AuthResDto;
 import com.bookripple.api.domain.member.entity.Member;
 import com.bookripple.api.domain.member.enums.LoginType;
 import com.bookripple.api.domain.member.repository.MemberRepository;
+import com.bookripple.api.domain.verification.email.service.EmailVerificationService;
+import com.bookripple.api.domain.verification.email.enums.EmailVerificationPurpose;
 import com.bookripple.api.global.dto.GlobalDto;
 import com.bookripple.api.global.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ public class AuthService {
   private final MemberRepository memberRepository;
   private final PasswordEncoder passwordEncoder;
   private final JwtTokenProvider jwtTokenProvider;
+  private final EmailVerificationService emailVerificationService;
 
   /**
    * 회원가입
@@ -28,11 +31,13 @@ public class AuthService {
   @Transactional
   public GlobalDto.IdRes signup(AuthReqDto.Signup request) {
 
-    // 로그인 아이디 중복 검증
     validateDuplicateLoginId(request.getLoginId());
 
-    // TODO: 이메일 인증 완료 여부 검증 (SIGN_UP 목적)
-    // emailVerificationService.validateVerified(request.getEmail(), SIGN_UP);
+    // 🔥 이메일 인증 완료 여부 검증 (회원가입 목적)
+    emailVerificationService.validateVerified(
+        request.getEmail(),
+        EmailVerificationPurpose.SIGN_UP
+    );
 
     String encodedPassword = passwordEncoder.encode(request.getPassword());
 
@@ -44,7 +49,7 @@ public class AuthService {
         .birthDate(request.getBirthDate())
         .isRequiredAgreed(request.getIsRequiredAgreed())
         .isOptionalAgreed(request.getIsOptionalAgreed())
-        .isCertified(true) // 가입 완료 시점에서는 인증된 상태로 간주
+        .isCertified(true) // 가입 이후 상태
         .loginType(LoginType.LOCAL)
         .build();
 
@@ -52,6 +57,7 @@ public class AuthService {
 
     return new GlobalDto.IdRes(savedMember.getId());
   }
+
 
   /**
    * 로컬 로그인
