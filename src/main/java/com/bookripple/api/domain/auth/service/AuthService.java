@@ -99,7 +99,7 @@ public class AuthService {
   private void validateDuplicateLoginId(String loginId) {
     if (memberRepository.existsByLoginId(loginId)) {
       throw new ApiException(
-          CommonErrorCode.BAD_REQUEST,
+          CommonErrorCode.CONFLICT,
           "이미 사용 중인 로그인 아이디입니다."
       );
     }
