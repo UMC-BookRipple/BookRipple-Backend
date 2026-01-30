@@ -7,52 +7,42 @@ import com.bookripple.api.domain.auth.service.EmailCodeService;
 import com.bookripple.api.domain.verification.email.enums.EmailVerificationPurpose;
 import com.bookripple.api.global.dto.GlobalDto;
 import jakarta.validation.Valid;
-import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/auth/email")
+@RequestMapping("/api/v1/auth/find-id")
 @RequiredArgsConstructor
-public class EmailVerificationController {
+public class FindIdController {
 
   private final EmailCodeService emailCodeService;
 
-  /**
-   * 회원가입용 이메일 인증 코드 발송
-   */
-  @PostMapping("/send")
-  public ResponseEntity<ApiResponse<GlobalDto.SingleRes<LocalDateTime>>> sendVerificationCode(
+  @PostMapping("/email/send")
+  public ResponseEntity<ApiResponse<String>> sendCode(
       @RequestBody @Valid GlobalDto.ContentReq request
   ) {
-      LocalDateTime expiredAt =
-          emailCodeService.sendVerificationCode(
-              request.content(),
-              EmailVerificationPurpose.SIGN_UP
-          );
+    emailCodeService.sendVerificationCode(
+        request.content(),
+        EmailVerificationPurpose.FIND_ID
+    );
 
     return ResponseEntity.ok(
-        ApiResponse.onSuccess(
-            CommonSuccessCode.OK,
-            new GlobalDto.SingleRes<>(expiredAt)
-        )
+        ApiResponse.onSuccess(CommonSuccessCode.OK, "인증코드가 발송되었습니다.")
     );
   }
 
-  /**
-   * 회원가입용 이메일 인증 코드 검증
-   */
-  @PostMapping("/verify")
+  @PostMapping("/email/verify")
   public ResponseEntity<ApiResponse<String>> verifyCode(
       @RequestBody @Valid AuthReqDto.Verify request
   ) {
     emailCodeService.verifyCode(
         request.getEmail(),
         request.getCode(),
-        EmailVerificationPurpose.SIGN_UP
+        EmailVerificationPurpose.FIND_ID
     );
 
+    // TODO: 인증 완료 후 실제 loginId 반환
     return ResponseEntity.ok(
         ApiResponse.onSuccess(CommonSuccessCode.OK, "이메일 인증이 완료되었습니다.")
     );

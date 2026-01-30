@@ -46,7 +46,7 @@ public class Member extends BaseEntity {
 
   @Builder.Default
   @Column(nullable = false)
-  private Boolean isCertified = false;  // 이메일 인증 여부
+  private Boolean isCertified = false;  // 가입 이후에도 유지되는 이메일 인증 상태
 
   @Column(nullable = false)
   private Boolean isRequiredAgreed; // 필수약관동의 여부
@@ -72,5 +72,8 @@ public class Member extends BaseEntity {
   public void certify() {
     this.isCertified = true;
   }
+  //회원가입 시 → true
+  //이메일 변경 시 → false
+  //재인증 후 → true
 
 }
