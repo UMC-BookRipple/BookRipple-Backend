@@ -5,6 +5,7 @@ import com.bookripple.api.domain.library.enums.LibraryStatus;
 import com.bookripple.api.domain.member.entity.Member;
 import com.bookripple.api.global.entity.BaseEntity;
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -15,6 +16,10 @@ import java.time.LocalDateTime;
                 @UniqueConstraint(name = "uk_library_member_book", columnNames = {"member_id", "book_id"})
         }
 )
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Getter
+@Builder
 public class LibraryItem extends BaseEntity {
 
     @Id
@@ -30,7 +35,7 @@ public class LibraryItem extends BaseEntity {
     private Book book;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false)
     private LibraryStatus status;
 
     // 필요할 수도 있으니 일단 넣어둠-> 진행률&날짜
