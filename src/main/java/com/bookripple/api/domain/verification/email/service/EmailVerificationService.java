@@ -43,7 +43,12 @@ public class EmailVerificationService {
                 "이메일 인증 요청이 존재하지 않습니다."
             ));
 
-    verification.verify();
+    if (verification.isExpired()) {
+      throw new ApiException(
+          CommonErrorCode.FORBIDDEN,
+          "인증 시간이 만료되었습니다."
+      );
+    }
   }
 
   @Transactional(readOnly = true)

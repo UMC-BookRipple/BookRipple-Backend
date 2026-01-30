@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Table(
-    name = "email_verification",
+    name = "email_auth",
     uniqueConstraints = {
         @UniqueConstraint(columnNames = {"email", "purpose"})
     }
@@ -40,8 +40,12 @@ public class EmailVerification {
     this.verified = true;
   }
 
+  public boolean isExpired() {
+    return expiredAt.isBefore(LocalDateTime.now());
+  }
+
   public boolean isValid() {
-    return verified && expiredAt.isAfter(LocalDateTime.now());
+    return verified && !isExpired();
   }
 
   public void refresh(LocalDateTime expiredAt) {
