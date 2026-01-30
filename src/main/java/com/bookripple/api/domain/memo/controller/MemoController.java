@@ -7,6 +7,7 @@ import com.bookripple.api.domain.memo.dto.MemoResDto.Item;
 import com.bookripple.api.domain.memo.service.MemoCommandService;
 import com.bookripple.api.domain.memo.service.MemoQueryService;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
+import com.bookripple.api.global.validation.ValidationGroups;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@Validated
 @RequestMapping("/api/v1/memos")
 public class MemoController {
 
@@ -38,7 +38,8 @@ public class MemoController {
     public ApiResponse<IdRes> updateMemo(
             @AuthenticationPrincipal Long memberId,
             @PathVariable Long memoId,
-            @Valid @RequestBody Update req
+            @Validated(ValidationGroups.MemoGroup.class)
+            @RequestBody Update req
     ) {
         return ApiResponse.onSuccess(CommonSuccessCode.OK,
                 memoCommandService.updateMemo(memberId, memoId, req)

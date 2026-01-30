@@ -14,7 +14,7 @@ public class MemoReqDto {
     ) {}
 
     public record Update(
-            @Valid ContentReq contentReq,  // PATCH에서도 본문 수정 가능
+            @Valid ContentReq contentReq,  // 본문 수정 가능
             @Size(max = 100) String memoTitle,
             String page
     ) {}
