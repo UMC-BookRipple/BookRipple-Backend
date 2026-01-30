@@ -21,7 +21,7 @@ public class EmailVerificationService {
   public void createOrRefresh(String email, EmailVerificationPurpose purpose) {
     emailVerificationRepository.findByEmailAndPurpose(email, purpose)
         .ifPresentOrElse(
-            ev -> ev.verify(), // 기존 거 무효화 방지용 (선택)
+            ev -> ev.refresh(LocalDateTime.now().plusMinutes(5)),
             () -> emailVerificationRepository.save(
                 EmailVerification.builder()
                     .email(email)
@@ -32,6 +32,7 @@ public class EmailVerificationService {
             )
         );
   }
+
 
   @Transactional
   public void markVerified(String email, EmailVerificationPurpose purpose) {
