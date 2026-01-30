@@ -5,5 +5,7 @@ public enum PurchaseStatus {
     ACCEPTED,   // 판매 요청 승인 (결제 대기 중)
     REJECTED,   // 요청 거절
     PAYMENT_COMPLETED, // 결제 완료 (배송 대기)
-    CANCELLED   // 요청 취소
+    SHIPPING,   // 배송 중
+    SHIPPED,    // 배송 완료
+    CANCELED   // 요청 취소
 }
