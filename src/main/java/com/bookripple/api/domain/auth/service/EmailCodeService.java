@@ -6,6 +6,7 @@ import com.bookripple.api.domain.auth.util.EmailSender;
 import com.bookripple.api.domain.auth.util.VerificationCodeStore;
 import com.bookripple.api.domain.verification.email.enums.EmailVerificationPurpose;
 import com.bookripple.api.domain.verification.email.service.EmailVerificationService;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,14 +20,14 @@ public class EmailCodeService {
   private final VerificationCodeStore codeStore;
   private final EmailVerificationService emailVerificationService;
 
-  public void sendVerificationCode(String email, EmailVerificationPurpose purpose) {
+  public LocalDateTime sendVerificationCode(String email, EmailVerificationPurpose purpose) {
     String code = generateCode();
     String key = generateKey(email, purpose);
 
     emailSender.send(email, "BookRipple 인증코드", "인증코드: " + code);
     codeStore.save(key, code);
 
-    emailVerificationService.createOrRefresh(email, purpose);
+    return emailVerificationService.createOrRefresh(email, purpose);
   }
 
   public void verifyCode(String email, String inputCode, EmailVerificationPurpose purpose) {

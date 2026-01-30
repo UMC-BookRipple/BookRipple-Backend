@@ -18,21 +18,24 @@ public class EmailVerificationService {
   private final EmailVerificationRepository emailVerificationRepository;
 
   @Transactional
-  public void createOrRefresh(String email, EmailVerificationPurpose purpose) {
+  public LocalDateTime createOrRefresh(String email, EmailVerificationPurpose purpose) {
+    LocalDateTime expiredAt = LocalDateTime.now().plusMinutes(2);
+
     emailVerificationRepository.findByEmailAndPurpose(email, purpose)
         .ifPresentOrElse(
-            ev -> ev.refresh(LocalDateTime.now().plusMinutes(5)),
+            ev -> ev.refresh(expiredAt),
             () -> emailVerificationRepository.save(
                 EmailVerification.builder()
                     .email(email)
                     .purpose(purpose)
                     .verified(false)
-                    .expiredAt(LocalDateTime.now().plusMinutes(5))
+                    .expiredAt(expiredAt)
                     .build()
             )
         );
-  }
 
+    return expiredAt;
+  }
 
   @Transactional
   public void markVerified(String email, EmailVerificationPurpose purpose) {
