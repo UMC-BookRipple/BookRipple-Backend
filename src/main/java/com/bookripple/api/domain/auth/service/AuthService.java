@@ -81,6 +81,7 @@ public class AuthService {
 
     return AuthResDto.Login.builder()
         .memberId(member.getId())
+        .userName(member.getName())
         .accessToken(accessToken)
         .build();
   }
