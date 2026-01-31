@@ -1,10 +1,9 @@
 package com.bookripple.api.domain.reading.entity;
 
-import java.time.LocalDateTime;
-
 import com.bookripple.api.domain.book.entity.Book;
 import com.bookripple.api.domain.member.entity.Member;
 
+import com.bookripple.api.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,7 +20,7 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
-public class ReadingRecord {
+public class ReadingRecord extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,25 +43,6 @@ public class ReadingRecord {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
-    @PrePersist
-    private void onCreate() {
-        validatePages();
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = this.createdAt;
-    }
-
-    @PreUpdate
-    private void onUpdate() {
-        validatePages();
-        this.updatedAt = LocalDateTime.now();
-    }
 
     private void validatePages() {
         if (startPage <= 0 || endPage <= 0) {
