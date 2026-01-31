@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import com.bookripple.api.domain.book.entity.Book;
 import com.bookripple.api.domain.member.entity.Member;
 
+import com.bookripple.api.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -28,7 +29,7 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
-public class ReadingProgress {
+public class ReadingProgress extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -56,15 +57,6 @@ public class ReadingProgress {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
-
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
-    @PrePersist
-    @PreUpdate
-    private void touchUpdatedAt() {
-        this.updatedAt = LocalDateTime.now();
-    }
 
 
     // 진행률 계산 메서드
