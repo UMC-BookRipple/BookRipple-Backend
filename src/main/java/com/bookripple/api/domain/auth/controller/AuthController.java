@@ -73,18 +73,27 @@ public class AuthController {
   }
 
   /**
-   * 카카오 로그인 Stub
+   * 카카오 로그인
    */
   @PostMapping("/kakao")
-  public ResponseEntity<ApiResponse<AuthResDto.Login>> kakaoLogin() {
-    AuthResDto.Login result = AuthResDto.Login.builder()
-        .memberId(0L)
-        .accessToken("KAKAO_DUMMY_TOKEN")
-        .build();
+  public ResponseEntity<ApiResponse<AuthResDto.Login>> kakaoLogin(
+      @RequestBody GlobalDto.ContentReq request
+  ) {
+    AuthResDto.Login result = authService.kakaoLogin(request.content());
 
     return ResponseEntity.ok(
         ApiResponse.onSuccess(CommonSuccessCode.OK, result)
     );
+  }
+
+  /**
+   * 카카오 Redirect URI 처리 (인가 코드 수신용)
+   * 테스트를 위해 GET으로 열어둠.. 실제 서비스 시에는 프론트에서 코드를 받아 POST로 전달함
+   */
+  @GetMapping("/kakao/callback")
+  public ResponseEntity<ApiResponse<AuthResDto.Login>> kakaoCallback(@RequestParam("code") String code) {
+    AuthResDto.Login result = authService.kakaoLogin(code);
+    return ResponseEntity.ok(ApiResponse.onSuccess(CommonSuccessCode.OK, result));
   }
 
   /**
