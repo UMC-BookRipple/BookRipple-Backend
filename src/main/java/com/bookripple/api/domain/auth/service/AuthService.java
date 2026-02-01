@@ -11,10 +11,16 @@ import com.bookripple.api.domain.verification.email.service.EmailVerificationSer
 import com.bookripple.api.domain.verification.email.enums.EmailVerificationPurpose;
 import com.bookripple.api.global.dto.GlobalDto;
 import com.bookripple.api.global.security.JwtTokenProvider;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClient;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +30,23 @@ public class AuthService {
   private final PasswordEncoder passwordEncoder;
   private final JwtTokenProvider jwtTokenProvider;
   private final EmailVerificationService emailVerificationService;
+  private final RestClient restClient;
+
+  @Value("${kakao.client-id}")
+  private String kakaoClientId;
+
+  @Value("${kakao.client-secret}")
+  private String kakaoClientSecret;
+
+  @Value("${kakao.redirect-uri}")
+  private String kakaoRedirectUri;
+
+  @Value("${kakao.token-uri}")
+  private String kakaoTokenUri;
+
+  @Value("${kakao.user-info-uri}")
+  private String kakaoUserInfoUri;
+
 
   /**
    * 회원가입
@@ -106,6 +129,36 @@ public class AuthService {
     }
   }
 
+  /**
+   * kakao 로그인
+   */
+  public AuthResDto.Login kakaoLogin(String code) {
+
+    // 1️⃣ 인가 코드 → 카카오 access token
+    String kakaoAccessToken = requestKakaoAccessToken(code);
+
+    // 2️⃣ access token → 카카오 사용자 정보
+    Map<String, Object> kakaoUser = requestKakaoUserInfo(kakaoAccessToken);
+
+    // 3️⃣ providerId 추출
+    Long providerId = ((Number) kakaoUser.get("id")).longValue();
+
+    // 4️⃣ nickname 추출
+    Map<String, Object> properties =
+        (Map<String, Object>) kakaoUser.get("properties");
+
+    String nickname = (String) properties.get("nickname");
+
+    // 🔴 아직은 반환에 쓰지 않음 (다음 단계)
+    return AuthResDto.Login.builder()
+        .memberId(0L)
+        .userName(nickname)
+        .accessToken("KAKAO_DUMMY_TOKEN")
+        .isNewMember(false)
+        .build();
+  }
+
+
   private void validateLocalMember(Member member) {
     if (member.getLoginType() != LoginType.LOCAL) {
       throw new ApiException(
@@ -122,5 +175,42 @@ public class AuthService {
           "비밀번호가 올바르지 않습니다."
       );
     }
+  }
+
+  private String requestKakaoAccessToken(String code) {
+
+    MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+    params.add("grant_type", "authorization_code");
+    params.add("client_id", kakaoClientId);
+    params.add("client_secret", kakaoClientSecret);
+    params.add("redirect_uri", kakaoRedirectUri);
+    params.add("code", code);
+
+    Map<String, Object> response = restClient.post()
+        .uri(kakaoTokenUri)
+        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        .body(params)
+        .retrieve()
+        .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), (req, res) -> {
+          throw new ApiException(CommonErrorCode.BAD_GATEWAY, "카카오 토큰 발급 실패");
+        })
+        .body(Map.class);
+
+    if (response == null || !response.containsKey("access_token")) {
+      throw new ApiException(CommonErrorCode.BAD_GATEWAY, "카카오 토큰 응답이 비어있습니다.");
+    }
+
+    return (String) response.get("access_token");
+  }
+
+  private Map<String, Object> requestKakaoUserInfo(String kakaoAccessToken) {
+    return restClient.get()
+        .uri(kakaoUserInfoUri)
+        .headers(headers -> headers.setBearerAuth(kakaoAccessToken))
+        .retrieve()
+        .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), (req, res) -> {
+          throw new ApiException(CommonErrorCode.BAD_GATEWAY, "카카오 사용자 정보 조회 실패");
+        })
+        .body(Map.class);
   }
 }
