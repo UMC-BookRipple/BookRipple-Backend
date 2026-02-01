@@ -130,32 +130,54 @@ public class AuthService {
   }
 
   /**
-   * kakao 로그인
+   * 카카오 로그인
    */
+  @Transactional
   public AuthResDto.Login kakaoLogin(String code) {
-
-    // 1️⃣ 인가 코드 → 카카오 access token
+    // 1️⃣ 카카오 토큰 및 정보 요청
     String kakaoAccessToken = requestKakaoAccessToken(code);
-
-    // 2️⃣ access token → 카카오 사용자 정보
     Map<String, Object> kakaoUser = requestKakaoUserInfo(kakaoAccessToken);
 
-    // 3️⃣ providerId 추출
-    Long providerId = ((Number) kakaoUser.get("id")).longValue();
-
-    // 4️⃣ nickname 추출
-    Map<String, Object> properties =
-        (Map<String, Object>) kakaoUser.get("properties");
-
+    // 2️⃣ 정보 추출
+    String providerId = String.valueOf(kakaoUser.get("id"));
+    Map<String, Object> properties = (Map<String, Object>) kakaoUser.get("properties");
     String nickname = (String) properties.get("nickname");
 
-    // 🔴 아직은 반환에 쓰지 않음 (다음 단계)
-    return AuthResDto.Login.builder()
-        .memberId(0L)
-        .userName(nickname)
-        .accessToken("KAKAO_DUMMY_TOKEN")
-        .isNewMember(false)
-        .build();
+    // 3️⃣ DB 조회 및 처리
+    return memberRepository.findByProviderId(providerId)
+        .map(member -> {
+          // [기존 회원] 로그인 처리
+          String accessToken = jwtTokenProvider.createAccessToken(member.getId(), "USER");
+          return AuthResDto.Login.builder()
+              .memberId(member.getId())
+              .userName(member.getName())
+              .accessToken(accessToken)
+              .isNewMember(false)
+              .build();
+        })
+        .orElseGet(() -> {
+          // [신규 회원] 회원가입 처리 후 로그인
+          Member newMember = Member.builder()
+              .loginId("kakao_" + providerId) // 중복 방지를 위한 규격화된 ID
+              .providerId(providerId)
+              .name(nickname)
+              .loginType(LoginType.KAKAO)
+              .isRequiredAgreed(true) // 소셜 로그인은 보통 가입 시 동의한 것으로 간주
+              .requiredAgreedAt(java.time.LocalDateTime.now()) // 동의 시간 기록
+              .isOptionalAgreed(false)
+              .isCertified(true)
+              .build();
+
+          Member savedMember = memberRepository.save(newMember);
+          String accessToken = jwtTokenProvider.createAccessToken(savedMember.getId(), "USER");
+
+          return AuthResDto.Login.builder()
+              .memberId(savedMember.getId())
+              .userName(savedMember.getName())
+              .accessToken(accessToken)
+              .isNewMember(true)
+              .build();
+        });
   }
 
 
