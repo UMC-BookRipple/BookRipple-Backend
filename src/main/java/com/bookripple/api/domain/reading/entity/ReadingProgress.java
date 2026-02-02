@@ -1,12 +1,11 @@
 package com.bookripple.api.domain.reading.entity;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 import com.bookripple.api.domain.book.entity.Book;
 import com.bookripple.api.domain.member.entity.Member;
-
 import com.bookripple.api.global.entity.BaseEntity;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,8 +20,7 @@ import lombok.*;
         },
         indexes = {
                 @Index(name = "idx_reading_progress_member", columnList = "member_id"),
-                @Index(name = "idx_reading_progress_book", columnList = "book_id"),
-                @Index(name = "idx_reading_progress_updated_at", columnList = "updated_at")
+                @Index(name = "idx_reading_progress_book", columnList = "book_id")
         }
 )
 @Getter
@@ -34,9 +32,6 @@ public class ReadingProgress extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "current_page", nullable = false)
-    private int currentPage;
 
     @Column(name = "reading_time", nullable = false)
     private int readingTime;
@@ -58,29 +53,29 @@ public class ReadingProgress extends BaseEntity {
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
-
-    // 진행률 계산 메서드
-    public void updateByEndPage(int endPage) {
-        if (endPage > this.currentPage) {
-            this.currentPage = endPage;
-        }
-
-        int totalPage = book.getTotalPage();
-        BigDecimal pct = BigDecimal.valueOf(this.currentPage)
-                .multiply(BigDecimal.valueOf(100))
-                .divide(BigDecimal.valueOf(totalPage), 2, java.math.RoundingMode.HALF_UP);
-
-        // 백분율 계산
-        if (pct.compareTo(BigDecimal.ZERO) < 0) pct = BigDecimal.ZERO;
-        if (pct.compareTo(BigDecimal.valueOf(100)) > 0) pct = BigDecimal.valueOf(100);
-
-        this.progress = pct;
-        this.isCompleted = (this.progress.compareTo(BigDecimal.valueOf(100)) >= 0);
+    // 초기값 설정
+    @PrePersist
+    private void initDefaults() {
+        this.readingTime = 0;
+        this.progress = BigDecimal.ZERO;
+        this.isLiked = false;
+        this.isCompleted = false;
     }
 
-    public void addReadingTime(int minutesToAdd) {
-        if (minutesToAdd <= 0) return;
-        this.readingTime += minutesToAdd;
+    public void addReadingTime(int seconds) {
+        if (seconds > 0) {
+            this.readingTime += seconds;
+        }
+    }
+
+    public void markCompleted() {
+        this.isCompleted = true;
+        this.progress = BigDecimal.valueOf(100);
+    }
+
+    public void uncomplete() {
+        this.isCompleted = false;
+        this.progress = BigDecimal.ZERO;
     }
 
     public void toggleLiked(boolean liked) {
