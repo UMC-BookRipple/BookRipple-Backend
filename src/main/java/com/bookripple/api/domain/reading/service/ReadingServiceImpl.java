@@ -46,6 +46,9 @@ public class ReadingServiceImpl implements ReadingService {
 
         store.getOrCreateProgress(member, book);
 
+        // start 시점부터 진행중 책장에서 조회 가능하도록
+        markAsReadingIfNotCompleted(member, book);
+
         return ReadingConverter.toStartRes(session);
     }
 
@@ -93,6 +96,23 @@ public class ReadingServiceImpl implements ReadingService {
         upsertLibraryStatus(member, book, LibraryStatus.COMPLETED);
 
         return ReadingConverter.toCompleteRes(book.getId(), progress);
+    }
+
+    private void markAsReadingIfNotCompleted(Member member, Book book) {
+        LibraryItem item = libraryItemRepository.findByMemberIdAndBookId(member.getId(), book.getId())
+                .orElseGet(() -> LibraryItem.builder()
+                        .member(member)
+                        .book(book)
+                        .status(LibraryStatus.READING)
+                        .build()
+                );
+
+        // 이미 완독 상태면 유지하는 쪽으로.
+        if (item.getStatus() != LibraryStatus.COMPLETED) {
+            item.setStatus(LibraryStatus.READING);
+        }
+
+        libraryItemRepository.save(item);
     }
 
     private void upsertLibraryStatus(Member member, Book book, LibraryStatus targetStatus) {
