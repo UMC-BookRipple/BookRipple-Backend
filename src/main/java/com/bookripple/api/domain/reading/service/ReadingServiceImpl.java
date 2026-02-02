@@ -36,6 +36,13 @@ public class ReadingServiceImpl implements ReadingService {
             throw new IllegalStateException("ACTIVE_SESSION_ALREADY_EXISTS");
         });
 
+        var pausedOpt = store.findPausedSession(memberId, bookId);
+        if (pausedOpt.isPresent()) {
+            ReadingSession paused = pausedOpt.get();
+            paused.resume(); // lastResumedAt=now, status=ACTIVE
+            return ReadingConverter.toStartRes(paused); // sessionId 그대로 반환
+        }
+
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("member not found"));
         Book book = bookRepository.findById(bookId)

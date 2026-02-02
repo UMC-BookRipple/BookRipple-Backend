@@ -38,6 +38,11 @@ public class ReadingStore {
         return progressRepository.findByMemberIdAndBookId(memberId, bookId);
     }
 
+
+    public Optional<ReadingSession> findPausedSession(Long memberId, Long bookId) {
+        return sessionRepository.findByMemberIdAndBookIdAndStatus(memberId, bookId, ReadingSessionStatus.PAUSED);
+    }
+
     @Transactional
     public ReadingProgress saveProgress(ReadingProgress progress) {
         return progressRepository.save(progress);
