@@ -25,11 +25,14 @@ import com.bookripple.api.domain.question.enums.QuestionType;
 import com.bookripple.api.domain.question.repository.QuestionRepository;
 import com.bookripple.api.domain.question.repository.ReadingQuestionRepository;
 import com.bookripple.api.domain.question.repository.SearchQuestionLogRepository;
+import com.bookripple.api.domain.reading.entity.ReadingProgress;
+import com.bookripple.api.domain.reading.repository.ReadingProgressRepository;
 import com.bookripple.api.global.converter.GlobalConverter;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdList;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
 import jakarta.transaction.Transactional;
+import java.math.BigDecimal;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -50,6 +53,7 @@ public class QuestionServiceImpl implements QuestionService {
   private final AiService aiService;
   private final ReadingQuestionRepository readingQuestionRepository;
   private final SearchQuestionLogRepository searchQuestionLogRepository;
+  private final ReadingProgressRepository progressRepository;
 
   @Override
   @Transactional
@@ -147,7 +151,8 @@ public class QuestionServiceImpl implements QuestionService {
     Book book = bookRepository.findById(bookId)
         .orElseThrow(() -> new ApiException(BookErrorCode.NO_BOOK));
 
-    AiQuestion aiQuestion = aiService.generateQuestions(AiQuestionType.AFTER, book.getTitle());
+    AiQuestion aiQuestion = aiService.generateQuestions(AiQuestionType.AFTER, book.getTitle(),
+        BigDecimal.valueOf(100));
 
     List<Question> aiQuestions = aiQuestion.questions().stream()
         .map(content -> QuestionConverter.toQuestion(member, book, content,
@@ -172,7 +177,10 @@ public class QuestionServiceImpl implements QuestionService {
     Book book = bookRepository.findById(bookId)
         .orElseThrow(() -> new ApiException(BookErrorCode.NO_BOOK));
 
-    AiQuestion aiQuestion = aiService.generateQuestions(AiQuestionType.DURING, book.getTitle());
+    ReadingProgress progress = progressRepository.findByMemberIdAndBookId(memberId, bookId);
+
+    AiQuestion aiQuestion = aiService.generateQuestions(AiQuestionType.DURING, book.getTitle(),
+        progress.getProgress());
 
     ReadingQuestion question = QuestionConverter.toReadingQuestion(member, book,
         aiQuestion.questions().get(0));
