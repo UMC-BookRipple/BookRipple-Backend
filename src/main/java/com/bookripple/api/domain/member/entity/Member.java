@@ -10,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,16 +33,19 @@ public class Member extends BaseEntity {
   @Column(nullable = false, unique = true, length = 50)
   private String loginId;
 
+  @Column(unique = true, length = 50)
+  private String providerId; // KAKAO user id
+
   @Column(columnDefinition = "TEXT")
   private String password; // 소셜 로그인 시 NULL 가능
 
   @Column(nullable = false, length = 20)
   private String name;
 
-  @Column(nullable = false, unique = true, length = 100)
+  @Column(unique = true, length = 100)
   private String email;
 
-  @Column(nullable = false)
+  @Column
   private LocalDate birthDate;
 
   @Builder.Default
@@ -51,8 +55,14 @@ public class Member extends BaseEntity {
   @Column(nullable = false)
   private Boolean isRequiredAgreed; // 필수약관동의 여부
 
+  @Column
+  private LocalDateTime requiredAgreedAt;
+
   @Column(nullable = false)
   private Boolean isOptionalAgreed; // 선택약관동의 여부
+
+  @Column
+  private LocalDateTime optionalAgreedAt;
 
   @Builder.Default
   @Enumerated(EnumType.STRING)

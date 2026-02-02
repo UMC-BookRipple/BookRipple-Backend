@@ -10,6 +10,7 @@ public class AuthResDto {
   public static class Login {
 
     private Long memberId;
+    private String userName;
     private String accessToken;
   }
 }
