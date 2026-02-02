@@ -95,6 +95,12 @@ public class QuestionServiceImpl implements QuestionService {
       throw new ApiException(BookErrorCode.NO_BOOK);
     }
 
+    ReadingProgress readingProgress = progressRepository.findByMemberIdAndBookId(memberId, bookId);
+
+    if (readingProgress.getProgress().compareTo(new BigDecimal("50")) < 0) {
+      throw new ApiException(QuestionErrorCode.INSUFFICIENT_PROGRESS);
+    }
+
     Pageable pageable = PageRequest.of(0, size);
 
     Slice<Question> questionSlice = questionRepository.findQuestionByCursor(bookId, lastId,
