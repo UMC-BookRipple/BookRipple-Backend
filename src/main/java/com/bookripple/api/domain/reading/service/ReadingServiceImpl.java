@@ -1,5 +1,8 @@
 package com.bookripple.api.domain.reading.service;
 
+import com.bookripple.api.domain.library.entity.LibraryItem;
+import com.bookripple.api.domain.library.enums.LibraryStatus;
+import com.bookripple.api.domain.library.repository.LibraryItemRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +26,7 @@ public class ReadingServiceImpl implements ReadingService {
     private final ReadingStore store;
     private final MemberRepository memberRepository;
     private final BookRepository bookRepository;
+    private final LibraryItemRepository libraryItemRepository;
 
     @Override
     public ReadingDto.StartRes start(Long memberId, ReadingDto.StartReq req) {
@@ -68,6 +72,11 @@ public class ReadingServiceImpl implements ReadingService {
         ReadingProgress progress = store.getOrCreateProgress(session.getMember(), session.getBook());
         progress.addReadingTime(sessionSeconds);
 
+        // 완독이 아니면 진행중으로 둠
+        if (!progress.isCompleted()) {
+            upsertLibraryStatus(session.getMember(), session.getBook(), LibraryStatus.READING);
+        }
+
         return ReadingConverter.toEndRes(record, sessionSeconds, progress);
     }
 
@@ -81,6 +90,23 @@ public class ReadingServiceImpl implements ReadingService {
         ReadingProgress progress = store.getOrCreateProgress(member, book);
         progress.markCompleted();
 
+        upsertLibraryStatus(member, book, LibraryStatus.COMPLETED);
+
         return ReadingConverter.toCompleteRes(book.getId(), progress);
+    }
+
+    private void upsertLibraryStatus(Member member, Book book, LibraryStatus targetStatus) {
+        LibraryItem item = libraryItemRepository.findByMemberIdAndBookId(member.getId(), book.getId())
+                .orElseGet(() -> LibraryItem.builder()
+                        .member(member)
+                        .book(book)
+                        .status(targetStatus)
+                        .build()
+                );
+
+        // 이미 존재하는 경우에도 상태 갱신
+        item.setStatus(targetStatus);
+
+        libraryItemRepository.save(item);
     }
 }
