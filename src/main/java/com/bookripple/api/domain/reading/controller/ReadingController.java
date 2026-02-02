@@ -34,7 +34,7 @@ public class ReadingController {
 
     // 독서 일시정지
     @PreventDuplicate
-    @PostMapping("/reading/{session-id}/pause")
+    @PostMapping("/{session-id}/pause")
     public ApiResponse<ReadingDto.PauseRes> pause(
             @AuthenticationPrincipal Long memberId,
             @PathVariable("session-id") @Min(1) Long sessionId
@@ -47,7 +47,7 @@ public class ReadingController {
 
     // 독서 종료
     @PreventDuplicate
-    @PostMapping("/reading/end")
+    @PostMapping("/end")
     public ApiResponse<ReadingDto.EndRes> end(
             @AuthenticationPrincipal Long memberId,
             @RequestBody ReadingDto.EndReq request
@@ -60,7 +60,7 @@ public class ReadingController {
 
     // 완독 설정
     @PreventDuplicate
-    @PostMapping("/reading/complete")
+    @PostMapping("/complete")
     public ApiResponse<ReadingDto.CompleteRes> complete(
             @AuthenticationPrincipal Long memberId,
             @RequestBody ReadingDto.CompleteReq request
