@@ -20,6 +20,9 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
   // 이메일 중복 체크
   boolean existsByEmail(String email);
 
+  // 카카오 고유 번호(providerId)로 기존 회원 확인
+  Optional<Member> findByProviderId(String providerId);
+
   // 이메일 조회 (중복 체크 / OAuth 대비)
   Optional<Member> findByEmail(String email);
 

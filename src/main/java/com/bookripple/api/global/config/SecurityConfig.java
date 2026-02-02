@@ -36,7 +36,8 @@ public class SecurityConfig {
                         "/api/v1/auth/check-id",
                         "/api/v1/auth/email/**",
                         "/api/v1/auth/find-id/**",
-                        "/api/v1/auth/find-pw/**"
+                        "/api/v1/auth/find-pw/**",
+                        "/api/v1/auth/kakao/**"
                     ).permitAll()
 
                     .requestMatchers(
