@@ -34,10 +34,9 @@ public class ReadingStore {
         return sessionRepository.save(session);
     }
 
-    public Optional<ReadingProgress> findProgress(Long memberId, Long bookId) {
+    public ReadingProgress findProgressOrNull(Long memberId, Long bookId) {
         return progressRepository.findByMemberIdAndBookId(memberId, bookId);
     }
-
 
     public Optional<ReadingSession> findPausedSession(Long memberId, Long bookId) {
         return sessionRepository.findByMemberIdAndBookIdAndStatus(memberId, bookId, ReadingSessionStatus.PAUSED);
@@ -50,13 +49,25 @@ public class ReadingStore {
 
     @Transactional
     public ReadingProgress getOrCreateProgress(Member member, Book book) {
-        return progressRepository.findByMemberIdAndBookId(member.getId(), book.getId())
-                .orElseGet(() -> progressRepository.save(
-                        ReadingProgress.builder()
-                                .member(member)
-                                .book(book)
-                                .build()
-                ));
+        ReadingProgress progress = progressRepository.findByMemberIdAndBookId(member.getId(), book.getId());
+        if (progress != null) {
+            return progress;
+        }
+
+        // 없으면 생성
+        try {
+            return progressRepository.save(
+                    ReadingProgress.builder()
+                            .member(member)
+                            .book(book)
+                            .build()
+            );
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            // 동시성으로 누가 먼저 만들었을 수 있음 -> 다시 조회
+            ReadingProgress retry = progressRepository.findByMemberIdAndBookId(member.getId(), book.getId());
+            if (retry != null) return retry;
+            throw e;
+        }
     }
 
     @Transactional

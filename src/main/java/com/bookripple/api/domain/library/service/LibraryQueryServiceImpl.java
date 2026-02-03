@@ -2,6 +2,8 @@ package com.bookripple.api.domain.library.service;
 
 import java.util.List;
 
+import com.bookripple.api.domain.library.dto.LibraryReq;
+import com.bookripple.api.domain.library.dto.LibraryRes;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -47,4 +49,15 @@ public class LibraryQueryServiceImpl implements LibraryQueryService {
         return LibraryItemListRes.of(items, hasNext, nextLastId);
     }
 
+    @Override
+    public LibraryRes.Delete deleteBooks(Long memberId, LibraryReq.Delete request) {
+
+        long deleted = libraryItemRepository.deleteByMemberIdAndStatusAndBook_IdIn(
+                memberId,
+                request.getCategory(),
+                request.getBookIds()
+        );
+
+        return LibraryRes.Delete.of(deleted);
+    }
 }

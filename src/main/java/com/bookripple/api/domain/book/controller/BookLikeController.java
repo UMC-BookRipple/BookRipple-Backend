@@ -4,7 +4,6 @@ import com.bookripple.api.common.code.CommonSuccessCode;
 import com.bookripple.api.common.response.ApiResponse;
 import com.bookripple.api.domain.book.dto.BookLikeRes;
 import com.bookripple.api.domain.book.service.BookCommandService;
-import com.bookripple.api.global.dto.GlobalDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;

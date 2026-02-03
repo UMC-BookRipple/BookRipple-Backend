@@ -34,6 +34,8 @@ import com.bookripple.api.global.dto.GlobalDto.IdRes;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
+
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
