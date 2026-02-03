@@ -4,7 +4,7 @@ import com.bookripple.api.domain.book.dto.BookLikeRes;
 
 public interface BookCommandService {
 
-    BookLikeRes like(Long bookId, Long memberId);
+    BookLikeRes likeBook(Long bookId, Long memberId);
 
-    BookLikeRes unlike(Long bookId, Long memberId);
+    BookLikeRes unlikeBook(Long bookId, Long memberId);
 }

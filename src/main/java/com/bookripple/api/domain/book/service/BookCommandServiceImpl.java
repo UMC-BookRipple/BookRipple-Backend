@@ -3,7 +3,7 @@ package com.bookripple.api.domain.book.service;
 import com.bookripple.api.common.code.BookErrorCode;
 import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.domain.book.converter.BookLikeConverter;
-import com.bookripple.api.domain.book.dto.BookLikeResDto.LikeStatus;
+import com.bookripple.api.domain.book.dto.BookLikeRes;
 import com.bookripple.api.domain.book.entity.Book;
 import com.bookripple.api.domain.book.repository.BookRepository;
 import com.bookripple.api.domain.member.entity.Member;
@@ -26,7 +26,7 @@ public class BookCommandServiceImpl implements BookCommandService {
 
     @Override
     @Transactional
-    public LikeStatus likeBook(Long bookId, Long memberId) {
+    public BookLikeRes likeBook(Long bookId, Long memberId) {
         if (!bookRepository.existsById(bookId)) {
             throw new ApiException(BookErrorCode.NO_BOOK);
         }
@@ -45,7 +45,7 @@ public class BookCommandServiceImpl implements BookCommandService {
 
     @Override
     @Transactional
-    public LikeStatus unlikeBook(Long bookId, Long memberId) {
+    public BookLikeRes unlikeBook(Long bookId, Long memberId) {
         if (!bookRepository.existsById(bookId)) {
             throw new ApiException(BookErrorCode.NO_BOOK);
         }

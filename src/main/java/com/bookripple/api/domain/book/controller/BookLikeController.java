@@ -1,35 +1,37 @@
 package com.bookripple.api.domain.book.controller;
 
+import com.bookripple.api.common.code.CommonSuccessCode;
+import com.bookripple.api.common.response.ApiResponse;
+import com.bookripple.api.domain.book.dto.BookLikeRes;
+import com.bookripple.api.domain.book.service.BookCommandService;
 import com.bookripple.api.global.dto.GlobalDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/books/likes")
 class BookLikeController {
 
-    private final BookLikeService bookLikeService;
+    private final BookCommandService bookCommandService;
 
     @PostMapping("/{bookId}")
-    public GlobalDto.SingleRes<BookLikeRes> likeBook(
+    public ApiResponse<BookLikeRes> likeBook(
             @PathVariable Long bookId,
-            @AuthenticationPrincipal CustomUserDetails user
+            @AuthenticationPrincipal Long memberId
     ) {
-        return GlobalDto.SingleRes.of(
-                bookLikeService.like(bookId, user.getId())
-        );
+        return ApiResponse.onSuccess(CommonSuccessCode.OK,
+                bookCommandService.likeBook(bookId, memberId));
     }
 
     @DeleteMapping("/{bookId}")
-    public GlobalDto.SingleRes<BookLikeRes> unlikeBook(
+    public ApiResponse<BookLikeRes> unlikeBook(
             @PathVariable Long bookId,
-            @AuthenticationPrincipal CustomUserDetails user
+            @AuthenticationPrincipal Long memberId
     ) {
-        return GlobalDto.SingleRes.of(
-                bookLikeService.unlike(bookId, user.getId())
+        return ApiResponse.onSuccess(CommonSuccessCode.OK,
+                bookCommandService.unlikeBook(bookId, memberId)
         );
     }
 }

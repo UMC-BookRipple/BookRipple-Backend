@@ -41,7 +41,5 @@ public class LibraryItem extends BaseEntity {
 
     // 필요할 수도 있으니 일단 넣어둠-> 진행률&날짜
     private Integer progressPercent; // 0~100
-    private LocalDateTime startedAt;
-    private LocalDateTime completedAt;
 
 }

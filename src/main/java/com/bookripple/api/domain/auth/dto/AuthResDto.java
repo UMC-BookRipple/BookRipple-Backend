@@ -12,5 +12,6 @@ public class AuthResDto {
     private Long memberId;
     private String userName;
     private String accessToken;
+    private Boolean isNewMember;
   }
 }
