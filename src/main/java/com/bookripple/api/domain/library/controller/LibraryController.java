@@ -1,12 +1,13 @@
 package com.bookripple.api.domain.library.controller;
 
 import com.bookripple.api.common.code.CommonSuccessCode;
+import com.bookripple.api.domain.library.dto.LibraryReq;
+import com.bookripple.api.domain.library.dto.LibraryRes;
+import com.bookripple.api.global.annotation.PreventDuplicate;
+import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.bookripple.api.domain.library.dto.LibraryItemListRes;
 import com.bookripple.api.domain.library.enums.LibraryStatus;
@@ -33,6 +34,18 @@ public class LibraryController {
     ) {
         return ApiResponse.onSuccess(CommonSuccessCode.OK,
                 libraryQueryService.getMyLibrary(memberId, status, lastId, size)
+        );
+    }
+
+    @PreventDuplicate
+    @PostMapping("/books/delete")
+    public ApiResponse<LibraryRes.Delete> deleteBooks(
+            @AuthenticationPrincipal Long memberId,
+            @Valid @RequestBody LibraryReq.Delete request
+    ) {
+        return ApiResponse.onSuccess(
+                CommonSuccessCode.OK,
+                libraryQueryService.deleteBooks(memberId, request)
         );
     }
 }
