@@ -4,6 +4,9 @@ import com.bookripple.api.common.code.CommonSuccessCode;
 import com.bookripple.api.domain.library.dto.LibraryReq;
 import com.bookripple.api.domain.library.dto.LibraryRes;
 import com.bookripple.api.global.annotation.PreventDuplicate;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -16,6 +19,9 @@ import com.bookripple.api.common.response.ApiResponse;
 
 import lombok.RequiredArgsConstructor;
 
+@Tag(
+        name = "내 책장",
+        description = "내 책장 조회 및 도서 삭제 API")
 @RestController
 @RequiredArgsConstructor
 @Validated
@@ -26,6 +32,10 @@ public class LibraryController {
 
     // 1. 내 책장 조회 API
     @GetMapping("/books")
+    @Operation(
+            summary = "내 책장 도서 조회",
+            description = "내 책장에 담긴 도서들을 상태별[LIKED, READING, COMPLETED]로 조회합니다."
+    )
     public ApiResponse<LibraryItemListRes> getMyLibrary(
             @AuthenticationPrincipal Long memberId,
             @RequestParam LibraryStatus status,
@@ -37,11 +47,18 @@ public class LibraryController {
         );
     }
 
+    // 2. 내 책장 도서 삭제 API
     @PreventDuplicate
     @PostMapping("/books/delete")
+    @Operation(
+            summary = "내 책장 도서 삭제",
+            description = "내 책장에서 도서를 선택 삭제합니다."
+    )
     public ApiResponse<LibraryRes.Delete> deleteBooks(
             @AuthenticationPrincipal Long memberId,
+            @Parameter(description = "삭제할 도서의 bookId 리스트", example = "[1, 2, 3]")
             @Valid @RequestBody LibraryReq.Delete request
+
     ) {
         return ApiResponse.onSuccess(
                 CommonSuccessCode.OK,

@@ -30,14 +30,29 @@ public class LibraryQueryServiceImpl implements LibraryQueryService {
     @Override
     public LibraryItemListRes getMyLibrary(Long memberId, LibraryStatus status, Long lastId, int size) {
         Pageable pageable = PageRequest.of(0, size);
+
+        //like 기준 조회
         if (status == LibraryStatus.LIKED) {
-            List<ReadingProgress> liked = (lastId == null)
+
+            List<ReadingProgress> fetched = (lastId == null)
                     ? readingProgressRepository.findByMemberIdAndIsLikedTrueOrderByIdDesc(memberId, pageable)
                     : readingProgressRepository.findByMemberIdAndIsLikedTrueAndIdLessThanOrderByIdDesc(memberId, lastId, pageable);
 
-            // 여기서 rp.getBook() 기반으로 응답 DTO 매핑
-            return LibraryConverter.fromLikedProgress(liked);
+            boolean hasNext = fetched.size() > size;
+            if (hasNext) {
+                fetched = fetched.subList(0, size);
+            }
+
+            List<LibraryItemRes> items = fetched.stream()
+                    .map(LibraryItemRes::from)
+                    .toList();
+
+            Long nextLastId = fetched.isEmpty() ? null : fetched.get(fetched.size() - 1).getId(); // rp.id
+
+            return LibraryItemListRes.of(items, hasNext, nextLastId);
         }
+
+        // reading, completed 기준 조회
         List<LibraryItem> fetched = (lastId == null)
                 ? libraryItemRepository.findByMemberIdAndStatusOrderByIdDesc(memberId, status, pageable)
                 : libraryItemRepository.findByMemberIdAndStatusAndIdLessThanOrderByIdDesc(
