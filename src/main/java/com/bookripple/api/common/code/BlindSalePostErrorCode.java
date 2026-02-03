@@ -9,10 +9,10 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum BlindSalePostErrorCode implements BaseErrorCode {
     // 404 NOT FOUND
-    POST_NOT_FOUND(HttpStatus.NOT_FOUND, "POST_404_1", "해당 판매 게시글을 찾을 수 없습니다."),
+    POST_NOT_FOUND(HttpStatus.NOT_FOUND, "POST_404", "해당 판매 게시글을 찾을 수 없습니다."),
 
     // 403 FORBIDDEN
-    NOT_POST_OWNER(HttpStatus.FORBIDDEN, "POST_403_1", "게시글 수정 및 삭제 권한이 없습니다."),
+    NOT_POST_OWNER(HttpStatus.FORBIDDEN, "POST_403", "게시글 수정 및 삭제 권한이 없습니다."),
 
     // 400 BAD REQUEST
     ALREADY_SOLD_OUT(HttpStatus.BAD_REQUEST, "POST_400_1", "이미 판매 완료된 게시글은 수정하거나 삭제할 수 없습니다."),
