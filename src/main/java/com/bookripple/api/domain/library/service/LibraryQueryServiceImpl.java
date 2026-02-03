@@ -4,6 +4,8 @@ import java.util.List;
 
 import com.bookripple.api.domain.library.dto.LibraryReq;
 import com.bookripple.api.domain.library.dto.LibraryRes;
+import com.bookripple.api.domain.reading.entity.ReadingProgress;
+import com.bookripple.api.domain.reading.repository.ReadingProgressRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,12 +25,19 @@ import lombok.RequiredArgsConstructor;
 public class LibraryQueryServiceImpl implements LibraryQueryService {
 
     private final LibraryItemRepository libraryItemRepository;
+    private final ReadingProgressRepository readingProgressRepository;
 
     @Override
     public LibraryItemListRes getMyLibrary(Long memberId, LibraryStatus status, Long lastId, int size) {
+        Pageable pageable = PageRequest.of(0, size);
+        if (status == LibraryStatus.LIKED) {
+            List<ReadingProgress> liked = (lastId == null)
+                    ? readingProgressRepository.findByMemberIdAndIsLikedTrueOrderByIdDesc(memberId, pageable)
+                    : readingProgressRepository.findByMemberIdAndIsLikedTrueAndIdLessThanOrderByIdDesc(memberId, lastId, pageable);
 
-        Pageable pageable = PageRequest.of(0, size + 1);
-
+            // 여기서 rp.getBook() 기반으로 응답 DTO 매핑
+            return LibraryConverter.fromLikedProgress(liked);
+        }
         List<LibraryItem> fetched = (lastId == null)
                 ? libraryItemRepository.findByMemberIdAndStatusOrderByIdDesc(memberId, status, pageable)
                 : libraryItemRepository.findByMemberIdAndStatusAndIdLessThanOrderByIdDesc(

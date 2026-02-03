@@ -6,6 +6,7 @@ import com.bookripple.api.domain.book.entity.Book;
 import com.bookripple.api.domain.library.entity.LibraryItem;
 import com.bookripple.api.domain.library.enums.LibraryStatus;
 
+import com.bookripple.api.domain.reading.entity.ReadingProgress;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -28,6 +29,19 @@ public record LibraryItemRes(
                 .coverUrl(book.getBookCover())
                 .authors(List.of(book.getAuthor()))
                 .status(item.getStatus())
+                .build();
+    }
+
+    // LIKED 탭 전용 (ReadingProgress → LibraryItemRes)
+    public static LibraryItemRes from(ReadingProgress rp) {
+        Book book = rp.getBook();
+        return LibraryItemRes.builder()
+                .libraryItemId(rp.getId())     // ⭐ 커서용 progressId
+                .bookId(book.getId())
+                .title(book.getTitle())
+                .coverUrl(book.getBookCover())
+                .authors(List.of(book.getAuthor()))
+                .status(LibraryStatus.LIKED)   // ⭐ 좋아요 탭
                 .build();
     }
 }

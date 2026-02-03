@@ -23,5 +23,6 @@ public interface LibraryItemRepository extends JpaRepository<LibraryItem, Long> 
     long deleteByMemberIdAndStatusAndBook_IdIn(
             Long memberId, LibraryStatus status, List<Long> bookIds
     );
+
 }
 
