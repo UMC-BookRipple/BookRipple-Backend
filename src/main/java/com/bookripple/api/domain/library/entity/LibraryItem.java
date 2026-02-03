@@ -34,13 +34,12 @@ public class LibraryItem extends BaseEntity {
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
+    @Setter
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private LibraryStatus status;
 
     // 필요할 수도 있으니 일단 넣어둠-> 진행률&날짜
     private Integer progressPercent; // 0~100
-    private LocalDateTime startedAt;
-    private LocalDateTime completedAt;
 
 }

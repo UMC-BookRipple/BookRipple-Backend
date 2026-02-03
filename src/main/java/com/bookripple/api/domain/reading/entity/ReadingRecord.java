@@ -2,8 +2,8 @@ package com.bookripple.api.domain.reading.entity;
 
 import com.bookripple.api.domain.book.entity.Book;
 import com.bookripple.api.domain.member.entity.Member;
-
 import com.bookripple.api.global.entity.BaseEntity;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,8 +12,7 @@ import lombok.*;
         name = "reading_record",
         indexes = {
                 @Index(name = "idx_reading_record_member_created", columnList = "member_id, created_at"),
-                @Index(name = "idx_reading_record_book_created", columnList = "book_id, created_at"),
-                @Index(name = "idx_reading_record_member_book_created", columnList = "member_id, book_id, created_at")
+                @Index(name = "idx_reading_record_book_created", columnList = "book_id, created_at")
         }
 )
 @Getter
@@ -26,14 +25,19 @@ public class ReadingRecord extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // 일단 안 쓰는 값
     @Column(name = "start_page", nullable = false)
     private int startPage;
 
     @Column(name = "end_page", nullable = false)
     private int endPage;
 
+    // 총 독서 시간 (분)
+    @Column(name = "reading_time", nullable = false)
+    private int readingTime;
+
     @Lob
-    @Column(name = "content", columnDefinition = "TEXT")
+    @Column(name = "content", nullable = false)
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -44,12 +48,18 @@ public class ReadingRecord extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    private void validatePages() {
-        if (startPage <= 0 || endPage <= 0) {
-            throw new IllegalArgumentException("startPage/endPage must be positive.");
+    @PrePersist
+    private void initDefaultsAndValidate() {
+        // 페이지 기반 기능 미사용 → 우선 값은 1
+        if (this.startPage == 0) this.startPage = 1;
+        if (this.endPage == 0) this.endPage = 1;
+
+        if (this.readingTime < 0) {
+            throw new IllegalArgumentException("readingTime must be >= 0");
         }
-        if (startPage > endPage) {
-            throw new IllegalArgumentException("startPage must be <= endPage.");
+
+        if (this.content == null) {
+            this.content = "";
         }
     }
 }
