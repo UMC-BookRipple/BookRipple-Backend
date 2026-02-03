@@ -1,5 +1,8 @@
 package com.bookripple.api.domain.blindsalepost.service;
 
+import com.bookripple.api.common.code.BlindSalePostErrorCode;
+import com.bookripple.api.common.code.CommonErrorCode;
+import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.domain.blindsalepost.converter.BlindSalePostConverter;
 import com.bookripple.api.domain.blindsalepost.dto.BlindSalePostReqDto;
 import com.bookripple.api.domain.blindsalepost.dto.BlindSalePostResDto;
@@ -37,9 +40,10 @@ public class BlindSalePostServiceImpl implements BlindSalePostService {
     public BlindSalePostResDto.Create createPost(Long memberId, BlindSalePostReqDto.Create request) {
         // 1. 등록할 회원과 실제 도서 정보를 조회합니다.
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ApiException(CommonErrorCode.NOT_FOUND, "해당 회원을 찾을 수 없습니다."));
+
         Book book = bookRepository.findById(request.actualBookId())
-                .orElseThrow(() -> new RuntimeException("도서 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new ApiException(CommonErrorCode.NOT_FOUND, "도서 정보를 찾을 수 없습니다."));
 
         // 2. [Converter]를 사용하여 DTO를 엔티티로 변환합니다.
         BlindSalePost post = BlindSalePostConverter.toBlindSalePost(request, member, book);
@@ -55,7 +59,7 @@ public class BlindSalePostServiceImpl implements BlindSalePostService {
     public BlindSalePostResDto.Detail getPostDetail(Long blindPostId) {
         // 1. 게시글 존재 여부 확인
         BlindSalePost post = blindSalePostRepository.findById(blindPostId)
-                .orElseThrow(() -> new RuntimeException("해당 게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ApiException(BlindSalePostErrorCode.POST_NOT_FOUND));
 
         // 2. 해당 게시글에 들어온 모든 구매 요청 리스트 조회
         List<PurchaseRequest> requests = purchaseRequestRepository.findAllByBlindSalePostId(blindPostId);
@@ -96,14 +100,21 @@ public class BlindSalePostServiceImpl implements BlindSalePostService {
     public void updatePost(Long memberId, Long blindBookId, BlindSalePostReqDto.Update request) {
         // 1. 게시글 존재 여부 확인
         BlindSalePost post = blindSalePostRepository.findById(blindBookId)
-                .orElseThrow(() -> new RuntimeException("해당 게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ApiException(BlindSalePostErrorCode.POST_NOT_FOUND));
 
         // 2. 권한 확인: 본인의 글만 수정 가능
         if (!post.getMember().getId().equals(memberId)) {
-            throw new RuntimeException("수정 권한이 없습니다.");
+            throw new ApiException(BlindSalePostErrorCode.NOT_POST_OWNER);
+        }
+        // 3. 비즈니스 검증: 예약 중이거나 판매 완료된 글은 수정 불가
+        if (post.getPostStatus() == PostStatus.RESERVED) {
+            throw new ApiException(BlindSalePostErrorCode.ALREADY_RESERVED);
+        }
+        if (post.getPostStatus() == PostStatus.SOLD_OUT) {
+            throw new ApiException(BlindSalePostErrorCode.ALREADY_SOLD_OUT);
         }
 
-        // 3. 엔티티의 update 메서드 호출 (Dirty Checking으로 자동 DB 반영)
+        // 4. 엔티티의 update 메서드 호출 (Dirty Checking으로 자동 DB 반영)
         post.update(
                 request.title(),
                 request.subtitle(),
@@ -116,13 +127,18 @@ public class BlindSalePostServiceImpl implements BlindSalePostService {
     @Override
     @Transactional
     public void deletePost(Long memberId, Long blindBookId) {
-        // 1. 삭제할 게시글이 존재하는지 확인
+        // 1. 삭제할 게시글 존재 확인
         BlindSalePost post = blindSalePostRepository.findById(blindBookId)
-                .orElseThrow(() -> new RuntimeException("해당 게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ApiException(BlindSalePostErrorCode.POST_NOT_FOUND));
 
-        // 2. 권한 확인: 게시글 작성자와 삭제 요청자가 일치하는지 체크
+        // 2. 권한 확인
         if (!post.getMember().getId().equals(memberId)) {
-            throw new RuntimeException("게시글을 삭제할 권한이 없습니다.");
+            throw new ApiException(BlindSalePostErrorCode.NOT_POST_OWNER);
+        }
+
+        // 3. 비즈니스 검증: 판매 완료된 글은 삭제 불가
+        if (post.getPostStatus() == PostStatus.SOLD_OUT) {
+            throw new ApiException(BlindSalePostErrorCode.ALREADY_SOLD_OUT);
         }
 
         // 3. 게시글 삭제 실행
