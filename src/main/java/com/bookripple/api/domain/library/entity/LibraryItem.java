@@ -34,6 +34,7 @@ public class LibraryItem extends BaseEntity {
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
+    @Setter
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private LibraryStatus status;
