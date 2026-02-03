@@ -31,7 +31,7 @@ public class BlindSalePostResDto {
             boolean hasNext
     ) {}
 
-    //  [상세 조회] 모든 상황을 아우르는 상세 정보
+    // [화면 1] 게시글 상세 정보 (판매자용)
     @Builder
     public record Detail(
             Long blindBookId,
@@ -39,16 +39,22 @@ public class BlindSalePostResDto {
             String subtitle,
             String description,
             Integer price,
-            String status,     // 게시글 상태 (SALE, DONE 등)
-            Long requestCount, // 판매요청 인원 수
-            List<PurchaseRequestInfo> requests // 구매 요청자 명단
+            String status,
+            Long requestCount // "판매요청 3명"을 띄우기 위한 카운트
+    ) {}
+
+    // [화면 2] 구매 요청자 목록
+    @Builder
+    public record PurchaseRequestList(
+            Long blindBookId,
+            List<PurchaseRequestInfo> requests
     ) {}
 
     // 상세 조회 내부에 포함될 구매 요청자 정보
     @Builder
     public record PurchaseRequestInfo(
             Long requestId,
-            String name,    // 구매 요청한 사람 이름
+            String name,    // "익명의 사용자 1325" 등
             String status   // WAITING, ACCEPTED 등
     ) {}
 }
