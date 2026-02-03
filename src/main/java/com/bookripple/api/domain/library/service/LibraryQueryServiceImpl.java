@@ -47,5 +47,4 @@ public class LibraryQueryServiceImpl implements LibraryQueryService {
         return LibraryItemListRes.of(items, hasNext, nextLastId);
     }
 
-
 }
