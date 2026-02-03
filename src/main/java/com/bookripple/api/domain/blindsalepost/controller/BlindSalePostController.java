@@ -1,5 +1,7 @@
 package com.bookripple.api.domain.blindsalepost.controller;
 
+import com.bookripple.api.common.code.CommonSuccessCode;
+import com.bookripple.api.common.response.ApiResponse;
 import com.bookripple.api.domain.blindsalepost.dto.BlindSalePostReqDto;
 import com.bookripple.api.domain.blindsalepost.dto.BlindSalePostResDto;
 import com.bookripple.api.domain.blindsalepost.enums.PostStatus;
@@ -34,7 +36,8 @@ public class BlindSalePostController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping // [GET] /api/v1/blind-books
+    // [GET] /api/v1/blind-books
+    @GetMapping
     public ResponseEntity<BlindSalePostResDto.SliceResponse> getMyList(
             @RequestParam PostStatus status,             // 판매중/거래완료 탭 필터
             @RequestParam(required = false) Long cursor, // 이전 페이지의 마지막 게시글 ID
@@ -50,7 +53,26 @@ public class BlindSalePostController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{blind-book-id}") // 글 수정하기 버튼 매핑
+    // 판매 도서 상세 정보 조회 (기본 상세 페이지)
+    @GetMapping("/{blind-book-id}")
+    public ApiResponse<BlindSalePostResDto.Detail> getPostDetail(
+            @PathVariable("blind-book-id") Long blindBookId) {
+
+        BlindSalePostResDto.Detail response = blindSalePostService.getPostDetail(blindBookId);
+        return ApiResponse.onSuccess(CommonSuccessCode.OK, response);
+    }
+
+    // 구매 요청자 명단 조회 (판매요청 인원 클릭 시)
+    @GetMapping("/{blind-book-id}/requests")
+    public ApiResponse<BlindSalePostResDto.PurchaseRequestList> getPurchaseRequests(
+            @PathVariable("blind-book-id") Long blindBookId) {
+
+        BlindSalePostResDto.PurchaseRequestList response = blindSalePostService.getPurchaseRequests(blindBookId);
+        return ApiResponse.onSuccess(CommonSuccessCode.OK, response);
+    }
+
+    // 글 수정하기 버튼 매핑
+    @PatchMapping("/{blind-book-id}")
     public ResponseEntity<String> update(
             @PathVariable("blind-book-id") Long blindBookId,
             @RequestBody BlindSalePostReqDto.Update requestDto) {
@@ -61,7 +83,8 @@ public class BlindSalePostController {
         return ResponseEntity.ok("게시글 수정이 완료되었습니다.");
     }
 
-    @DeleteMapping("/{blind-book-id}") // [DELETE] /api/v1/blind-books/{id}
+    // [DELETE] /api/v1/blind-books/{id}
+    @DeleteMapping("/{blind-book-id}")
     public ResponseEntity<String> delete(
             @PathVariable("blind-book-id") Long blindBookId) {
 
