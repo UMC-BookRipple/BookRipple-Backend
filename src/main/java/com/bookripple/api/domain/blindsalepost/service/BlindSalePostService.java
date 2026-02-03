@@ -16,4 +16,6 @@ public interface BlindSalePostService {
     void updatePost(Long memberId, Long blindBookId, BlindSalePostReqDto.Update request);
 
     void deletePost(Long memberId, Long blindBookId);
+
+    BlindSalePostResDto.PurchaseRequestList getPurchaseRequests(Long blindPostId);
 }

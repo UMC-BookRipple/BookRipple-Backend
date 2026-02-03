@@ -61,11 +61,24 @@ public class BlindSalePostServiceImpl implements BlindSalePostService {
         BlindSalePost post = blindSalePostRepository.findById(blindPostId)
                 .orElseThrow(() -> new ApiException(BlindSalePostErrorCode.POST_NOT_FOUND));
 
-        // 2. 해당 게시글에 들어온 모든 구매 요청 리스트 조회
+        // 2. 해당 게시글에 들어온 요청 갯수만 카운트
+        long requestCount = purchaseRequestRepository.countByBlindSalePostId(blindPostId);
+
+        // 3. 상세 정보와 카운트만 반환
+        return BlindSalePostConverter.toDetail(post, requestCount);
+    }
+
+    @Override
+    public BlindSalePostResDto.PurchaseRequestList getPurchaseRequests(Long blindPostId) {
+        // 1. 게시글 존재 확인
+        if (!blindSalePostRepository.existsById(blindPostId)) {
+            throw new ApiException(BlindSalePostErrorCode.POST_NOT_FOUND);
+        }
+        // 2. 구매 요청자 명단만 조회
         List<PurchaseRequest> requests = purchaseRequestRepository.findAllByBlindSalePostId(blindPostId);
 
-        // 3. 컨버터를 통해 게시글 정보와 요청자 명단을 합쳐서 DTO로 변환
-        return BlindSalePostConverter.toDetail(post, requests);
+        // 3. 명단 리스트 반환
+        return BlindSalePostConverter.toPurchaseRequestList(blindPostId, requests);
     }
 
     @Override

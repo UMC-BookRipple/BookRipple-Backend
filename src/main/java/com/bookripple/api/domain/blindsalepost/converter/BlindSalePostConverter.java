@@ -45,8 +45,8 @@ public class BlindSalePostConverter {
                 .build();
     }
 
-    //  [상세 조회] 엔티티 + 요청자 명단 -> 상세 DTO 변환
-    public static BlindSalePostResDto.Detail toDetail(BlindSalePost post, List<PurchaseRequest> requests) {
+    // [화면 1용] 상세 정보 + 요청 인원수 변환
+    public static BlindSalePostResDto.Detail toDetail(BlindSalePost post, long requestCount) {
         return BlindSalePostResDto.Detail.builder()
                 .blindBookId(post.getId())
                 .title(post.getTitle())
@@ -54,18 +54,25 @@ public class BlindSalePostConverter {
                 .description(post.getDescription())
                 .price(post.getPrice())
                 .status(post.getPostStatus().name())
-                .requestCount((long) requests.size()) // 실시간 요청 인원수 계산
-                .requests(requests.stream()
-                        .map(BlindSalePostConverter::toPurchaseRequestInfo)
-                        .collect(Collectors.toList())) // 요청자 리스트 변환
+                .requestCount(requestCount) // 카운트만 매핑
                 .build();
     }
 
-    // [상세 조회 내부] 구매 요청 엔티티 -> 요청자 정보 DTO 변환
+    // [화면 2용] 요청자 명단 리스트 변환
+    public static BlindSalePostResDto.PurchaseRequestList toPurchaseRequestList(Long blindBookId, List<PurchaseRequest> requests) {
+        return BlindSalePostResDto.PurchaseRequestList.builder()
+                .blindBookId(blindBookId)
+                .requests(requests.stream()
+                        .map(BlindSalePostConverter::toPurchaseRequestInfo)
+                        .collect(Collectors.toList()))
+                .build();
+    }
+
+    // 개별 요청 정보 변환
     public static BlindSalePostResDto.PurchaseRequestInfo toPurchaseRequestInfo(PurchaseRequest request) {
         return BlindSalePostResDto.PurchaseRequestInfo.builder()
                 .requestId(request.getId())
-                .name(request.getMember().getName()) // 멤버 엔티티의 닉네임을 사용
+                .name(request.getMember().getName()) // 닉네임 또는 익명 명칭 사용
                 .status(request.getStatus().name())
                 .build();
     }
