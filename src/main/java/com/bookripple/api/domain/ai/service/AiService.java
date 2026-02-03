@@ -7,6 +7,7 @@ import com.bookripple.api.domain.ai.dto.AiResDto.AiQuestion;
 import com.bookripple.api.domain.ai.dto.AiResDto.GeminiRes;
 import com.bookripple.api.domain.ai.enums.AiQuestionType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -30,8 +31,11 @@ public class AiService {
         .build();
   }
 
-  public AiQuestion generateQuestions(AiQuestionType type, String bookTitle) {
-    String prompt = String.format(type.getPrompt(), bookTitle);
+  public AiQuestion generateQuestions(AiQuestionType type, String bookTitle, BigDecimal progress) {
+
+    String progressStr = String.format("%.1f", progress);
+
+    String prompt = String.format(type.getPrompt(), bookTitle, progressStr);
 
     GeminiReq req = createReq(prompt);
 

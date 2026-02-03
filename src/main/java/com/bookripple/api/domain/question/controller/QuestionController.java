@@ -63,7 +63,7 @@ public class QuestionController {
   public ApiResponse<QuestionList> getQuestion(
       @AuthenticationPrincipal Long memberId,
       @PathVariable("book-id") @Min(1) Long bookId,
-      @RequestParam(required = false) @NotBlank @Size(max = 50) String keyword,
+      @RequestParam(required = false) @Size(max = 50) String keyword,
       @RequestParam(defaultValue = "false") Boolean onlyMine,
       @RequestParam(required = false) @Min(1) Long lastId,
       @RequestParam(defaultValue = "3") @Max(100) int size
