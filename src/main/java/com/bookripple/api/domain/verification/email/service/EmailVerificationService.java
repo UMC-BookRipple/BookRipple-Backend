@@ -1,6 +1,6 @@
 package com.bookripple.api.domain.verification.email.service;
 
-import com.bookripple.api.common.code.CommonErrorCode;
+import com.bookripple.api.common.code.AuthErrorCode;
 import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.domain.verification.email.entity.EmailVerification;
 import com.bookripple.api.domain.verification.email.enums.EmailVerificationPurpose;
@@ -41,16 +41,10 @@ public class EmailVerificationService {
   public void markVerified(String email, EmailVerificationPurpose purpose) {
     EmailVerification verification =
         emailVerificationRepository.findByEmailAndPurpose(email, purpose)
-            .orElseThrow(() -> new ApiException(
-                CommonErrorCode.NOT_FOUND,
-                "이메일 인증 요청이 존재하지 않습니다."
-            ));
+            .orElseThrow(() -> new ApiException(AuthErrorCode.NOT_FOUND_VERIFICATION_CODE));
 
     if (verification.isExpired()) {
-      throw new ApiException(
-          CommonErrorCode.FORBIDDEN,
-          "인증 시간이 만료되었습니다."
-      );
+      throw new ApiException(AuthErrorCode.EXPIRED_VERIFICATION_CODE);
     }
     verification.verify();
   }
@@ -59,16 +53,12 @@ public class EmailVerificationService {
   public void validateVerified(String email, EmailVerificationPurpose purpose) {
     EmailVerification verification =
         emailVerificationRepository.findByEmailAndPurpose(email, purpose)
-            .orElseThrow(() -> new ApiException(
-                CommonErrorCode.FORBIDDEN,
-                "이메일 인증이 필요합니다."
-            ));
+            // 인증 내역이 아예 없는 경우
+            .orElseThrow(() -> new ApiException(AuthErrorCode.EMAIL_NOT_VERIFIED));
 
     if (!verification.isValid()) {
-      throw new ApiException(
-          CommonErrorCode.FORBIDDEN,
-          "이메일 인증이 완료되지 않았거나 만료되었습니다."
-      );
+      // 인증은 했으나 만료되거나 검증 안 됨
+      throw new ApiException(AuthErrorCode.EMAIL_NOT_VERIFIED);
     }
   }
 }
