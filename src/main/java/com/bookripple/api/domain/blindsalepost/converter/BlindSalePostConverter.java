@@ -8,6 +8,7 @@ import com.bookripple.api.domain.blindsalepost.dto.BlindSalePostResDto;
 import com.bookripple.api.domain.book.entity.Book;
 import com.bookripple.api.domain.member.entity.Member;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class BlindSalePostConverter {
@@ -118,6 +119,23 @@ public class BlindSalePostConverter {
                 .content(content)
                 .nextCursor(nextCursor)
                 .hasNext(hasNext)
+                .build();
+    }
+
+    public static BlindSalePostResDto.BuyerDetail toBuyerDetail(
+            BlindSalePost post,
+            Optional<PurchaseRequest> myRequest) {
+
+        return BlindSalePostResDto.BuyerDetail.builder()
+                .blindBookId(post.getId())
+                .title(post.getTitle())
+                .subtitle(post.getSubtitle())
+                .description(post.getDescription())
+                .price(post.getPrice())
+                .bookCondition(post.getBookCondition().name())
+                .sellerName(post.getMember().getName())
+                .purchaseStatus(myRequest.map(req -> req.getStatus().name()).orElse(null))
+                .requestId(myRequest.map(PurchaseRequest::getId).orElse(null))
                 .build();
     }
 

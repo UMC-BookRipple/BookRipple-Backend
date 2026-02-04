@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -203,5 +204,18 @@ public class BlindSalePostServiceImpl implements BlindSalePostService {
         Long nextCursor = hasNext ? contentRequests.get(contentRequests.size() - 1).getId() : null;
 
         return BlindSalePostConverter.toBuyerSlice(content, nextCursor, hasNext);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public BlindSalePostResDto.BuyerDetail getPostDetailForBuyer(Long memberId, Long blindPostId) {
+
+        BlindSalePost post = blindSalePostRepository.findById(blindPostId)
+                .orElseThrow(() -> new ApiException(BlindSalePostErrorCode.POST_NOT_FOUND));
+
+        Optional<PurchaseRequest> myRequest = purchaseRequestRepository
+                .findByBlindSalePostIdAndMemberId(blindPostId, memberId);
+
+        return BlindSalePostConverter.toBuyerDetail(post, myRequest);
     }
 }

@@ -22,4 +22,6 @@ public interface BlindSalePostService {
     BlindSalePostResDto.BuyerSliceResponse<BlindSalePostResDto.BuyerListElement> getAllPosts(Long cursor, int size);
 
     BlindSalePostResDto.BuyerSliceResponse<BlindSalePostResDto.MyRequestListElement> getMyRequests(Long memberId, Long cursor, int size);
+
+    BlindSalePostResDto.BuyerDetail getPostDetailForBuyer(Long memberId, Long blindPostId);
 }
