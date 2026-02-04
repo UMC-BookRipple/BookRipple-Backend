@@ -86,7 +86,7 @@ public class BlindSalePostController {
     // 구매자용 블라인드 북 판매 목록 조회 (무한 스크롤)
     @GetMapping
     public ApiResponse<BlindSalePostResDto.BuyerSliceResponse<BlindSalePostResDto.BuyerListElement>> getAllPosts(
-            @RequestParam(value = "status", required = false) String status, // 시안의 ON_SALE 대응
+            @RequestParam(value = "status", required = false) String status,
             @RequestParam(required = false) Long cursor,
             @RequestParam(defaultValue = "10") int size) {
 
@@ -107,5 +107,15 @@ public class BlindSalePostController {
 
         return ApiResponse.onSuccess(CommonSuccessCode.OK,
                 blindSalePostService.getMyRequests(memberId, cursor, size));
+    }
+
+    // [GET] /api/v1/blind-books/{blind-book-id}/buyer
+    @GetMapping("/{blind-book-id}/buyer")
+    public ApiResponse<BlindSalePostResDto.BuyerDetail> getPostDetailForBuyer(
+            @AuthenticationPrincipal Long memberId,
+            @PathVariable("blind-book-id") Long blindBookId) {
+
+        return ApiResponse.onSuccess(CommonSuccessCode.OK,
+                blindSalePostService.getPostDetailForBuyer(memberId, blindBookId));
     }
 }
