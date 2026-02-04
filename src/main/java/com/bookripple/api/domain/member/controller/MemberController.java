@@ -28,12 +28,12 @@ public class MemberController {
   private Long getCurrentMemberId() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-    // 인증 정보가 없거나, 익명 사용자(anonymousUser)인 경우 처리
-    if (authentication == null || authentication.getPrincipal().equals("anonymousUser")) {
+    if (authentication == null ||
+        authentication.getPrincipal() == null ||
+        !(authentication.getPrincipal() instanceof Long)) {
       throw new ApiException(CommonErrorCode.UNAUTHORIZED);
     }
 
-    // Filter에서 넣은 타입(Long)으로 캐스팅
     return (Long) authentication.getPrincipal();
   }
 
@@ -143,7 +143,10 @@ public class MemberController {
     memberService.withdraw(memberId);
 
     return ResponseEntity.ok(
-        ApiResponse.onSuccess(CommonSuccessCode.OK, new GlobalDto.IdRes(memberId))
+        ApiResponse.onSuccess(
+            CommonSuccessCode.OK,
+            new GlobalDto.IdRes(memberId)
+        )
     );
   }
 }
