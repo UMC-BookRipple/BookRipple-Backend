@@ -68,14 +68,14 @@ public class BlindSalePostResDto {
             String status
     ) {}
 
-    // [오른쪽 탭] 내 구매 요청 현황 리스트 아이템
+    // 구매자용: 내 구매 요청 현황 리스트
     @Builder
     public record MyRequestListElement(
             Long requestId,
             String actualBookTitle, // 실제 도서 제목 (구매 요청 시 공개)
             String author,          // 저자
             Integer price,
-            String statusLabel,     // "배송 시작", "승인 대기", "거래 수락" 등
+            String status,     // "배송 시작", "승인 대기", "거래 수락" 등
             String purchaseStatus   // 내부 Enum 값 (WAITING, ACCEPTED 등)
     ) {}
 

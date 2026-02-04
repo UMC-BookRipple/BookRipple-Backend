@@ -157,4 +157,50 @@ public class BlindSalePostServiceImpl implements BlindSalePostService {
         // 3. 게시글 삭제 실행
         blindSalePostRepository.delete(post);
     }
+
+    // 1. 블라인드 북 전체 목록 (SALE 상태만)
+    @Override
+    public BlindSalePostResDto.BuyerSliceResponse<BlindSalePostResDto.BuyerListElement> getAllPosts(Long cursor, int size) {
+        Pageable pageable = PageRequest.of(0, size + 1); // 다음 페이지 확인을 위해 하나 더 조회
+
+        List<BlindSalePost> posts = (cursor == null)
+                ? blindSalePostRepository.findAllByPostStatusOrderByIdDesc(PostStatus.SALE, pageable)
+                : blindSalePostRepository.findAllByPostStatusAndIdLessThanOrderByIdDesc(PostStatus.SALE, cursor, pageable);
+
+        // 다음 페이지 존재 여부 확인
+        boolean hasNext = posts.size() > size;
+        List<BlindSalePost> contentPosts = hasNext ? posts.subList(0, size) : posts;
+
+        // DTO 변환
+        List<BlindSalePostResDto.BuyerListElement> content = contentPosts.stream()
+                .map(BlindSalePostConverter::toBuyerListElement)
+                .collect(Collectors.toList());
+
+        // 다음 커서 결정 (마지막 요소의 ID)
+        Long nextCursor = hasNext ? contentPosts.get(size - 1).getId() : null;
+
+        return BlindSalePostConverter.toBuyerSlice(content, nextCursor, hasNext);
+    }
+
+    // 2. 내가 요청한 책 목록 (오른쪽 탭)
+    @Override
+    public BlindSalePostResDto.BuyerSliceResponse<BlindSalePostResDto.MyRequestListElement> getMyRequests(Long memberId, Long cursor, int size) {
+        Pageable pageable = PageRequest.of(0, size + 1);
+
+        List<PurchaseRequest> requests = (cursor == null)
+                ? purchaseRequestRepository.findAllByMemberIdOrderByIdDesc(memberId, pageable)
+                : purchaseRequestRepository.findAllByMemberIdAndIdLessThanOrderByIdDesc(memberId, cursor, pageable);
+
+        boolean hasNext = requests.size() > size;
+        List<PurchaseRequest> contentRequests = hasNext ? requests.subList(0, size) : requests;
+
+        // DTO 변환 (실제 책 제목 및 상태 라벨 포함)
+        List<BlindSalePostResDto.MyRequestListElement> content = contentRequests.stream()
+                .map(BlindSalePostConverter::toMyRequestListElement)
+                .collect(Collectors.toList());
+
+        Long nextCursor = hasNext ? contentRequests.get(size - 1).getId() : null;
+
+        return BlindSalePostConverter.toBuyerSlice(content, nextCursor, hasNext);
+    }
 }

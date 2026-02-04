@@ -111,5 +111,15 @@ public class BlindSalePostConverter {
                 .build();
     }
 
+    // 슬라이스 응답 변환 (제네릭 활용)
+    public static <T> BlindSalePostResDto.BuyerSliceResponse<T> toBuyerSlice(
+            List<T> content, Long nextCursor, boolean hasNext) {
+        return BlindSalePostResDto.BuyerSliceResponse.<T>builder()
+                .content(content)
+                .nextCursor(nextCursor)
+                .hasNext(hasNext)
+                .build();
+    }
+
 
 }
