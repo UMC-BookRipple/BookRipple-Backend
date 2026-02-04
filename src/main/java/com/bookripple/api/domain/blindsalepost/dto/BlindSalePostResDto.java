@@ -86,5 +86,17 @@ public class BlindSalePostResDto {
             boolean hasNext
     ) {}
 
-
+    // 구매자용 블라인드 북 상세 정보
+    @Builder
+    public record BuyerDetail(
+            Long blindBookId,
+            String title,
+            String subtitle,
+            String description,
+            Integer price,
+            String bookCondition, // "상", "중", "하" 등
+            String sellerName,    // "익명의 사용자 1325"
+            String purchaseStatus,
+            Long requestId         // 취소나 결제 시 필요한 요청 ID
+    ) {}
 }
