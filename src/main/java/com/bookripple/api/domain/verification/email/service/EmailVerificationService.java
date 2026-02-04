@@ -52,6 +52,7 @@ public class EmailVerificationService {
           "인증 시간이 만료되었습니다."
       );
     }
+    verification.verify();
   }
 
   @Transactional(readOnly = true)
