@@ -46,7 +46,7 @@ public class EmailVerificationService {
     if (verification.isExpired()) {
       throw new ApiException(AuthErrorCode.EXPIRED_VERIFICATION_CODE);
     }
-    verification.verify();
+    verification.confirmVerification(LocalDateTime.now().plusMinutes(30));
   }
 
   @Transactional(readOnly = true)
