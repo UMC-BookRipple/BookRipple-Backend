@@ -63,6 +63,7 @@ public class BlindSalePostResDto {
     public record BuyerListElement(
             Long blindBookId,
             String title,
+            String subtitle,
             Integer price,
             String status
     ) {}

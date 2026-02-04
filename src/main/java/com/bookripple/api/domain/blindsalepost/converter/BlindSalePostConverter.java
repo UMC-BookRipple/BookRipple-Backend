@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 public class BlindSalePostConverter {
 
-    //  요청 DTO -> 엔티티 변환 (등록 시 사용)
+    //  판매자용 블라인드 북 판매게시글 등록, 요청 DTO -> 엔티티 변환
     public static BlindSalePost toBlindSalePost(BlindSalePostReqDto.Create request, Member member, Book book) {
         return BlindSalePost.builder()
                 .member(member)
@@ -25,7 +25,7 @@ public class BlindSalePostConverter {
                 .build();
     }
 
-    //  엔티티 -> 등록 응답 DTO 변환
+    //  판매자용 엔티티 -> 등록 응답 DTO 변환
     public static BlindSalePostResDto.Create toCreateResponse(BlindSalePost post) {
         return BlindSalePostResDto.Create.builder()
                 .blindBookId(post.getId())
@@ -34,7 +34,7 @@ public class BlindSalePostConverter {
                 .build();
     }
 
-    //  [목록 조회] 엔티티 -> 목록 요약 DTO 변환
+    //  판매자용 블라인드 북 판매 목록 조회, 엔티티 -> 목록 요약 DTO 변환
     public static BlindSalePostResDto.ListElement toListElement(BlindSalePost post) {
         return BlindSalePostResDto.ListElement.builder()
                 .blindBookId(post.getId())
@@ -45,7 +45,7 @@ public class BlindSalePostConverter {
                 .build();
     }
 
-    // 상세 정보 + 요청 인원수 변환
+    // 판매자용 상세 정보 + 요청 인원수 변환
     public static BlindSalePostResDto.Detail toDetail(BlindSalePost post, long requestCount) {
         return BlindSalePostResDto.Detail.builder()
                 .blindBookId(post.getId())
@@ -58,7 +58,7 @@ public class BlindSalePostConverter {
                 .build();
     }
 
-    // 요청자 명단 리스트 변환
+    // 판매자용 요청자 명단 리스트 변환
     public static BlindSalePostResDto.PurchaseRequestList toPurchaseRequestList(Long blindBookId, List<PurchaseRequest> requests) {
         return BlindSalePostResDto.PurchaseRequestList.builder()
                 .blindBookId(blindBookId)
@@ -68,7 +68,7 @@ public class BlindSalePostConverter {
                 .build();
     }
 
-    // 개별 요청 정보 변환
+    // 판매자용 개별 요청 정보 변환
     public static BlindSalePostResDto.PurchaseRequestInfo toPurchaseRequestInfo(PurchaseRequest request) {
         return BlindSalePostResDto.PurchaseRequestInfo.builder()
                 .requestId(request.getId())
@@ -77,7 +77,7 @@ public class BlindSalePostConverter {
                 .build();
     }
 
-    // List와 다음 페이지 정보를 SliceResponse DTO로 변환
+    // 판매자용 List와 다음 페이지 정보를 SliceResponse DTO로 변환
     public static BlindSalePostResDto.SliceResponse toSliceResponse(
             List<BlindSalePostResDto.ListElement> content,
             Long nextCursor,
@@ -87,6 +87,27 @@ public class BlindSalePostConverter {
                 .content(content)
                 .nextCursor(nextCursor)
                 .hasNext(hasNext)
+                .build();
+    }
+
+    // 구매자용 전체 목록 변환
+    public static BlindSalePostResDto.BuyerListElement toBuyerListElement(BlindSalePost post) {
+        return BlindSalePostResDto.BuyerListElement.builder()
+                .blindBookId(post.getId())
+                .title(post.getTitle())
+                .price(post.getPrice())
+                .subtitle(post.getSubtitle())
+                .build();
+    }
+
+    // 구매자용 내 요청 목록 변환
+    public static BlindSalePostResDto.MyRequestListElement toMyRequestListElement(PurchaseRequest request) {
+        return BlindSalePostResDto.MyRequestListElement.builder()
+                .requestId(request.getId())
+                .actualBookTitle(request.getBlindSalePost().getBook().getTitle())
+                .author(request.getBlindSalePost().getBook().getAuthor())
+                .price(request.getBlindSalePost().getPrice())
+                .purchaseStatus(request.getStatus().name())
                 .build();
     }
 
