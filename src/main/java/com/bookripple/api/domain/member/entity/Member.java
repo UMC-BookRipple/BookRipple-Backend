@@ -104,16 +104,29 @@ public class Member extends BaseEntity {
 
   // 회원 탈퇴(Soft Delete)
   public void withdraw() {
+    if (this.status == MemberStatus.QUIT) {
+      return; // 이미 탈퇴한 경우
+    }
+
     this.status = MemberStatus.QUIT;
     this.isCertified = false;
 
-    // 개인정보 마스킹 (선택 사항: 재가입 방지 및 개인정보 보호)
-    // 기존 이메일 앞에 "deleted_"와 타임스탬프 등을 붙여서 중복 제약을 피함
-    String timestamp = String.valueOf(System.currentTimeMillis());
-    this.email = "deleted_" + timestamp + "_" + this.email;
+    // Unique Key 제약 충돌 방지 & 개인정보 마스킹
+    // 예: "user1" -> "deleted_1700000000_user1"
+    long timestamp = System.currentTimeMillis();
+
     this.loginId = "deleted_" + timestamp + "_" + this.loginId;
+    this.email = "deleted_" + timestamp + "_" + this.email;
+
+    // 개인정보 삭제
+    this.name = "탈퇴회원"; // 또는 기존 이름 유지 정책에 따라 결정
     this.providerId = null; // 소셜 연동 해제
     this.password = null;   // 비밀번호 삭제
+
+
+    // 약관 동의 정보 초기화
+    this.isRequiredAgreed = false;
+    this.isOptionalAgreed = false;
   }
 
 }
