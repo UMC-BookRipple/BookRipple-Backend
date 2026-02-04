@@ -3,6 +3,7 @@ package com.bookripple.api.domain.auth.controller;
 import com.bookripple.api.common.code.CommonSuccessCode;
 import com.bookripple.api.common.response.ApiResponse;
 import com.bookripple.api.domain.auth.dto.AuthReqDto;
+import com.bookripple.api.domain.auth.service.AuthService; // 추가
 import com.bookripple.api.domain.auth.service.EmailCodeService;
 import com.bookripple.api.domain.verification.email.enums.EmailVerificationPurpose;
 import com.bookripple.api.global.dto.GlobalDto;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class FindPasswordController {
 
   private final EmailCodeService emailCodeService;
+  private final AuthService authService;
 
   @PostMapping("/email/send")
   public ResponseEntity<ApiResponse<String>> sendCode(
@@ -48,8 +50,11 @@ public class FindPasswordController {
   }
 
   @PostMapping("/password/reset")
-  public ResponseEntity<ApiResponse<String>> resetPassword() {
-    // TODO: 인증 완료 여부 검증 + 비밀번호 변경
+  public ResponseEntity<ApiResponse<String>> resetPassword(
+      @RequestBody @Valid AuthReqDto.PasswordReset request
+  ) {
+    authService.resetPassword(request);
+
     return ResponseEntity.ok(
         ApiResponse.onSuccess(CommonSuccessCode.OK, "비밀번호가 변경되었습니다.")
     );
