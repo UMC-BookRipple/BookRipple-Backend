@@ -45,7 +45,7 @@ public class BlindSalePostConverter {
                 .build();
     }
 
-    // [화면 1용] 상세 정보 + 요청 인원수 변환
+    // 상세 정보 + 요청 인원수 변환
     public static BlindSalePostResDto.Detail toDetail(BlindSalePost post, long requestCount) {
         return BlindSalePostResDto.Detail.builder()
                 .blindBookId(post.getId())
@@ -58,7 +58,7 @@ public class BlindSalePostConverter {
                 .build();
     }
 
-    // [화면 2용] 요청자 명단 리스트 변환
+    // 요청자 명단 리스트 변환
     public static BlindSalePostResDto.PurchaseRequestList toPurchaseRequestList(Long blindBookId, List<PurchaseRequest> requests) {
         return BlindSalePostResDto.PurchaseRequestList.builder()
                 .blindBookId(blindBookId)
@@ -77,7 +77,7 @@ public class BlindSalePostConverter {
                 .build();
     }
 
-    // [목록 조회] List와 다음 페이지 정보를 SliceResponse DTO로 변환
+    // List와 다음 페이지 정보를 SliceResponse DTO로 변환
     public static BlindSalePostResDto.SliceResponse toSliceResponse(
             List<BlindSalePostResDto.ListElement> content,
             Long nextCursor,

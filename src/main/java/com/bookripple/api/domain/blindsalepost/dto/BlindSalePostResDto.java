@@ -31,7 +31,7 @@ public class BlindSalePostResDto {
             boolean hasNext
     ) {}
 
-    // [화면 1] 게시글 상세 정보 (판매자용)
+    // 게시글 상세 정보 (판매자용)
     @Builder
     public record Detail(
             Long blindBookId,
@@ -43,7 +43,7 @@ public class BlindSalePostResDto {
             Long requestCount // "판매요청 3명"을 띄우기 위한 카운트
     ) {}
 
-    // [화면 2] 구매 요청자 목록
+    // 구매 요청자 목록
     @Builder
     public record PurchaseRequestList(
             Long blindBookId,
