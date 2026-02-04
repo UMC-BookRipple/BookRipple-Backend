@@ -13,7 +13,7 @@ public class BlindSalePostResDto {
             String status,         // SALE 등
             LocalDateTime createdAt
     ) {}
-    // [목록 조회] 탭별 리스트에 들어갈 요약 정보
+    // 판매자용: 탭별 리스트에 들어갈 요약 정보
     @Builder
     public record ListElement(
             Long blindBookId,
@@ -31,7 +31,7 @@ public class BlindSalePostResDto {
             boolean hasNext
     ) {}
 
-    // 게시글 상세 정보 (판매자용)
+    // 판매자용: 게시글 상세 정보
     @Builder
     public record Detail(
             Long blindBookId,
@@ -43,18 +43,48 @@ public class BlindSalePostResDto {
             Long requestCount // "판매요청 3명"을 띄우기 위한 카운트
     ) {}
 
-    // 구매 요청자 목록
+    // 판매자용: 구매 요청자 목록
     @Builder
     public record PurchaseRequestList(
             Long blindBookId,
             List<PurchaseRequestInfo> requests
     ) {}
 
-    // 상세 조회 내부에 포함될 구매 요청자 정보
+    // 판매자용: 상세 조회 내부에 포함될 구매 요청자 정보
     @Builder
     public record PurchaseRequestInfo(
             Long requestId,
             String name,    // "익명의 사용자 1325" 등
             String status   // WAITING, ACCEPTED 등
     ) {}
+
+    // 구매자용: 블라인드 북 판매 목록
+    @Builder
+    public record BuyerListElement(
+            Long blindBookId,
+            String title,
+            Integer price,
+            String status
+    ) {}
+
+    // [오른쪽 탭] 내 구매 요청 현황 리스트 아이템
+    @Builder
+    public record MyRequestListElement(
+            Long requestId,
+            String actualBookTitle, // 실제 도서 제목 (구매 요청 시 공개)
+            String author,          // 저자
+            Integer price,
+            String statusLabel,     // "배송 시작", "승인 대기", "거래 수락" 등
+            String purchaseStatus   // 내부 Enum 값 (WAITING, ACCEPTED 등)
+    ) {}
+
+    // 무한 스크롤 응답 묶음 (구매자용)
+    @Builder
+    public record BuyerSliceResponse<T>(
+            List<T> content,
+            Long nextCursor,
+            boolean hasNext
+    ) {}
+
+
 }
