@@ -5,6 +5,9 @@ import com.bookripple.api.domain.blindsalepost.entity.PurchaseRequest;
 import com.bookripple.api.domain.member.entity.Member;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,4 +29,9 @@ public interface PurchaseRequestRepository extends JpaRepository<PurchaseRequest
     // 내가 보낸 요청 목록 조회
     List<PurchaseRequest> findAllByMemberIdOrderByIdDesc(Long memberId, Pageable pageable);
     List<PurchaseRequest> findAllByMemberIdAndIdLessThanOrderByIdDesc(Long memberId, Long id, Pageable pageable);
+
+    @Modifying
+    @Query("UPDATE PurchaseRequest p SET p.status = 'REJECTED' " +
+            "WHERE p.blindSalePost.id = :postId AND p.id != :requestId AND p.status = 'WAITING'")
+    void rejectOthers(@Param("postId") Long postId, @Param("requestId") Long requestId);
 }

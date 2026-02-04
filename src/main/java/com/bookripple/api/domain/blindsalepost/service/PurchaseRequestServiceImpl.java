@@ -7,6 +7,7 @@ import com.bookripple.api.domain.blindsalepost.converter.PurchaseRequestConverte
 import com.bookripple.api.domain.blindsalepost.dto.PurchaseRequestResDto;
 import com.bookripple.api.domain.blindsalepost.entity.BlindSalePost;
 import com.bookripple.api.domain.blindsalepost.entity.PurchaseRequest;
+import com.bookripple.api.domain.blindsalepost.enums.PostStatus;
 import com.bookripple.api.domain.blindsalepost.enums.PurchaseStatus;
 import com.bookripple.api.domain.blindsalepost.repository.BlindSalePostRepository;
 import com.bookripple.api.domain.blindsalepost.repository.PurchaseRequestRepository;
@@ -15,6 +16,10 @@ import com.bookripple.api.domain.member.repository.MemberRepository;
 import com.bookripple.api.domain.notification.enums.NotificationType;
 import com.bookripple.api.domain.notification.service.NotificationService;
 import java.util.Arrays;
+
+import com.bookripple.api.domain.order.entity.Trade;
+import com.bookripple.api.domain.order.enums.TradeStatus;
+import com.bookripple.api.domain.order.repository.TradeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +40,7 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
   private final PurchaseRequestRepository purchaseRequestRepository;
   private final MemberRepository memberRepository;
   private final NotificationService notificationService;
+  private final TradeRepository tradeRepository;
 
   @Override
   @Transactional
@@ -92,6 +98,22 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
     validateStatus(purchaseRequest, PurchaseStatus.WAITING);
 
     purchaseRequest.updateStatus(PurchaseStatus.ACCEPTED);
+
+    //  결제 로직: 게시글 예약 및 거래 생성
+    BlindSalePost post = purchaseRequest.getBlindSalePost();
+    post.updateStatus(PostStatus.RESERVED); // 게시글 잠금
+
+    Trade trade = Trade.builder() // 거래 생성
+            .buyer(purchaseRequest.getMember())
+            .seller(post.getMember())
+            .blindSalePost(post)
+            .amount(post.getPrice())
+            .status(TradeStatus.REQUESTED) // 기본값으로 설정됨
+            .build();
+    tradeRepository.save(trade);
+
+    // 나머지 대기자들 일괄 거절 처리
+    purchaseRequestRepository.rejectOthers(post.getId(), purchaseRequestId);
 
     notificationService.create(
         purchaseRequest.getMember(),
