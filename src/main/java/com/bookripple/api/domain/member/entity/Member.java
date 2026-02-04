@@ -86,4 +86,34 @@ public class Member extends BaseEntity {
   //이메일 변경 시 → false
   //재인증 후 → true
 
+  // 비밀번호 변경
+  public void updatePassword(String encodedPassword) {
+    this.password = encodedPassword;
+  }
+
+  // 로그인 아이디 변경
+  public void updateLoginId(String newLoginId) {
+    this.loginId = newLoginId;
+  }
+
+  // 이메일 변경 (변경 시 인증 상태 초기화)
+  public void updateEmail(String newEmail) {
+    this.email = newEmail;
+    this.isCertified = false; // 이메일이 바뀌었으므로 재인증 필요 시 false로 설정
+  }
+
+  // 회원 탈퇴(Soft Delete)
+  public void withdraw() {
+    this.status = MemberStatus.QUIT;
+    this.isCertified = false;
+
+    // 개인정보 마스킹 (선택 사항: 재가입 방지 및 개인정보 보호)
+    // 기존 이메일 앞에 "deleted_"와 타임스탬프 등을 붙여서 중복 제약을 피함
+    String timestamp = String.valueOf(System.currentTimeMillis());
+    this.email = "deleted_" + timestamp + "_" + this.email;
+    this.loginId = "deleted_" + timestamp + "_" + this.loginId;
+    this.providerId = null; // 소셜 연동 해제
+    this.password = null;   // 비밀번호 삭제
+  }
+
 }
