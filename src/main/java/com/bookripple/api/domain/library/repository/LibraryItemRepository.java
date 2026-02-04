@@ -19,5 +19,10 @@ public interface LibraryItemRepository extends JpaRepository<LibraryItem, Long> 
     );
 
     Optional<LibraryItem> findByMemberIdAndBookId(Long memberId, Long bookId);
+
+    long deleteByMemberIdAndStatusAndBook_IdIn(
+            Long memberId, LibraryStatus status, List<Long> bookIds
+    );
+
 }
 
