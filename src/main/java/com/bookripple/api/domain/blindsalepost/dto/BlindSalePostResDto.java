@@ -75,7 +75,6 @@ public class BlindSalePostResDto {
             String actualBookTitle, // 실제 도서 제목 (구매 요청 시 공개)
             String author,          // 저자
             Integer price,
-            String status,     // "배송 시작", "승인 대기", "거래 수락" 등
             String purchaseStatus   // 내부 Enum 값 (WAITING, ACCEPTED 등)
     ) {}
 

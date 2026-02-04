@@ -194,12 +194,13 @@ public class BlindSalePostServiceImpl implements BlindSalePostService {
         boolean hasNext = requests.size() > size;
         List<PurchaseRequest> contentRequests = hasNext ? requests.subList(0, size) : requests;
 
-        // DTO 변환 (실제 책 제목 및 상태 라벨 포함)
+        // DTO 변환
         List<BlindSalePostResDto.MyRequestListElement> content = contentRequests.stream()
                 .map(BlindSalePostConverter::toMyRequestListElement)
                 .collect(Collectors.toList());
 
-        Long nextCursor = hasNext ? contentRequests.get(size - 1).getId() : null;
+        // 다음 커서 결정 (마지막 요소의 ID)
+        Long nextCursor = hasNext ? contentRequests.get(contentRequests.size() - 1).getId() : null;
 
         return BlindSalePostConverter.toBuyerSlice(content, nextCursor, hasNext);
     }
