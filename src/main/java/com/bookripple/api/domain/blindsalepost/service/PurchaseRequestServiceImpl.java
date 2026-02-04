@@ -43,7 +43,7 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
         .orElseThrow(() -> new ApiException(PurchaseRequestErrorCode.BLIND_SALE_POST_NOT_FOUND));
 
     Member buyer = memberRepository.findById(memberId)
-        .orElseThrow(() -> new ApiException(MemberErrorCode.NO_MEMBER));
+        .orElseThrow(() -> new ApiException(MemberErrorCode.MEMBER_NOT_FOUND));
 
     PurchaseRequest purchaseRequest = PurchaseRequest.builder()
         .blindSalePost(blindSalePost)
