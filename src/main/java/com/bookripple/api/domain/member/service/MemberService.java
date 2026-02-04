@@ -5,6 +5,7 @@ import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.domain.auth.service.EmailCodeService;
 import com.bookripple.api.domain.member.entity.Member;
 import com.bookripple.api.domain.member.enums.LoginType;
+import com.bookripple.api.domain.member.enums.MemberStatus;
 import com.bookripple.api.domain.member.repository.MemberRepository;
 import com.bookripple.api.domain.verification.email.enums.EmailVerificationPurpose;
 import lombok.RequiredArgsConstructor;
@@ -118,9 +119,14 @@ public class MemberService {
   @Transactional
   public void withdraw(Long memberId) {
     Member member = getMemberOrThrow(memberId);
-    memberRepository.delete(member);
-  }
 
+    if (member.getStatus() == MemberStatus.QUIT) {
+      throw new ApiException(MemberErrorCode.MEMBER_NOT_FOUND);
+    }
+
+    member.withdraw();
+
+  }
   // --- Helper Methods ---
 
   private Member getMemberOrThrow(Long memberId) {
