@@ -57,7 +57,6 @@ public class TradeController {
 
     /**
      * [5단계 - 조회] 판매자 배송 시작 화면 정보 조회
-     * GET 요청 시 실행됩니다.
      */
     @GetMapping("/{tradeId}/shipping")
     public ApiResponse<TradeResDto.SellerTradeDetail> getShippingScreenInfo(
@@ -72,7 +71,6 @@ public class TradeController {
 
     /**
      * [5단계 - 제출] 배송 정보 등록 및 상태 변경
-     * PATCH 요청 시 실행됩니다.
      */
     @PatchMapping("/{tradeId}/shipping")
     public ApiResponse<String> submitShippingInfo(
