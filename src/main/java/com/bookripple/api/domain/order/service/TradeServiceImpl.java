@@ -93,15 +93,44 @@ public class TradeServiceImpl implements TradeService {
                 .orElseThrow(() -> new ApiException(PurchaseRequestErrorCode.PURCHASE_REQUEST_NOT_FOUND));
         purchaseRequest.updateStatus(PurchaseStatus.PAYMENT_COMPLETED); // 거래 완료
 
-        // 6. NotificationService.create 규격에 맞춰 알림 생성
-        String notificationContent = String.format("결제가 완료되었습니다! 배송지: [%s]", trade.getShippingAddress());
+    }
 
-        notificationService.create(
-                trade.getSeller(),                  // 수신자: 판매자
-                NotificationType.SETTLEMENT_DONE,    // 알림 타입
-                notificationContent,                 // 내용: 한 줄 주소 포함
-                "/trades/" + trade.getId()           // 이동할 URL
-        );
+    @Override
+    @Transactional
+    public void cancelTradeBeforePayment(Long memberId, Long tradeId) {
+        // 1. 거래 조회 및 권한 확인
+        Trade trade = tradeRepository.findById(tradeId)
+                .orElseThrow(() -> new ApiException(CommonErrorCode.NOT_FOUND));
+
+        if (!trade.getBuyer().getId().equals(memberId)) {
+            throw new ApiException(CommonErrorCode.FORBIDDEN);
+        }
+
+        // 2. 현재 상태 확인 (결제 대기 중인 REQUESTED 상태일 때만 취소 가능)
+        if (trade.getStatus() != TradeStatus.REQUESTED) {
+            throw new ApiException(PurchaseRequestErrorCode.INVALID_STATUS);
+        }
+
+        // 3. 상태 복구 (Rollback)
+
+        // 게시글: RESERVED -> SALE (다시 다른 사람이 살 수 있게 함)
+        trade.getBlindSalePost().updateStatus(PostStatus.SALE);
+
+        // 구매요청: ACCEPTED -> CANCELED
+        // (Trade와 PurchaseRequest가 연관관계가 없다면 Repository로 조회)
+        PurchaseRequest purchaseRequest = purchaseRequestRepository
+                .findByBlindSalePostIdAndStatus(trade.getBlindSalePost().getId(), PurchaseStatus.ACCEPTED)
+                .orElseThrow(() -> new ApiException(PurchaseRequestErrorCode.PURCHASE_REQUEST_NOT_FOUND));
+        purchaseRequest.updateStatus(PurchaseStatus.CANCELED);
+
+        // 거래: REQUESTED -> REJECTED
+        trade.updateStatus(TradeStatus.REJECTED);
+
+        // 4. 결제(Payment) 및 정산(Settlement) 데이터 처리
+        // 이미 생성된 READY/PENDING 데이터가 있다면 삭제하거나 CANCELED로 변경합니다.
+        paymentRepository.deleteByTradeId(tradeId);
+        settlementRepository.deleteByTradeId(tradeId);
+
     }
 
 
