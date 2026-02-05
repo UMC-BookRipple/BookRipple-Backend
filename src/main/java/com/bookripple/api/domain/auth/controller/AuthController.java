@@ -86,27 +86,13 @@ public class AuthController {
   }
 
   /**
-   * 카카오 Redirect URI 처리 (인가 코드 수신용)
-   * 테스트를 위해 GET으로 열어둠.. 실제 서비스 시에는 프론트에서 코드를 받아 POST로 전달함
-   *
-  @GetMapping("/kakao/callback")
-  public ResponseEntity<ApiResponse<AuthResDto.Login>> kakaoCallback(@RequestParam("code") String code) {
-    AuthResDto.Login result = authService.kakaoLogin(code);
-    return ResponseEntity.ok(ApiResponse.onSuccess(CommonSuccessCode.OK, result));
-  }
-
-  */
-
-  /**
    * 로그아웃
    */
   @PostMapping("/logout")
   public ResponseEntity<ApiResponse<String>> logout(HttpServletRequest request) {
 
-    // 1. 헤더에서 토큰 문자열 꺼내기
     String accessToken = resolveToken(request);
 
-    // 2. 로그아웃 수행 (토큰이 있을 때만)
     if (accessToken != null) {
       authService.logout(accessToken);
     }

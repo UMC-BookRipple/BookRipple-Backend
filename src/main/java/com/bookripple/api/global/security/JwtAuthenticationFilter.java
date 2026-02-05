@@ -35,15 +35,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     String token = resolveToken(request);
 
-    // 순서: 1. 토큰 존재 확인 -> 2. 서명 유효성 확인 -> 3. 블랙리스트 확인
     if (token != null && jwtTokenProvider.validateToken(token)) {
 
-      // 2. [변경] 인메모리 블랙리스트에 등록된 토큰인가?
       if (tokenBlacklistService.isBlacklisted(token)) {
-        // 로그아웃된 토큰이므로 접근 거부 (로그 남기고 인증 객체 설정 안 함 -> 401 발생)
         log.warn("Logout token blocked: {}", token);
       } else {
-        // 정상 토큰 -> 인증 객체 생성
         Long memberId = jwtTokenProvider.getMemberId(token);
         List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
 
