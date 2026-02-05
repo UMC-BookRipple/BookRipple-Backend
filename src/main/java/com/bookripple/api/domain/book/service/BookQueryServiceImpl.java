@@ -24,7 +24,7 @@ public class BookQueryServiceImpl implements BookQueryService {
 
   //1 알라딘 검색
   @Override
-  @Transactional(readOnly = true)
+  @Transactional
   public BookSearchRes searchFromAladin(Long memberId, String keyword, int start, int size, String queryType,
       String searchTarget) {
     // 최소 검증
