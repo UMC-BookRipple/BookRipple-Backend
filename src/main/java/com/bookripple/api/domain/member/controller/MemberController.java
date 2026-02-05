@@ -5,9 +5,13 @@ import com.bookripple.api.common.code.CommonSuccessCode;
 import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.common.response.ApiResponse;
 import com.bookripple.api.domain.auth.dto.AuthReqDto;
+import com.bookripple.api.domain.auth.service.EmailCodeService;
+import com.bookripple.api.domain.member.dto.MemberReqDto;
 import com.bookripple.api.domain.member.service.MemberService;
+import com.bookripple.api.domain.verification.email.enums.EmailVerificationPurpose;
 import com.bookripple.api.global.dto.GlobalDto;
 import jakarta.validation.Valid;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -20,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
 
   private final MemberService memberService;
+  private final EmailCodeService emailCodeService;
 
   /**
    * Helper: 현재 로그인한 사용자 ID 추가
@@ -35,21 +40,6 @@ public class MemberController {
     }
 
     return (Long) authentication.getPrincipal();
-  }
-
-  /**
-   * 현재 비밀번호 확인
-   */
-  @PostMapping("/me/password/check")
-  public ResponseEntity<ApiResponse<String>> checkCurrentPassword(
-      @RequestBody @Valid GlobalDto.ContentReq request
-  ) {
-    // request.content() -> 사용자가 입력한 평문 비밀번호
-    memberService.checkCurrentPassword(getCurrentMemberId(), request.content());
-
-    return ResponseEntity.ok(
-        ApiResponse.onSuccess(CommonSuccessCode.OK, "비밀번호가 확인되었습니다.")
-    );
   }
 
   /**
@@ -85,18 +75,34 @@ public class MemberController {
   }
 
   /**
+   * 현재 비밀번호 확인
+   */
+  @PostMapping("/me/password/check")
+  public ResponseEntity<ApiResponse<String>> checkCurrentPassword(
+      @RequestBody @Valid GlobalDto.ContentReq request
+  ) {
+    // request.content() -> 사용자가 입력한 평문 비밀번호
+    memberService.checkCurrentPassword(getCurrentMemberId(), request.content());
+
+    return ResponseEntity.ok(
+        ApiResponse.onSuccess(CommonSuccessCode.OK, "비밀번호가 확인되었습니다.")
+    );
+  }
+
+  /**
    * 비밀번호 변경
    */
   @PutMapping("/me/password")
   public ResponseEntity<ApiResponse<GlobalDto.IdRes>> changePassword(
-      @RequestBody @Valid AuthReqDto.PasswordReset request
+      @RequestBody @Valid MemberReqDto.PasswordUpdate request
   ) {
-    // request.getNewPassword() -> 변경할 새로운 비밀번호
-    // 주의: PasswordReset DTO에 email 필드가 있어도, 로그인된 상태이므로 무시하고 ID 기반 처리
-    Long memberId = memberService.changePassword(getCurrentMemberId(), request.getNewPassword());
+    Long memberId = memberService.changePassword(getCurrentMemberId(), request);
 
     return ResponseEntity.ok(
-        ApiResponse.onSuccess(CommonSuccessCode.OK, new GlobalDto.IdRes(memberId))
+        ApiResponse.onSuccess(
+            CommonSuccessCode.OK,
+            new GlobalDto.IdRes(memberId)
+        )
     );
   }
 
@@ -104,14 +110,21 @@ public class MemberController {
    * 이메일 변경 인증코드 발송
    */
   @PostMapping("/email/send")
-  public ResponseEntity<ApiResponse<String>> sendEmailChangeCode(
+  public ResponseEntity<ApiResponse<GlobalDto.SingleRes<LocalDateTime>>> sendEmailChangeCode(
       @RequestBody @Valid GlobalDto.ContentReq request
   ) {
     // request.content() -> 변경하고자 하는 새로운 이메일
-    memberService.sendEmailChangeCode(getCurrentMemberId(), request.content());
+    LocalDateTime expiredAt =
+        emailCodeService.sendVerificationCode(
+            request.content(),
+            EmailVerificationPurpose.CHANGE_EMAIL
+        );
 
     return ResponseEntity.ok(
-        ApiResponse.onSuccess(CommonSuccessCode.OK, "인증코드가 발송되었습니다.")
+        ApiResponse.onSuccess(
+            CommonSuccessCode.OK,
+            new GlobalDto.SingleRes<>(expiredAt)
+        )
     );
   }
 
