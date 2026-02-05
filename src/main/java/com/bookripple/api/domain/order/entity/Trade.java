@@ -38,4 +38,17 @@ public class Trade extends BaseEntity {
     @Builder.Default
     private TradeStatus status = TradeStatus.REQUESTED;
 
+    // 수정사함 -> 모든 배송 정보를 한 줄의 텍스트로 받습니다.
+    @Column(columnDefinition = "TEXT")
+    private String shippingAddress;
+
+    // 주소 입력 편의 메서드
+    public void updateShippingAddress(String address) {
+        this.shippingAddress = address;
+    }
+
+    public void updateStatus(TradeStatus status) {
+        this.status = status;
+    }
+
 }
