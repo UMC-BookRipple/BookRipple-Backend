@@ -52,4 +52,9 @@ public class EmailVerification {
     this.verified = false;
     this.expiredAt = expiredAt;
   }
+
+  public void confirmVerification(LocalDateTime extendedExpiry) {
+    this.verified = true;
+    this.expiredAt = extendedExpiry;
+  }
 }

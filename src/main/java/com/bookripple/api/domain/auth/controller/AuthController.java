@@ -58,14 +58,11 @@ public class AuthController {
   }
 
   /**
-   * 게스트 로그인 Stub
+   * 게스트 로그인
    */
   @PostMapping("/login/guest")
   public ResponseEntity<ApiResponse<AuthResDto.Login>> guestLogin() {
-    AuthResDto.Login result = AuthResDto.Login.builder()
-        .memberId(0L)
-        .accessToken("GUEST_TOKEN")
-        .build();
+    AuthResDto.Login result = authService.guestLogin();
 
     return ResponseEntity.ok(
         ApiResponse.onSuccess(CommonSuccessCode.OK, result)
@@ -99,12 +96,24 @@ public class AuthController {
   */
 
   /**
-   * 로그아웃 Stub
+   * 로그아웃
    */
   @PostMapping("/logout")
-  public ResponseEntity<ApiResponse<String>> logout() {
+  public ResponseEntity<ApiResponse<String>> logout(@RequestHeader("Authorization") String bearerToken) {
+
+    String accessToken = resolveToken(bearerToken);
+
+    authService.logout(accessToken);
+
     return ResponseEntity.ok(
         ApiResponse.onSuccess(CommonSuccessCode.OK, "로그아웃 되었습니다.")
     );
+  }
+
+  private String resolveToken(String bearerToken) {
+    if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+      return bearerToken.substring(7);
+    }
+    return bearerToken;
   }
 }

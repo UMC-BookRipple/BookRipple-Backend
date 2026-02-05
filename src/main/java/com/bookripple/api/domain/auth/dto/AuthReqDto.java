@@ -27,13 +27,13 @@ public class AuthReqDto {
   @NoArgsConstructor
   public static class Signup {
 
-    @Schema(description = "로그인 아이디", example = "abcd")
+    @Schema(description = "로그인 아이디", example = "loginid")
     @NotBlank(message = "로그인 아이디는 필수입니다.")
     private String loginId;
 
     @Schema(
         description = "비밀번호 (8자 이상, 영문/숫자/특수문자 중 2종 이상 포함)",
-        example = "string", // 혹은 "password123!" 처럼 유효한 예시
+        example = "string123",
         type = "string"
     )
     @NotBlank(message = "비밀번호는 필수입니다.")
@@ -75,8 +75,19 @@ public class AuthReqDto {
 
   @Getter
   @NoArgsConstructor
-  public static class PasswordReset{
+  public static class PasswordReset {
+
     private String email;
+    @Schema(
+        description = "비밀번호 (8자 이상, 영문/숫자/특수문자 중 2종 이상 포함)",
+        example = "string123",
+        type = "string"
+    )
+    @NotBlank(message = "비밀번호는 필수입니다.")
+    @Pattern(
+        regexp = "^(?:(?=.*[A-Za-z])(?=.*\\d)|(?=.*[A-Za-z])(?=.*[^A-Za-z0-9])|(?=.*\\d)(?=.*[^A-Za-z0-9])).{8,}$",
+        message = "비밀번호는 8자 이상이며 영문, 숫자, 특수문자 중 2종 이상을 포함해야 합니다."
+    )
     private String newPassword;
   }
 }
