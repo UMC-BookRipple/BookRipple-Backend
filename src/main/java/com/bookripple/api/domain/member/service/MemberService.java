@@ -3,6 +3,7 @@ package com.bookripple.api.domain.member.service;
 import com.bookripple.api.common.code.MemberErrorCode;
 import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.domain.auth.service.EmailCodeService;
+import com.bookripple.api.domain.member.dto.MemberReqDto;
 import com.bookripple.api.domain.member.entity.Member;
 import com.bookripple.api.domain.member.enums.LoginType;
 import com.bookripple.api.domain.member.enums.MemberStatus;
@@ -64,12 +65,28 @@ public class MemberService {
    * 비밀번호 변경
    */
   @Transactional
-  public Long changePassword(Long memberId, String newPassword) {
+  public Long changePassword(Long memberId, MemberReqDto.PasswordUpdate request) {
     Member member = getMemberOrThrow(memberId);
 
     validateLocalAccount(member);
 
-    String encodedPassword = passwordEncoder.encode(newPassword);
+    // 1. 새 비밀번호와 새 비밀번호 확인 일치 여부 검증
+    if (!request.getNewPassword().equals(request.getNewPasswordConfirm())) {
+      throw new ApiException(MemberErrorCode.PASSWORD_CONFIRM_MISMATCH); // 에러 코드 필요
+    }
+
+    // 2. 현재 비밀번호 일치 여부 확인 (DB의 기존 비밀번호와 비교)
+    if (!passwordEncoder.matches(request.getCurrentPassword(), member.getPassword())) {
+      throw new ApiException(MemberErrorCode.PASSWORD_MISMATCH);
+    }
+
+    // 3. 새 비밀번호가 기존 비밀번호와 동일한지 확인 (재사용 방지)
+    if (passwordEncoder.matches(request.getNewPassword(), member.getPassword())) {
+      throw new ApiException(MemberErrorCode.PASSWORD_SAME_AS_OLD);
+    }
+
+    // 4. 암호화 및 변경
+    String encodedPassword = passwordEncoder.encode(request.getNewPassword());
     member.updatePassword(encodedPassword);
 
     return member.getId();
