@@ -59,4 +59,16 @@ public class JwtTokenProvider {
             .getPayload();
     return Long.parseLong(claims.getSubject());
   }
+
+  public long getRemainingTime(String token) {
+    Date expiration = Jwts.parser()
+        .verifyWith(secretKey)
+        .build()
+        .parseSignedClaims(token)
+        .getPayload()
+        .getExpiration();
+
+    long now = new Date().getTime();
+    return expiration.getTime() - now;
+  }
 }

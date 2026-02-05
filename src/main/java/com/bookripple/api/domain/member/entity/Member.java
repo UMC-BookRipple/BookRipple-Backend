@@ -86,4 +86,47 @@ public class Member extends BaseEntity {
   //이메일 변경 시 → false
   //재인증 후 → true
 
+  // 비밀번호 변경
+  public void updatePassword(String encodedPassword) {
+    this.password = encodedPassword;
+  }
+
+  // 로그인 아이디 변경
+  public void updateLoginId(String newLoginId) {
+    this.loginId = newLoginId;
+  }
+
+  // 이메일 변경 (변경 시 인증 상태 초기화)
+  public void updateEmail(String newEmail) {
+    this.email = newEmail;
+    this.isCertified = false; // 이메일이 바뀌었으므로 재인증 필요 시 false로 설정
+  }
+
+  // 회원 탈퇴(Soft Delete)
+  public void withdraw() {
+    if (this.status == MemberStatus.QUIT) {
+      return; // 이미 탈퇴한 경우
+    }
+
+    this.status = MemberStatus.QUIT;
+    this.isCertified = false;
+
+    // Unique Key 제약 충돌 방지 & 개인정보 마스킹
+    // 예: "user1" -> "deleted_1700000000_user1"
+    long timestamp = System.currentTimeMillis();
+
+    this.loginId = "deleted_" + timestamp + "_" + this.loginId;
+    this.email = "deleted_" + timestamp + "_" + this.email;
+
+    // 개인정보 삭제
+    this.name = "탈퇴회원"; // 또는 기존 이름 유지 정책에 따라 결정
+    this.providerId = null; // 소셜 연동 해제
+    this.password = null;   // 비밀번호 삭제
+
+
+    // 약관 동의 정보 초기화
+    this.isRequiredAgreed = false;
+    this.isOptionalAgreed = false;
+  }
+
 }

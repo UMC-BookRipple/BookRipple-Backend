@@ -1,16 +1,15 @@
 package com.bookripple.api.domain.auth.service;
 
-import com.bookripple.api.common.code.CommonErrorCode;
+import com.bookripple.api.common.code.AuthErrorCode;
 import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.domain.auth.util.EmailSender;
 import com.bookripple.api.domain.auth.util.VerificationCodeStore;
 import com.bookripple.api.domain.verification.email.enums.EmailVerificationPurpose;
 import com.bookripple.api.domain.verification.email.service.EmailVerificationService;
 import java.time.LocalDateTime;
+import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -34,16 +33,11 @@ public class EmailCodeService {
     String key = generateKey(email, purpose);
 
     String savedCode = codeStore.get(key)
-        .orElseThrow(() -> new ApiException(
-            CommonErrorCode.NOT_FOUND,
-            "인증코드를 찾을 수 없습니다."
-        ));
+        // 시간 만료로 삭제되었거나, 요청한 적 없음
+        .orElseThrow(() -> new ApiException(AuthErrorCode.NOT_FOUND_VERIFICATION_CODE));
 
     if (!savedCode.equals(inputCode)) {
-      throw new ApiException(
-          CommonErrorCode.BAD_REQUEST,
-          "인증코드가 일치하지 않습니다."
-      );
+      throw new ApiException(AuthErrorCode.INVALID_VERIFICATION_CODE);
     }
 
     emailVerificationService.markVerified(email, purpose);

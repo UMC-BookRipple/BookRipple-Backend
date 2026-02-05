@@ -3,6 +3,7 @@ package com.bookripple.api.domain.auth.controller;
 import com.bookripple.api.common.code.CommonSuccessCode;
 import com.bookripple.api.common.response.ApiResponse;
 import com.bookripple.api.domain.auth.dto.AuthReqDto;
+import com.bookripple.api.domain.auth.service.AuthService; // 추가
 import com.bookripple.api.domain.auth.service.EmailCodeService;
 import com.bookripple.api.domain.verification.email.enums.EmailVerificationPurpose;
 import com.bookripple.api.global.dto.GlobalDto;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class FindIdController {
 
   private final EmailCodeService emailCodeService;
+  private final AuthService authService;
 
   @PostMapping("/email/send")
   public ResponseEntity<ApiResponse<String>> sendCode(
@@ -42,9 +44,10 @@ public class FindIdController {
         EmailVerificationPurpose.FIND_ID
     );
 
-    // TODO: 인증 완료 후 실제 loginId 반환
+    String loginId = authService.findLoginIdByEmail(request.getEmail());
+
     return ResponseEntity.ok(
-        ApiResponse.onSuccess(CommonSuccessCode.OK, "이메일 인증이 완료되었습니다.")
+        ApiResponse.onSuccess(CommonSuccessCode.OK, loginId)
     );
   }
 }

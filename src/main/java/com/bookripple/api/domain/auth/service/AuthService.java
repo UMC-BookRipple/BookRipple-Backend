@@ -1,17 +1,22 @@
 package com.bookripple.api.domain.auth.service;
 
+import com.bookripple.api.common.code.AuthErrorCode;
 import com.bookripple.api.common.code.CommonErrorCode;
+import com.bookripple.api.common.code.MemberErrorCode;
 import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.domain.auth.dto.AuthReqDto;
 import com.bookripple.api.domain.auth.dto.AuthResDto;
 import com.bookripple.api.domain.member.entity.Member;
 import com.bookripple.api.domain.member.enums.LoginType;
+import com.bookripple.api.domain.member.enums.MemberRole;
 import com.bookripple.api.domain.member.repository.MemberRepository;
 import com.bookripple.api.domain.verification.email.service.EmailVerificationService;
 import com.bookripple.api.domain.verification.email.enums.EmailVerificationPurpose;
+import com.bookripple.api.global.service.TokenBlacklistService;
 import com.bookripple.api.global.dto.GlobalDto;
 import com.bookripple.api.global.security.JwtTokenProvider;
 import java.util.Map;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -31,6 +36,7 @@ public class AuthService {
   private final JwtTokenProvider jwtTokenProvider;
   private final EmailVerificationService emailVerificationService;
   private final RestClient restClient;
+  private final TokenBlacklistService tokenBlacklistService;
 
   @Value("${kakao.client-id}")
   private String kakaoClientId;
@@ -56,7 +62,6 @@ public class AuthService {
 
     validateDuplicateLoginId(request.getLoginId());
 
-    // 🔥 이메일 인증 완료 여부 검증 (회원가입 목적)
     emailVerificationService.validateVerified(
         request.getEmail(),
         EmailVerificationPurpose.SIGN_UP
@@ -72,7 +77,7 @@ public class AuthService {
         .birthDate(request.getBirthDate())
         .isRequiredAgreed(request.getIsRequiredAgreed())
         .isOptionalAgreed(request.getIsOptionalAgreed())
-        .isCertified(true) // 가입 이후 상태
+        .isCertified(true)
         .loginType(LoginType.LOCAL)
         .build();
 
@@ -89,16 +94,10 @@ public class AuthService {
   public AuthResDto.Login localLogin(AuthReqDto.Login request) {
 
     Member member = memberRepository.findByLoginId(request.getLoginId())
-        .orElseThrow(() -> new ApiException(
-            CommonErrorCode.NOT_FOUND,
-            "존재하지 않는 로그인 아이디입니다."
-        ));
+        .orElseThrow(() -> new ApiException(MemberErrorCode.MEMBER_NOT_FOUND));
 
     validateLocalMember(member);
     validatePassword(request.getPassword(), member.getPassword());
-
-    // TODO: 이메일 인증 여부 로그인 정책 결정
-    // if (!member.getIsCertified()) { ... }
 
     String accessToken = jwtTokenProvider.createAccessToken(member.getId(), "USER");
 
@@ -122,10 +121,7 @@ public class AuthService {
    */
   private void validateDuplicateLoginId(String loginId) {
     if (memberRepository.existsByLoginId(loginId)) {
-      throw new ApiException(
-          CommonErrorCode.CONFLICT,
-          "이미 사용 중인 로그인 아이디입니다."
-      );
+      throw new ApiException(MemberErrorCode.DUPLICATE_LOGIN_ID);
     }
   }
 
@@ -134,19 +130,15 @@ public class AuthService {
    */
   @Transactional
   public AuthResDto.Login kakaoLogin(String code) {
-    // 1️⃣ 카카오 토큰 및 정보 요청
     String kakaoAccessToken = requestKakaoAccessToken(code);
     Map<String, Object> kakaoUser = requestKakaoUserInfo(kakaoAccessToken);
 
-    // 2️⃣ 정보 추출
     String providerId = String.valueOf(kakaoUser.get("id"));
     Map<String, Object> properties = (Map<String, Object>) kakaoUser.get("properties");
     String nickname = (String) properties.get("nickname");
 
-    // 3️⃣ DB 조회 및 처리
     return memberRepository.findByProviderId(providerId)
         .map(member -> {
-          // [기존 회원] 로그인 처리
           String accessToken = jwtTokenProvider.createAccessToken(member.getId(), "USER");
           return AuthResDto.Login.builder()
               .memberId(member.getId())
@@ -156,14 +148,13 @@ public class AuthService {
               .build();
         })
         .orElseGet(() -> {
-          // [신규 회원] 회원가입 처리 후 로그인
           Member newMember = Member.builder()
-              .loginId("kakao_" + providerId) // 중복 방지를 위한 규격화된 ID
+              .loginId("kakao_" + providerId)
               .providerId(providerId)
               .name(nickname)
               .loginType(LoginType.KAKAO)
-              .isRequiredAgreed(true) // 소셜 로그인은 보통 가입 시 동의한 것으로 간주
-              .requiredAgreedAt(java.time.LocalDateTime.now()) // 동의 시간 기록
+              .isRequiredAgreed(true)
+              .requiredAgreedAt(java.time.LocalDateTime.now())
               .isOptionalAgreed(false)
               .isCertified(true)
               .build();
@@ -180,27 +171,19 @@ public class AuthService {
         });
   }
 
-
   private void validateLocalMember(Member member) {
     if (member.getLoginType() != LoginType.LOCAL) {
-      throw new ApiException(
-          CommonErrorCode.BAD_REQUEST,
-          "로컬 로그인 계정이 아닙니다."
-      );
+      throw new ApiException(MemberErrorCode.SOCIAL_PROFILE_RESTRICTION);
     }
   }
 
   private void validatePassword(String rawPassword, String encodedPassword) {
     if (encodedPassword == null || !passwordEncoder.matches(rawPassword, encodedPassword)) {
-      throw new ApiException(
-          CommonErrorCode.UNAUTHORIZED,
-          "비밀번호가 올바르지 않습니다."
-      );
+      throw new ApiException(AuthErrorCode.LOGIN_FAILED);
     }
   }
 
   private String requestKakaoAccessToken(String code) {
-
     MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
     params.add("grant_type", "authorization_code");
     params.add("client_id", kakaoClientId);
@@ -234,5 +217,84 @@ public class AuthService {
           throw new ApiException(CommonErrorCode.BAD_GATEWAY, "카카오 사용자 정보 조회 실패");
         })
         .body(Map.class);
+  }
+
+  /**
+   * 아이디 찾기
+   */
+  @Transactional(readOnly = true)
+  public String findLoginIdByEmail(String email) {
+    Member member = memberRepository.findByEmail(email)
+        .orElseThrow(() -> new ApiException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+    validateLocalMember(member);
+
+    return member.getLoginId();
+  }
+
+  /**
+   * 비밀번호 재설정
+   */
+  @Transactional
+  public void resetPassword(AuthReqDto.PasswordReset request) {
+    emailVerificationService.validateVerified(
+        request.getEmail(),
+        EmailVerificationPurpose.FIND_PW
+    );
+
+    Member member = memberRepository.findByEmail(request.getEmail())
+        .orElseThrow(() -> new ApiException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+    validateLocalMember(member);
+
+    String encodedPassword = passwordEncoder.encode(request.getNewPassword());
+    member.updatePassword(encodedPassword);
+  }
+
+  /**
+   * 게스트 로그인 (임시 회원 생성 및 토큰 발급)
+   */
+  @Transactional
+  public AuthResDto.Login guestLogin() {
+    // 1. 게스트용 고유 ID 생성 (중복 방지)
+    String guestIdentifier = UUID.randomUUID().toString().substring(0, 8);
+    String guestLoginId = "guest_" + guestIdentifier;
+
+    // 2. 게스트 회원 생성
+    Member guestMember = Member.builder()
+        .loginId(guestLoginId)
+        .password(passwordEncoder.encode("GUEST_PASSWORD")) // 임의의 비밀번호 설정
+        .name("게스트" + guestIdentifier)
+        .email(guestLoginId + "@guest.com") // 더미 이메일
+        .loginType(LoginType.GUEST) // LoginType.GUEST 필요
+        .role(MemberRole.USER)      // 일반 유저 권한 부여
+        .isRequiredAgreed(true)     // 약관 동의 간주
+        .isOptionalAgreed(false)
+        .isCertified(true)          // 인증된 것으로 처리
+        .build();
+
+    memberRepository.save(guestMember);
+
+    // 3. 토큰 발급
+    String accessToken = jwtTokenProvider.createAccessToken(guestMember.getId(), "USER");
+
+    return AuthResDto.Login.builder()
+        .memberId(guestMember.getId())
+        .userName(guestMember.getName())
+        .accessToken(accessToken)
+        .isNewMember(true)
+        .build();
+  }
+
+  /**
+   * 로그아웃 (인메모리 블랙리스트)
+   */
+  @Transactional
+  public void logout(String accessToken) {
+    if (!jwtTokenProvider.validateToken(accessToken)) {
+      throw new ApiException(AuthErrorCode.INVALID_TOKEN);
+    }
+
+    tokenBlacklistService.addToBlacklist(accessToken);
   }
 }
