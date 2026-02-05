@@ -16,21 +16,4 @@ public interface EmailVerificationRepository
       String email,
       EmailVerificationPurpose purpose
   );
-
-  /**
-   * 이메일 + 목적 기준 존재 여부 확인
-   */
-  boolean existsByEmailAndPurpose(
-      String email,
-      EmailVerificationPurpose purpose
-  );
-
-  /**
-   * (선택) 인증 완료된 경우만 조회
-   * - 필요해질 때 사용
-   */
-  Optional<EmailVerification> findByEmailAndPurposeAndVerifiedTrue(
-      String email,
-      EmailVerificationPurpose purpose
-  );
 }
