@@ -11,9 +11,4 @@ public interface PurchaseRequestService {
 
   PurchaseRequestResDto.Decision approvePurchaseRequest(Long memberId, Long purchaseRequestId);
 
-  PurchaseRequestResDto.Decision rejectPurchaseRequest(Long memberId, Long purchaseRequestId);
-
-  PurchaseRequestResDto.Decision startShipping(Long memberId, Long purchaseRequestId);
-
-  PurchaseRequestResDto.Decision completeShipping(Long memberId, Long purchaseRequestId);
 }

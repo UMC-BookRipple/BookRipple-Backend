@@ -32,9 +32,7 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
   private static final String TRADE_REQUESTED_CONTENT = "구매 요청이 왔습니다. 요청을 승인하겠습니까?";
   private static final String TRADE_CANCELED_CONTENT = "구매 요청이 취소되었습니다.";
   private static final String TRADE_APPROVED_CONTENT = "구매 요청이 승인 되었습니다.";
-  private static final String TRADE_REJECTED_CONTENT = "구매 요청이 거절되었습니다.";
-  private static final String SHIPPING_STARTED_CONTENT = "상품이 배송중입니다.";
-  private static final String SETTLEMENT_DONE_CONTENT = "거래가 완료되었습니다.";
+
 
   private final BlindSalePostRepository blindSalePostRepository;
   private final PurchaseRequestRepository purchaseRequestRepository;
@@ -125,64 +123,7 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
     return PurchaseRequestConverter.toDecision(purchaseRequest);
   }
 
-  @Override
-  @Transactional
-  public PurchaseRequestResDto.Decision rejectPurchaseRequest(Long memberId,
-      Long purchaseRequestId) {
-    PurchaseRequest purchaseRequest = getPurchaseRequest(purchaseRequestId);
-    validateSeller(memberId, purchaseRequest);
-    validateStatus(purchaseRequest, PurchaseStatus.WAITING);
 
-    purchaseRequest.updateStatus(PurchaseStatus.REJECTED);
-
-    notificationService.create(
-        purchaseRequest.getMember(),
-        NotificationType.TRADE_REJECTED,
-        TRADE_REJECTED_CONTENT,
-        toBlindSalePostUrl(purchaseRequest.getBlindSalePost().getId())
-    );
-
-    return PurchaseRequestConverter.toDecision(purchaseRequest);
-  }
-
-  @Override
-  @Transactional
-  public PurchaseRequestResDto.Decision startShipping(Long memberId, Long purchaseRequestId) {
-    PurchaseRequest purchaseRequest = getPurchaseRequest(purchaseRequestId);
-    validateSeller(memberId, purchaseRequest);
-    validateStatus(purchaseRequest, PurchaseStatus.ACCEPTED);
-
-    purchaseRequest.updateStatus(PurchaseStatus.SHIPPING);
-
-    notificationService.create(
-        purchaseRequest.getMember(),
-        NotificationType.SHIPPING_STARTED,
-        SHIPPING_STARTED_CONTENT,
-        toBlindSalePostUrl(purchaseRequest.getBlindSalePost().getId())
-    );
-
-    return PurchaseRequestConverter.toDecision(purchaseRequest);
-  }
-
-  @Override
-  @Transactional
-  public PurchaseRequestResDto.Decision completeShipping(Long memberId,
-      Long purchaseRequestId) {
-    PurchaseRequest purchaseRequest = getPurchaseRequest(purchaseRequestId);
-    validateBuyer(memberId, purchaseRequest);
-    validateStatus(purchaseRequest, PurchaseStatus.SHIPPING);
-
-    purchaseRequest.updateStatus(PurchaseStatus.SHIPPED);
-
-    notificationService.create(
-        purchaseRequest.getBlindSalePost().getMember(),
-        NotificationType.SETTLEMENT_DONE,
-        SETTLEMENT_DONE_CONTENT,
-        toBlindSalePostUrl(purchaseRequest.getBlindSalePost().getId())
-    );
-
-    return PurchaseRequestConverter.toDecision(purchaseRequest);
-  }
 
   private PurchaseRequest getPurchaseRequest(Long purchaseRequestId) {
     return purchaseRequestRepository.findById(purchaseRequestId)
