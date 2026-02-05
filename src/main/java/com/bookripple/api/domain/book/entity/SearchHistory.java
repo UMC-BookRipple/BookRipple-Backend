@@ -1,5 +1,6 @@
 package com.bookripple.api.domain.book.entity;
 
+import com.bookripple.api.domain.book.enums.SearchLogType;
 import com.bookripple.api.domain.member.entity.Member;
 import com.bookripple.api.global.entity.BaseEntity;
 import jakarta.persistence.*;
@@ -22,6 +23,10 @@ public class SearchHistory extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private SearchLogType type;
 
     @Column(nullable = false, length = 100)
     private String keyword;
