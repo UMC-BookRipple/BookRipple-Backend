@@ -3,6 +3,7 @@ package com.bookripple.api.domain.order.converter;
 import com.bookripple.api.domain.order.dto.TradeReqDto;
 import com.bookripple.api.domain.order.entity.Payment;
 import com.bookripple.api.domain.order.entity.Settlement;
+import com.bookripple.api.domain.order.entity.ShippingInfo;
 import com.bookripple.api.domain.order.entity.Trade;
 import com.bookripple.api.domain.order.enums.PaymentStatus;
 import com.bookripple.api.domain.order.enums.SettlementStatus;
@@ -55,6 +56,17 @@ public class TradeConverter {
                 .amount(response.totalAmount().intValue())
                 .approvedAt(LocalDateTime.parse(response.approvedAt(), DateTimeFormatter.ISO_OFFSET_DATE_TIME))
                 .rawResponse(response.rawJson()) // 전체 응답 저장
+                .build();
+    }
+
+    /**
+     * [5단계] 배송 정보(ShippingInfo) 엔티티 생성
+     */
+    public static ShippingInfo toShippingInfo(Trade trade, TradeReqDto.StartShipping dto) {
+        return ShippingInfo.builder()
+                .trade(trade)
+                .companyName(dto.companyName())
+                .shippingNumber(dto.shippingNumber())
                 .build();
     }
 }

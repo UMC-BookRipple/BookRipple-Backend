@@ -13,17 +13,11 @@ import com.bookripple.api.domain.notification.enums.NotificationType;
 import com.bookripple.api.domain.notification.service.NotificationService;
 import com.bookripple.api.domain.order.converter.TradeConverter;
 import com.bookripple.api.domain.order.dto.TradeReqDto;
-import com.bookripple.api.domain.order.entity.Payment;
-import com.bookripple.api.domain.order.entity.Settlement;
-import com.bookripple.api.domain.order.entity.Trade;
-import com.bookripple.api.domain.order.entity.TradeShippingAddress;
+import com.bookripple.api.domain.order.entity.*;
 import com.bookripple.api.domain.order.enums.PaymentStatus;
 import com.bookripple.api.domain.order.enums.SettlementStatus;
 import com.bookripple.api.domain.order.enums.TradeStatus;
-import com.bookripple.api.domain.order.repository.PaymentRepository;
-import com.bookripple.api.domain.order.repository.SettlementRepository;
-import com.bookripple.api.domain.order.repository.TradeRepository;
-import com.bookripple.api.domain.order.repository.TradeShippingAddressRepository;
+import com.bookripple.api.domain.order.repository.*;
 import com.bookripple.api.domain.toss.client.TossPaymentClient;
 import com.bookripple.api.domain.toss.dto.TossPaymentDto;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +37,7 @@ public class TradeServiceImpl implements TradeService {
     private final TossPaymentClient tossPaymentClient;
     private final NotificationService notificationService;
     private final PurchaseRequestRepository purchaseRequestRepository;
+    private final ShippingInfoRepository shippingInfoRepository;
 
 
     @Override
@@ -130,6 +125,35 @@ public class TradeServiceImpl implements TradeService {
         // 이미 생성된 READY/PENDING 데이터가 있다면 삭제하거나 CANCELED로 변경합니다.
         paymentRepository.deleteByTradeId(tradeId);
         settlementRepository.deleteByTradeId(tradeId);
+    }
+
+    @Override
+    @Transactional
+    public void startShipping(Long memberId, Long tradeId, TradeReqDto.StartShipping dto) {
+        // 1. 거래 조회 및 판매자 권한 검증
+        Trade trade = tradeRepository.findById(tradeId)
+                .orElseThrow(() -> new ApiException(CommonErrorCode.NOT_FOUND));
+
+        if (!trade.getSeller().getId().equals(memberId)) {
+            throw new ApiException(CommonErrorCode.FORBIDDEN);
+        }
+
+        // 2. 상태 확인: 결제 완료(PAID) 상태에서만 배송 가능
+        if (trade.getStatus() != TradeStatus.PAID) {
+            throw new ApiException(PurchaseRequestErrorCode.INVALID_STATUS);
+        }
+
+        // 3. ShippingInfo 생성 및 저장
+        ShippingInfo shippingInfo = TradeConverter.toShippingInfo(trade, dto);
+        shippingInfoRepository.save(shippingInfo);
+
+        // 4. 상태 일괄 업데이트
+        trade.updateStatus(TradeStatus.SHIPPED);
+
+        PurchaseRequest purchaseRequest = purchaseRequestRepository
+                .findByBlindSalePostIdAndStatus(trade.getBlindSalePost().getId(), PurchaseStatus.PAYMENT_COMPLETED)
+                .orElseThrow(() -> new ApiException(PurchaseRequestErrorCode.PURCHASE_REQUEST_NOT_FOUND));
+        purchaseRequest.updateStatus(PurchaseStatus.SHIPPING);
 
     }
 

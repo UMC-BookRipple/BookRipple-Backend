@@ -53,4 +53,17 @@ public class TradeController {
         tradeService.cancelTradeBeforePayment(memberId, tradeId);
         return ApiResponse.onSuccess(CommonSuccessCode.OK, "구매 요청 결제가 취소되었습니다.");
     }
+
+    /**
+     * [5단계] 배송 시작: 판매자가 운송장 번호를 입력하고 상태를 변경함
+     */
+    @PatchMapping("/{tradeId}/shipping")
+    public ApiResponse<String> startShipping(
+            @AuthenticationPrincipal Long memberId,
+            @PathVariable Long tradeId,
+            @RequestBody TradeReqDto.StartShipping requestDto) {
+
+        tradeService.startShipping(memberId, tradeId, requestDto);
+        return ApiResponse.onSuccess(CommonSuccessCode.OK, "배송 정보 등록이 완료되었습니다.");
+    }
 }
