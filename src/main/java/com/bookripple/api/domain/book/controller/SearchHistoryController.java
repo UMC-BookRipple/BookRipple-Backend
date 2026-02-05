@@ -3,6 +3,7 @@ package com.bookripple.api.domain.book.controller;
 import com.bookripple.api.common.code.CommonSuccessCode;
 import com.bookripple.api.common.response.ApiResponse;
 import com.bookripple.api.domain.book.dto.SearchHistoryRes;
+import com.bookripple.api.domain.book.enums.SearchLogType;
 import com.bookripple.api.domain.book.service.SearchHistoryCommandService;
 import com.bookripple.api.domain.book.service.SearchHistoryQueryService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,10 +31,11 @@ public class SearchHistoryController {
     )
     public ApiResponse<SearchHistoryRes.ListRes> getHistories(
             @AuthenticationPrincipal Long memberId,
+            @RequestParam(defaultValue = "BOOK") SearchLogType type,
             @RequestParam(required = false) Long lastId,
             @RequestParam(defaultValue = "20") int size
     ) {
-        return ApiResponse.onSuccess(CommonSuccessCode.OK, queryService.getHistories(memberId, lastId, size));
+        return ApiResponse.onSuccess(CommonSuccessCode.OK, queryService.getHistories(memberId, type, lastId, size));
     }
 
     @DeleteMapping("/history/{historyId}")
@@ -43,9 +45,10 @@ public class SearchHistoryController {
     )
     public ApiResponse<SearchHistoryRes.DeleteOne> deleteOne(
             @AuthenticationPrincipal Long memberId,
+            @RequestParam(defaultValue = "BOOK") SearchLogType type,
             @PathVariable Long historyId
     ) {
-        return ApiResponse.onSuccess(CommonSuccessCode.OK, commandService.deleteOne(memberId, historyId));
+        return ApiResponse.onSuccess(CommonSuccessCode.OK, commandService.deleteOne(memberId, type, historyId));
     }
 
     @DeleteMapping("/history")
@@ -54,9 +57,11 @@ public class SearchHistoryController {
             description = "사용자의 모든 검색 기록을 삭제합니다."
     )
     public ApiResponse<SearchHistoryRes.DeleteAll> deleteAll(
-            @AuthenticationPrincipal Long memberId
+            @AuthenticationPrincipal Long memberId,
+            @RequestParam(defaultValue = "BOOK") SearchLogType type
+
     ) {
-        return ApiResponse.onSuccess(CommonSuccessCode.OK, commandService.deleteAll(memberId));
+        return ApiResponse.onSuccess(CommonSuccessCode.OK, commandService.deleteAll(memberId, type));
     }
 }
 

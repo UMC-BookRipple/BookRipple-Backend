@@ -7,6 +7,7 @@ import com.bookripple.api.domain.book.converter.BookConverter;
 import com.bookripple.api.domain.book.dto.BookRes;
 import com.bookripple.api.domain.book.dto.BookSearchRes;
 import com.bookripple.api.domain.book.entity.Book;
+import com.bookripple.api.domain.book.enums.SearchLogType;
 import com.bookripple.api.domain.book.repository.BookRepository;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ public class BookQueryServiceImpl implements BookQueryService {
   @Override
   @Transactional
   public BookSearchRes searchFromAladin(Long memberId, String keyword, int start, int size, String queryType,
-      String searchTarget) {
+      String searchTarget, SearchLogType type) {
     // 최소 검증
     if (keyword == null || keyword.isBlank()) {
       throw new IllegalArgumentException("keyword must not be blank");
@@ -47,7 +48,7 @@ public class BookQueryServiceImpl implements BookQueryService {
     if (memberId != null) {
       String normalized = keyword.trim();
       if (!normalized.isBlank()) {
-        searchHistoryCommandService.saveOrRefresh(memberId, normalized); // ✅ 추가
+        searchHistoryCommandService.saveOrRefresh(memberId, normalized, type);
       }
     }
       return BookConverter.toBookSearchRes(resDto);
