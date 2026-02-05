@@ -16,17 +16,17 @@ import org.springframework.web.bind.annotation.*;
         description = "사용자 검색 기록 조회 및 삭제 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/search/history")
+@RequestMapping("/api/v1/books/search")
 
 public class SearchHistoryController {
 
     private final SearchHistoryQueryService queryService;
     private final SearchHistoryCommandService commandService;
 
-    @GetMapping
+    @GetMapping("/history")
     @Operation(
             summary = "검색 기록 조회",
-            description = "사용자의 검색 기록을 조회합니다. 커서 기반 페이징을 지원합니다. "
+            description = "사용자의 검색 기록을 조회합니다. "
     )
     public ApiResponse<SearchHistoryRes.ListRes> getHistories(
             @AuthenticationPrincipal Long memberId,
@@ -36,7 +36,7 @@ public class SearchHistoryController {
         return ApiResponse.onSuccess(CommonSuccessCode.OK, queryService.getHistories(memberId, lastId, size));
     }
 
-    @DeleteMapping("/{historyId}")
+    @DeleteMapping("/history/{historyId}")
     @Operation(
             summary = "검색 기록 삭제 (단일)",
             description = "사용자의 특정 검색 기록을 삭제합니다."
@@ -48,7 +48,7 @@ public class SearchHistoryController {
         return ApiResponse.onSuccess(CommonSuccessCode.OK, commandService.deleteOne(memberId, historyId));
     }
 
-    @DeleteMapping
+    @DeleteMapping("/history")
     @Operation(
             summary = "검색 기록 삭제 (전체)",
             description = "사용자의 모든 검색 기록을 삭제합니다."
