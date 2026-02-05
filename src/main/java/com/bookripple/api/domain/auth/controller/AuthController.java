@@ -6,9 +6,11 @@ import com.bookripple.api.domain.auth.dto.AuthReqDto;
 import com.bookripple.api.domain.auth.dto.AuthResDto;
 import com.bookripple.api.domain.auth.service.AuthService;
 import com.bookripple.api.global.dto.GlobalDto;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -99,21 +101,26 @@ public class AuthController {
    * 로그아웃
    */
   @PostMapping("/logout")
-  public ResponseEntity<ApiResponse<String>> logout(@RequestHeader("Authorization") String bearerToken) {
+  public ResponseEntity<ApiResponse<String>> logout(HttpServletRequest request) {
 
-    String accessToken = resolveToken(bearerToken);
+    // 1. 헤더에서 토큰 문자열 꺼내기
+    String accessToken = resolveToken(request);
 
-    authService.logout(accessToken);
+    // 2. 로그아웃 수행 (토큰이 있을 때만)
+    if (accessToken != null) {
+      authService.logout(accessToken);
+    }
 
     return ResponseEntity.ok(
         ApiResponse.onSuccess(CommonSuccessCode.OK, "로그아웃 되었습니다.")
     );
   }
 
-  private String resolveToken(String bearerToken) {
-    if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+  private String resolveToken(HttpServletRequest request) {
+    String bearerToken = request.getHeader("Authorization");
+    if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
       return bearerToken.substring(7);
     }
-    return bearerToken;
+    return null;
   }
 }
