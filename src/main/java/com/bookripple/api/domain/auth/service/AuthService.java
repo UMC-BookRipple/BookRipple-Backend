@@ -8,12 +8,15 @@ import com.bookripple.api.domain.auth.dto.AuthReqDto;
 import com.bookripple.api.domain.auth.dto.AuthResDto;
 import com.bookripple.api.domain.member.entity.Member;
 import com.bookripple.api.domain.member.enums.LoginType;
+import com.bookripple.api.domain.member.enums.MemberRole;
 import com.bookripple.api.domain.member.repository.MemberRepository;
 import com.bookripple.api.domain.verification.email.service.EmailVerificationService;
 import com.bookripple.api.domain.verification.email.enums.EmailVerificationPurpose;
+import com.bookripple.api.global.service.TokenBlacklistService;
 import com.bookripple.api.global.dto.GlobalDto;
 import com.bookripple.api.global.security.JwtTokenProvider;
 import java.util.Map;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -33,6 +36,7 @@ public class AuthService {
   private final JwtTokenProvider jwtTokenProvider;
   private final EmailVerificationService emailVerificationService;
   private final RestClient restClient;
+  private final TokenBlacklistService tokenBlacklistService;
 
   @Value("${kakao.client-id}")
   private String kakaoClientId;
@@ -245,5 +249,52 @@ public class AuthService {
 
     String encodedPassword = passwordEncoder.encode(request.getNewPassword());
     member.updatePassword(encodedPassword);
+  }
+
+  /**
+   * 게스트 로그인 (임시 회원 생성 및 토큰 발급)
+   */
+  @Transactional
+  public AuthResDto.Login guestLogin() {
+    // 1. 게스트용 고유 ID 생성 (중복 방지)
+    String guestIdentifier = UUID.randomUUID().toString().substring(0, 8);
+    String guestLoginId = "guest_" + guestIdentifier;
+
+    // 2. 게스트 회원 생성
+    Member guestMember = Member.builder()
+        .loginId(guestLoginId)
+        .password(passwordEncoder.encode("GUEST_PASSWORD")) // 임의의 비밀번호 설정
+        .name("게스트" + guestIdentifier)
+        .email(guestLoginId + "@guest.com") // 더미 이메일
+        .loginType(LoginType.GUEST) // LoginType.GUEST 필요
+        .role(MemberRole.USER)      // 일반 유저 권한 부여
+        .isRequiredAgreed(true)     // 약관 동의 간주
+        .isOptionalAgreed(false)
+        .isCertified(true)          // 인증된 것으로 처리
+        .build();
+
+    memberRepository.save(guestMember);
+
+    // 3. 토큰 발급
+    String accessToken = jwtTokenProvider.createAccessToken(guestMember.getId(), "USER");
+
+    return AuthResDto.Login.builder()
+        .memberId(guestMember.getId())
+        .userName(guestMember.getName())
+        .accessToken(accessToken)
+        .isNewMember(true)
+        .build();
+  }
+
+  /**
+   * 로그아웃 (인메모리 블랙리스트)
+   */
+  @Transactional
+  public void logout(String accessToken) {
+    if (!jwtTokenProvider.validateToken(accessToken)) {
+      throw new ApiException(AuthErrorCode.INVALID_TOKEN);
+    }
+
+    tokenBlacklistService.addToBlacklist(accessToken);
   }
 }
