@@ -15,4 +15,7 @@ public interface SearchHistoryRepository extends JpaRepository<SearchHistory, Lo
 
     // 전체 삭제
     long deleteByMemberId(Long memberId);
+
+    // 중복 키워드 최신화
+    void deleteByMemberIdAndKeyword(Long memberId, String keyword);
 }

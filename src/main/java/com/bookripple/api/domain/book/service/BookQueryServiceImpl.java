@@ -19,12 +19,13 @@ public class BookQueryServiceImpl implements BookQueryService {
 
   private final BookRepository bookRepository;
   private final AladinService aladinService;
+  private final SearchHistoryCommandService searchHistoryCommandService;
 
 
   //1 알라딘 검색
   @Override
   @Transactional(readOnly = true)
-  public BookSearchRes searchFromAladin(String keyword, int start, int size, String queryType,
+  public BookSearchRes searchFromAladin(Long memberId, String keyword, int start, int size, String queryType,
       String searchTarget) {
     // 최소 검증
     if (keyword == null || keyword.isBlank()) {
@@ -41,9 +42,15 @@ public class BookQueryServiceImpl implements BookQueryService {
     }
 
     AladinSearchResDto resDto =
-        aladinService.search(keyword, start, size, queryType, searchTarget);
+            aladinService.search(keyword, start, size, queryType, searchTarget);
 
-    return BookConverter.toBookSearchRes(resDto);
+    if (memberId != null) {
+      String normalized = keyword.trim();
+      if (!normalized.isBlank()) {
+        searchHistoryCommandService.saveOrRefresh(memberId, normalized); // ✅ 추가
+      }
+    }
+      return BookConverter.toBookSearchRes(resDto);
   }
 
   //2. 알라딘 도서 상세 조회 및 저장
