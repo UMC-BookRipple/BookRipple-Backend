@@ -53,11 +53,9 @@ public class EmailVerificationService {
   public void validateVerified(String email, EmailVerificationPurpose purpose) {
     EmailVerification verification =
         emailVerificationRepository.findByEmailAndPurpose(email, purpose)
-            // 인증 내역이 아예 없는 경우
             .orElseThrow(() -> new ApiException(AuthErrorCode.EMAIL_NOT_VERIFIED));
 
     if (!verification.isValid()) {
-      // 인증은 했으나 만료되거나 검증 안 됨
       throw new ApiException(AuthErrorCode.EMAIL_NOT_VERIFIED);
     }
   }
