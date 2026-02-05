@@ -3,6 +3,7 @@ package com.bookripple.api.domain.order.controller;
 import com.bookripple.api.common.code.CommonSuccessCode;
 import com.bookripple.api.common.response.ApiResponse;
 import com.bookripple.api.domain.order.dto.TradeReqDto;
+import com.bookripple.api.domain.order.dto.TradeResDto;
 import com.bookripple.api.domain.order.service.TradeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -55,15 +56,31 @@ public class TradeController {
     }
 
     /**
-     * [5단계] 배송 시작: 판매자가 운송장 번호를 입력하고 상태를 변경함
+     * [5단계 - 조회] 판매자 배송 시작 화면 정보 조회
+     * GET 요청 시 실행됩니다.
+     */
+    @GetMapping("/{tradeId}/shipping")
+    public ApiResponse<TradeResDto.SellerTradeDetail> getShippingScreenInfo(
+            @AuthenticationPrincipal Long memberId,
+            @PathVariable Long tradeId) {
+
+        return ApiResponse.onSuccess(
+                CommonSuccessCode.OK,
+                tradeService.getSellerTradeDetail(memberId, tradeId)
+        );
+    }
+
+    /**
+     * [5단계 - 제출] 배송 정보 등록 및 상태 변경
+     * PATCH 요청 시 실행됩니다.
      */
     @PatchMapping("/{tradeId}/shipping")
-    public ApiResponse<String> startShipping(
+    public ApiResponse<String> submitShippingInfo(
             @AuthenticationPrincipal Long memberId,
             @PathVariable Long tradeId,
             @RequestBody TradeReqDto.StartShipping requestDto) {
 
         tradeService.startShipping(memberId, tradeId, requestDto);
-        return ApiResponse.onSuccess(CommonSuccessCode.OK, "배송 정보 등록이 완료되었습니다.");
+        return ApiResponse.onSuccess(CommonSuccessCode.OK, "배송 정보가 성공적으로 등록되었습니다.");
     }
 }

@@ -13,6 +13,7 @@ import com.bookripple.api.domain.notification.enums.NotificationType;
 import com.bookripple.api.domain.notification.service.NotificationService;
 import com.bookripple.api.domain.order.converter.TradeConverter;
 import com.bookripple.api.domain.order.dto.TradeReqDto;
+import com.bookripple.api.domain.order.dto.TradeResDto;
 import com.bookripple.api.domain.order.entity.*;
 import com.bookripple.api.domain.order.enums.PaymentStatus;
 import com.bookripple.api.domain.order.enums.SettlementStatus;
@@ -155,6 +156,22 @@ public class TradeServiceImpl implements TradeService {
                 .orElseThrow(() -> new ApiException(PurchaseRequestErrorCode.PURCHASE_REQUEST_NOT_FOUND));
         purchaseRequest.updateStatus(PurchaseStatus.SHIPPING);
 
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public TradeResDto.SellerTradeDetail getSellerTradeDetail(Long memberId, Long tradeId) {
+        // 1. 거래 조회
+        Trade trade = tradeRepository.findById(tradeId)
+                .orElseThrow(() -> new ApiException(CommonErrorCode.NOT_FOUND));
+
+        // 2. 요청자가 해당 거래의 판매자인지 체크
+        if (!trade.getSeller().getId().equals(memberId)) {
+            throw new ApiException(CommonErrorCode.FORBIDDEN);
+        }
+
+        // 3. 컨버터를 통해 DTO 반환
+        return TradeConverter.toSellerTradeDetail(trade);
     }
 
 

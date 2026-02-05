@@ -1,6 +1,7 @@
 package com.bookripple.api.domain.order.converter;
 
 import com.bookripple.api.domain.order.dto.TradeReqDto;
+import com.bookripple.api.domain.order.dto.TradeResDto;
 import com.bookripple.api.domain.order.entity.Payment;
 import com.bookripple.api.domain.order.entity.Settlement;
 import com.bookripple.api.domain.order.entity.ShippingInfo;
@@ -67,6 +68,18 @@ public class TradeConverter {
                 .trade(trade)
                 .companyName(dto.companyName())
                 .shippingNumber(dto.shippingNumber())
+                .build();
+    }
+
+    /**
+     * [5단계] 판매자용 배송 정보 조회 DTO 변환
+     */
+    public static TradeResDto.SellerTradeDetail toSellerTradeDetail(Trade trade) {
+        return TradeResDto.SellerTradeDetail.builder()
+                .title(trade.getBlindSalePost().getTitle())
+                .price(trade.getAmount())
+                .buyerNickname(trade.getBuyer().getName())
+                .shippingAddress(trade.getShippingAddress())
                 .build();
     }
 }
