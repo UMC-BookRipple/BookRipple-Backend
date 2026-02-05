@@ -41,6 +41,11 @@ public class TradeServiceImpl implements TradeService {
     private final ShippingInfoRepository shippingInfoRepository;
 
 
+    private static final String PAYMENT_DONE_CONTENT = "결제가 완료되었습니다! 배송을 시작해 주세요.";
+    private static final String TRADE_CANCELED_CONTENT = "구매 요청이 취소되었습니다.";
+    private static final String SHIPPING_STARTED_CONTENT = "상품이 배송중입니다.";
+
+
     @Override
     @Transactional
     public void preparePayment(Long memberId, Long tradeId, TradeReqDto.PreparePayment dto) {
@@ -89,6 +94,14 @@ public class TradeServiceImpl implements TradeService {
                 .orElseThrow(() -> new ApiException(PurchaseRequestErrorCode.PURCHASE_REQUEST_NOT_FOUND));
         purchaseRequest.updateStatus(PurchaseStatus.PAYMENT_COMPLETED); // 거래 완료
 
+        // [알림 추가] 판매자에게 결제 완료 알림 발송
+        notificationService.create(
+                trade.getSeller(),
+                NotificationType.TRADE_APPROVED,
+                PAYMENT_DONE_CONTENT + " 주소: " + trade.getShippingAddress(), // 한 줄 주소 포함
+                "/blind-sale-posts/" + trade.getBlindSalePost().getId()
+        );
+
     }
 
     @Override
@@ -126,6 +139,16 @@ public class TradeServiceImpl implements TradeService {
         // 이미 생성된 READY/PENDING 데이터가 있다면 삭제하거나 CANCELED로 변경합니다.
         paymentRepository.deleteByTradeId(tradeId);
         settlementRepository.deleteByTradeId(tradeId);
+
+        // [알림 추가] 판매자에게 취소 알림 발송
+        notificationService.create(
+                trade.getSeller(),
+                NotificationType.TRADE_CANCELED,
+                TRADE_CANCELED_CONTENT + " 주소: " + trade.getShippingAddress(), // 한 줄 주소 포함
+                "/blind-sale-posts/" + trade.getBlindSalePost().getId()
+        );
+
+
     }
 
     @Override
@@ -155,6 +178,14 @@ public class TradeServiceImpl implements TradeService {
                 .findByBlindSalePostIdAndStatus(trade.getBlindSalePost().getId(), PurchaseStatus.PAYMENT_COMPLETED)
                 .orElseThrow(() -> new ApiException(PurchaseRequestErrorCode.PURCHASE_REQUEST_NOT_FOUND));
         purchaseRequest.updateStatus(PurchaseStatus.SHIPPING);
+
+        // [알림 추가] 구매자에게 배송 시작 알림 발송
+        notificationService.create(
+                trade.getBuyer(),
+                NotificationType.SHIPPING_STARTED,
+                SHIPPING_STARTED_CONTENT + " (" + dto.companyName() + " : " + dto.shippingNumber() + ")",
+                "/blind-sale-posts/" + trade.getBlindSalePost().getId()
+        );
 
     }
 

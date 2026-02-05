@@ -44,7 +44,7 @@ public class TradeController {
     }
 
     /**
-     * [4-2단계] 결제 전 취소: 구매자가 결제창 단계에서 취소 시 상태 복구
+     * [4-2단계] 결제 전 취소: 구매자가 결제 전 단계에서 취소 시 상태 복구
      */
     @PatchMapping("/{tradeId}/cancel")
     public ApiResponse<String> cancelTradeBeforePayment(
