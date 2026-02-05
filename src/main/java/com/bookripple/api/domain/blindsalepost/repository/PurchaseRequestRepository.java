@@ -2,6 +2,7 @@ package com.bookripple.api.domain.blindsalepost.repository;
 
 import com.bookripple.api.domain.blindsalepost.entity.BlindSalePost;
 import com.bookripple.api.domain.blindsalepost.entity.PurchaseRequest;
+import com.bookripple.api.domain.blindsalepost.enums.PurchaseStatus;
 import com.bookripple.api.domain.member.entity.Member;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -29,6 +30,9 @@ public interface PurchaseRequestRepository extends JpaRepository<PurchaseRequest
     // 내가 보낸 요청 목록 조회
     List<PurchaseRequest> findAllByMemberIdOrderByIdDesc(Long memberId, Pageable pageable);
     List<PurchaseRequest> findAllByMemberIdAndIdLessThanOrderByIdDesc(Long memberId, Long id, Pageable pageable);
+
+    // 특정 게시글에서 현재 '수락(ACCEPTED)' 상태인 요청을 찾습니다.
+    Optional<PurchaseRequest> findByBlindSalePostIdAndStatus(Long blindSalePostId, PurchaseStatus status);
 
     @Modifying
     @Query("UPDATE PurchaseRequest p SET p.status = 'REJECTED' " +
