@@ -16,4 +16,12 @@ public interface BlindSalePostService {
     void updatePost(Long memberId, Long blindBookId, BlindSalePostReqDto.Update request);
 
     void deletePost(Long memberId, Long blindBookId);
+
+    BlindSalePostResDto.PurchaseRequestList getPurchaseRequests(Long blindPostId);
+
+    BlindSalePostResDto.BuyerSliceResponse<BlindSalePostResDto.BuyerListElement> getAllPosts(Long cursor, int size);
+
+    BlindSalePostResDto.BuyerSliceResponse<BlindSalePostResDto.MyRequestListElement> getMyRequests(Long memberId, Long cursor, int size);
+
+    BlindSalePostResDto.BuyerDetail getPostDetailForBuyer(Long memberId, Long blindPostId);
 }

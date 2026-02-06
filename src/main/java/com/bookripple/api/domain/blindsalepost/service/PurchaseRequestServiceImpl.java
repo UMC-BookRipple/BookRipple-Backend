@@ -7,6 +7,7 @@ import com.bookripple.api.domain.blindsalepost.converter.PurchaseRequestConverte
 import com.bookripple.api.domain.blindsalepost.dto.PurchaseRequestResDto;
 import com.bookripple.api.domain.blindsalepost.entity.BlindSalePost;
 import com.bookripple.api.domain.blindsalepost.entity.PurchaseRequest;
+import com.bookripple.api.domain.blindsalepost.enums.PostStatus;
 import com.bookripple.api.domain.blindsalepost.enums.PurchaseStatus;
 import com.bookripple.api.domain.blindsalepost.repository.BlindSalePostRepository;
 import com.bookripple.api.domain.blindsalepost.repository.PurchaseRequestRepository;
@@ -15,6 +16,10 @@ import com.bookripple.api.domain.member.repository.MemberRepository;
 import com.bookripple.api.domain.notification.enums.NotificationType;
 import com.bookripple.api.domain.notification.service.NotificationService;
 import java.util.Arrays;
+
+import com.bookripple.api.domain.order.entity.Trade;
+import com.bookripple.api.domain.order.enums.TradeStatus;
+import com.bookripple.api.domain.order.repository.TradeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,14 +32,13 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
   private static final String TRADE_REQUESTED_CONTENT = "구매 요청이 왔습니다. 요청을 승인하겠습니까?";
   private static final String TRADE_CANCELED_CONTENT = "구매 요청이 취소되었습니다.";
   private static final String TRADE_APPROVED_CONTENT = "구매 요청이 승인 되었습니다.";
-  private static final String TRADE_REJECTED_CONTENT = "구매 요청이 거절되었습니다.";
-  private static final String SHIPPING_STARTED_CONTENT = "상품이 배송중입니다.";
-  private static final String SETTLEMENT_DONE_CONTENT = "거래가 완료되었습니다.";
+
 
   private final BlindSalePostRepository blindSalePostRepository;
   private final PurchaseRequestRepository purchaseRequestRepository;
   private final MemberRepository memberRepository;
   private final NotificationService notificationService;
+  private final TradeRepository tradeRepository;
 
   @Override
   @Transactional
@@ -93,6 +97,22 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
 
     purchaseRequest.updateStatus(PurchaseStatus.ACCEPTED);
 
+    //  결제 로직: 게시글 예약 및 거래 생성
+    BlindSalePost post = purchaseRequest.getBlindSalePost();
+    post.updateStatus(PostStatus.RESERVED); // 게시글 잠금
+
+    Trade trade = Trade.builder() // 거래 생성
+            .buyer(purchaseRequest.getMember())
+            .seller(post.getMember())
+            .blindSalePost(post)
+            .amount(post.getPrice())
+            .status(TradeStatus.REQUESTED) // 기본값으로 설정됨
+            .build();
+    tradeRepository.save(trade);
+
+    // 나머지 대기자들 일괄 거절 처리
+    purchaseRequestRepository.rejectOthers(post.getId(), purchaseRequestId);
+
     notificationService.create(
         purchaseRequest.getMember(),
         NotificationType.TRADE_APPROVED,
@@ -103,64 +123,7 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
     return PurchaseRequestConverter.toDecision(purchaseRequest);
   }
 
-  @Override
-  @Transactional
-  public PurchaseRequestResDto.Decision rejectPurchaseRequest(Long memberId,
-      Long purchaseRequestId) {
-    PurchaseRequest purchaseRequest = getPurchaseRequest(purchaseRequestId);
-    validateSeller(memberId, purchaseRequest);
-    validateStatus(purchaseRequest, PurchaseStatus.WAITING);
 
-    purchaseRequest.updateStatus(PurchaseStatus.REJECTED);
-
-    notificationService.create(
-        purchaseRequest.getMember(),
-        NotificationType.TRADE_REJECTED,
-        TRADE_REJECTED_CONTENT,
-        toBlindSalePostUrl(purchaseRequest.getBlindSalePost().getId())
-    );
-
-    return PurchaseRequestConverter.toDecision(purchaseRequest);
-  }
-
-  @Override
-  @Transactional
-  public PurchaseRequestResDto.Decision startShipping(Long memberId, Long purchaseRequestId) {
-    PurchaseRequest purchaseRequest = getPurchaseRequest(purchaseRequestId);
-    validateSeller(memberId, purchaseRequest);
-    validateStatus(purchaseRequest, PurchaseStatus.ACCEPTED);
-
-    purchaseRequest.updateStatus(PurchaseStatus.SHIPPING);
-
-    notificationService.create(
-        purchaseRequest.getMember(),
-        NotificationType.SHIPPING_STARTED,
-        SHIPPING_STARTED_CONTENT,
-        toBlindSalePostUrl(purchaseRequest.getBlindSalePost().getId())
-    );
-
-    return PurchaseRequestConverter.toDecision(purchaseRequest);
-  }
-
-  @Override
-  @Transactional
-  public PurchaseRequestResDto.Decision completeShipping(Long memberId,
-      Long purchaseRequestId) {
-    PurchaseRequest purchaseRequest = getPurchaseRequest(purchaseRequestId);
-    validateBuyer(memberId, purchaseRequest);
-    validateStatus(purchaseRequest, PurchaseStatus.SHIPPING);
-
-    purchaseRequest.updateStatus(PurchaseStatus.SHIPPED);
-
-    notificationService.create(
-        purchaseRequest.getBlindSalePost().getMember(),
-        NotificationType.SETTLEMENT_DONE,
-        SETTLEMENT_DONE_CONTENT,
-        toBlindSalePostUrl(purchaseRequest.getBlindSalePost().getId())
-    );
-
-    return PurchaseRequestConverter.toDecision(purchaseRequest);
-  }
 
   private PurchaseRequest getPurchaseRequest(Long purchaseRequestId) {
     return purchaseRequestRepository.findById(purchaseRequestId)

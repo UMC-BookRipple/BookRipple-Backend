@@ -18,4 +18,8 @@ public interface BlindSalePostRepository extends JpaRepository<BlindSalePost, Lo
     // 2. 다음 페이지 조회용 (커서 있음: id < cursor)
     List<BlindSalePost> findAllByMemberIdAndPostStatusAndIdLessThanOrderByIdDesc(
             Long memberId, PostStatus status, Long id, Pageable pageable);
+
+    // 판매 중인 전체 글 조회 (최신순)
+    List<BlindSalePost> findAllByPostStatusOrderByIdDesc(PostStatus status, Pageable pageable);
+    List<BlindSalePost> findAllByPostStatusAndIdLessThanOrderByIdDesc(PostStatus status, Long id, Pageable pageable);
 }

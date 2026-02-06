@@ -1,5 +1,8 @@
 package com.bookripple.api.domain.blindsalepost.service;
 
+import com.bookripple.api.common.code.BlindSalePostErrorCode;
+import com.bookripple.api.common.code.CommonErrorCode;
+import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.domain.blindsalepost.converter.BlindSalePostConverter;
 import com.bookripple.api.domain.blindsalepost.dto.BlindSalePostReqDto;
 import com.bookripple.api.domain.blindsalepost.dto.BlindSalePostResDto;
@@ -20,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,9 +41,10 @@ public class BlindSalePostServiceImpl implements BlindSalePostService {
     public BlindSalePostResDto.Create createPost(Long memberId, BlindSalePostReqDto.Create request) {
         // 1. 등록할 회원과 실제 도서 정보를 조회합니다.
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ApiException(CommonErrorCode.NOT_FOUND, "해당 회원을 찾을 수 없습니다."));
+
         Book book = bookRepository.findById(request.actualBookId())
-                .orElseThrow(() -> new RuntimeException("도서 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new ApiException(CommonErrorCode.NOT_FOUND, "도서 정보를 찾을 수 없습니다."));
 
         // 2. [Converter]를 사용하여 DTO를 엔티티로 변환합니다.
         BlindSalePost post = BlindSalePostConverter.toBlindSalePost(request, member, book);
@@ -55,13 +60,26 @@ public class BlindSalePostServiceImpl implements BlindSalePostService {
     public BlindSalePostResDto.Detail getPostDetail(Long blindPostId) {
         // 1. 게시글 존재 여부 확인
         BlindSalePost post = blindSalePostRepository.findById(blindPostId)
-                .orElseThrow(() -> new RuntimeException("해당 게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ApiException(BlindSalePostErrorCode.POST_NOT_FOUND));
 
-        // 2. 해당 게시글에 들어온 모든 구매 요청 리스트 조회
+        // 2. 해당 게시글에 들어온 요청 갯수만 카운트
+        long requestCount = purchaseRequestRepository.countByBlindSalePostId(blindPostId);
+
+        // 3. 상세 정보와 카운트만 반환
+        return BlindSalePostConverter.toDetail(post, requestCount);
+    }
+
+    @Override
+    public BlindSalePostResDto.PurchaseRequestList getPurchaseRequests(Long blindPostId) {
+        // 1. 게시글 존재 확인
+        if (!blindSalePostRepository.existsById(blindPostId)) {
+            throw new ApiException(BlindSalePostErrorCode.POST_NOT_FOUND);
+        }
+        // 2. 구매 요청자 명단만 조회
         List<PurchaseRequest> requests = purchaseRequestRepository.findAllByBlindSalePostId(blindPostId);
 
-        // 3. 컨버터를 통해 게시글 정보와 요청자 명단을 합쳐서 DTO로 변환
-        return BlindSalePostConverter.toDetail(post, requests);
+        // 3. 명단 리스트 반환
+        return BlindSalePostConverter.toPurchaseRequestList(blindPostId, requests);
     }
 
     @Override
@@ -96,14 +114,21 @@ public class BlindSalePostServiceImpl implements BlindSalePostService {
     public void updatePost(Long memberId, Long blindBookId, BlindSalePostReqDto.Update request) {
         // 1. 게시글 존재 여부 확인
         BlindSalePost post = blindSalePostRepository.findById(blindBookId)
-                .orElseThrow(() -> new RuntimeException("해당 게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ApiException(BlindSalePostErrorCode.POST_NOT_FOUND));
 
         // 2. 권한 확인: 본인의 글만 수정 가능
         if (!post.getMember().getId().equals(memberId)) {
-            throw new RuntimeException("수정 권한이 없습니다.");
+            throw new ApiException(BlindSalePostErrorCode.NOT_POST_OWNER);
+        }
+        // 3. 비즈니스 검증: 예약 중이거나 판매 완료된 글은 수정 불가
+        if (post.getPostStatus() == PostStatus.RESERVED) {
+            throw new ApiException(BlindSalePostErrorCode.ALREADY_RESERVED);
+        }
+        if (post.getPostStatus() == PostStatus.SOLD_OUT) {
+            throw new ApiException(BlindSalePostErrorCode.ALREADY_SOLD_OUT);
         }
 
-        // 3. 엔티티의 update 메서드 호출 (Dirty Checking으로 자동 DB 반영)
+        // 4. 엔티티의 update 메서드 호출 (Dirty Checking으로 자동 DB 반영)
         post.update(
                 request.title(),
                 request.subtitle(),
@@ -116,16 +141,81 @@ public class BlindSalePostServiceImpl implements BlindSalePostService {
     @Override
     @Transactional
     public void deletePost(Long memberId, Long blindBookId) {
-        // 1. 삭제할 게시글이 존재하는지 확인
+        // 1. 삭제할 게시글 존재 확인
         BlindSalePost post = blindSalePostRepository.findById(blindBookId)
-                .orElseThrow(() -> new RuntimeException("해당 게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ApiException(BlindSalePostErrorCode.POST_NOT_FOUND));
 
-        // 2. 권한 확인: 게시글 작성자와 삭제 요청자가 일치하는지 체크
+        // 2. 권한 확인
         if (!post.getMember().getId().equals(memberId)) {
-            throw new RuntimeException("게시글을 삭제할 권한이 없습니다.");
+            throw new ApiException(BlindSalePostErrorCode.NOT_POST_OWNER);
+        }
+
+        // 3. 비즈니스 검증: 판매 완료된 글은 삭제 불가
+        if (post.getPostStatus() == PostStatus.SOLD_OUT) {
+            throw new ApiException(BlindSalePostErrorCode.ALREADY_SOLD_OUT);
         }
 
         // 3. 게시글 삭제 실행
         blindSalePostRepository.delete(post);
+    }
+
+    // 1. 블라인드 북 전체 목록 (SALE 상태만)
+    @Override
+    public BlindSalePostResDto.BuyerSliceResponse<BlindSalePostResDto.BuyerListElement> getAllPosts(Long cursor, int size) {
+        Pageable pageable = PageRequest.of(0, size + 1); // 다음 페이지 확인을 위해 하나 더 조회
+
+        List<BlindSalePost> posts = (cursor == null)
+                ? blindSalePostRepository.findAllByPostStatusOrderByIdDesc(PostStatus.SALE, pageable)
+                : blindSalePostRepository.findAllByPostStatusAndIdLessThanOrderByIdDesc(PostStatus.SALE, cursor, pageable);
+
+        // 다음 페이지 존재 여부 확인
+        boolean hasNext = posts.size() > size;
+        List<BlindSalePost> contentPosts = hasNext ? posts.subList(0, size) : posts;
+
+        // DTO 변환
+        List<BlindSalePostResDto.BuyerListElement> content = contentPosts.stream()
+                .map(BlindSalePostConverter::toBuyerListElement)
+                .collect(Collectors.toList());
+
+        // 다음 커서 결정 (마지막 요소의 ID)
+        Long nextCursor = hasNext ? contentPosts.get(size - 1).getId() : null;
+
+        return BlindSalePostConverter.toBuyerSlice(content, nextCursor, hasNext);
+    }
+
+    // 2. 내가 요청한 책 목록 (오른쪽 탭)
+    @Override
+    public BlindSalePostResDto.BuyerSliceResponse<BlindSalePostResDto.MyRequestListElement> getMyRequests(Long memberId, Long cursor, int size) {
+        Pageable pageable = PageRequest.of(0, size + 1);
+
+        List<PurchaseRequest> requests = (cursor == null)
+                ? purchaseRequestRepository.findAllByMemberIdOrderByIdDesc(memberId, pageable)
+                : purchaseRequestRepository.findAllByMemberIdAndIdLessThanOrderByIdDesc(memberId, cursor, pageable);
+
+        boolean hasNext = requests.size() > size;
+        List<PurchaseRequest> contentRequests = hasNext ? requests.subList(0, size) : requests;
+
+        // DTO 변환
+        List<BlindSalePostResDto.MyRequestListElement> content = contentRequests.stream()
+                .map(BlindSalePostConverter::toMyRequestListElement)
+                .collect(Collectors.toList());
+
+        // 다음 커서 결정 (마지막 요소의 ID)
+        Long nextCursor = hasNext ? contentRequests.get(contentRequests.size() - 1).getId() : null;
+
+        return BlindSalePostConverter.toBuyerSlice(content, nextCursor, hasNext);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public BlindSalePostResDto.BuyerDetail getPostDetailForBuyer(Long memberId, Long blindPostId) {
+
+        BlindSalePost post = blindSalePostRepository.findById(blindPostId)
+                .orElseThrow(() -> new ApiException(BlindSalePostErrorCode.POST_NOT_FOUND));
+
+        Optional<PurchaseRequest> myRequest = purchaseRequestRepository
+                .findByBlindSalePostIdAndMemberId(blindPostId, memberId);
+
+        return BlindSalePostConverter.toBuyerDetail(post, myRequest);
     }
 }

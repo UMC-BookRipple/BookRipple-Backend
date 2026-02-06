@@ -58,4 +58,8 @@ public class BlindSalePost extends BaseEntity {
         this.bookCondition = condition;
     }
 
+    public void updateStatus(PostStatus status) {
+        this.postStatus = status;
+    }
+
 }

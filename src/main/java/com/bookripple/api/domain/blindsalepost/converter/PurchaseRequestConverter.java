@@ -4,7 +4,6 @@ import com.bookripple.api.domain.blindsalepost.dto.PurchaseRequestResDto;
 import com.bookripple.api.domain.blindsalepost.entity.PurchaseRequest;
 
 public class PurchaseRequestConverter {
-
   public static PurchaseRequestResDto.Create toCreate(PurchaseRequest purchaseRequest) {
     return PurchaseRequestResDto.Create.builder()
         .purchaseRequestId(purchaseRequest.getId())

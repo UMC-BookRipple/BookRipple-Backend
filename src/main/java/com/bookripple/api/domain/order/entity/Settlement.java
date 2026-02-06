@@ -40,4 +40,8 @@ public class Settlement extends BaseEntity {
     @Column(nullable = false)
     private SettlementStatus status;
 
+    public void updateStatus(SettlementStatus status) {
+        this.status = status;
+    }
+
 }
