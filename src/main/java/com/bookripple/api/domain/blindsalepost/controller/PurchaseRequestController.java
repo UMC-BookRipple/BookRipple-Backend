@@ -51,30 +51,5 @@ public class PurchaseRequestController {
         purchaseRequestService.approvePurchaseRequest(memberId, purchaseRequestId));
   }
 
-  @PatchMapping("/{purchaseRequestId}/reject")
-  public ApiResponse<PurchaseRequestResDto.Decision> rejectPurchaseRequest(
-      @AuthenticationPrincipal Long memberId,
-      @PathVariable @Min(1) Long purchaseRequestId
-  ) {
-    return ApiResponse.onSuccess(CommonSuccessCode.OK,
-        purchaseRequestService.rejectPurchaseRequest(memberId, purchaseRequestId));
-  }
 
-  @PatchMapping("/{purchaseRequestId}/shipping")
-  public ApiResponse<PurchaseRequestResDto.Decision> startShipping(
-      @AuthenticationPrincipal Long memberId,
-      @PathVariable @Min(1) Long purchaseRequestId
-  ) {
-    return ApiResponse.onSuccess(CommonSuccessCode.OK,
-        purchaseRequestService.startShipping(memberId, purchaseRequestId));
-  }
-
-  @PatchMapping("/{purchaseRequestId}/shipped")
-  public ApiResponse<PurchaseRequestResDto.Decision> completeShipping(
-      @AuthenticationPrincipal Long memberId,
-      @PathVariable @Min(1) Long purchaseRequestId
-  ) {
-    return ApiResponse.onSuccess(CommonSuccessCode.OK,
-        purchaseRequestService.completeShipping(memberId, purchaseRequestId));
-  }
 }
