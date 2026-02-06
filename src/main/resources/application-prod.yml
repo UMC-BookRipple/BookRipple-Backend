@@ -58,3 +58,10 @@ toss:
     client-key: ${TOSS_PAYMENT_CLIENT_KEY}
     secret-key: ${TOSS_PAYMENT_SECRET_KEY}
     base-url: https://api.tosspayments.com/v1/payments
+
+
+aladin:
+  base-url: ${ALADIN_BASE_URL}
+  ttb-key: ${ALADIN_TTB_KEY}
+  output: js
+  version: 20131101
