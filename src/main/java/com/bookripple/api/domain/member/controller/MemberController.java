@@ -27,8 +27,7 @@ public class MemberController {
   private final EmailCodeService emailCodeService;
 
   /**
-   * Helper: 현재 로그인한 사용자 ID 추가
-   * SecurityContext에서 현재 로그인한 사용자의 ID(PK)를 꺼냄.
+   * Helper 메서드 - 현재 로그인한 사용자 ID 추가
    */
   private Long getCurrentMemberId() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -49,9 +48,6 @@ public class MemberController {
   public ResponseEntity<ApiResponse<Boolean>> checkDuplicateLoginId(
       @RequestParam("loginId") String loginId
   ) {
-    // 중복이면 true, 사용 가능하면 false? -> 보통 API 명세에 따라 다름.
-    // 기존 AuthController에서는 isAvailable 반환이었으므로, 여기서는 중복 여부를 반환하거나 사용 가능 여부를 반환.
-    // 여기서는 "중복이 아니면 true(사용가능)" 로직으로 맞춤 (AuthController 참조)
     boolean isDuplicate = memberService.isLoginIdDuplicate(loginId);
 
     return ResponseEntity.ok(
@@ -66,7 +62,6 @@ public class MemberController {
   public ResponseEntity<ApiResponse<GlobalDto.IdRes>> changeLoginId(
       @RequestBody @Valid GlobalDto.ContentReq request
   ) {
-    // request.content() -> 변경할 새로운 Login ID
     Long memberId = memberService.changeLoginId(getCurrentMemberId(), request.content());
 
     return ResponseEntity.ok(
@@ -81,7 +76,6 @@ public class MemberController {
   public ResponseEntity<ApiResponse<String>> checkCurrentPassword(
       @RequestBody @Valid GlobalDto.ContentReq request
   ) {
-    // request.content() -> 사용자가 입력한 평문 비밀번호
     memberService.checkCurrentPassword(getCurrentMemberId(), request.content());
 
     return ResponseEntity.ok(
@@ -113,7 +107,6 @@ public class MemberController {
   public ResponseEntity<ApiResponse<GlobalDto.SingleRes<LocalDateTime>>> sendEmailChangeCode(
       @RequestBody @Valid GlobalDto.ContentReq request
   ) {
-    // request.content() -> 변경하고자 하는 새로운 이메일
     LocalDateTime expiredAt =
         emailCodeService.sendVerificationCode(
             request.content(),
@@ -135,10 +128,9 @@ public class MemberController {
   public ResponseEntity<ApiResponse<String>> verifyEmailChangeCode(
       @RequestBody @Valid AuthReqDto.Verify request
   ) {
-    // 검증 성공 시 바로 이메일 변경 처리
     memberService.verifyAndChangeEmail(
         getCurrentMemberId(),
-        request.getEmail(), // 검증하려는 이메일 (변경 대상)
+        request.getEmail(),
         request.getCode()
     );
 

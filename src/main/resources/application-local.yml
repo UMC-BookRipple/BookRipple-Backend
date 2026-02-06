@@ -6,7 +6,7 @@ spring:
     driver-class-name: ${LOCAL_DB_DRIVER:com.mysql.cj.jdbc.Driver}
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     show-sql: true
 
   mail:
@@ -45,8 +45,8 @@ aladin:
   version: 20131101
 
 kakao:
-  client-id: ${KAKAO_CLIENT_ID}    # 카카오 REST API 키
+  client-id: ${KAKAO_CLIENT_ID}
   client-secret: ${KAKAO_CLIENT_SECRET}
-  redirect-uri: ${KAKAO_REDIRECT_URI}  # 현재는 테스트 주소
+  redirect-uri: ${KAKAO_REDIRECT_URI}  # 로컬 테스트 주소
   token-uri: https://kauth.kakao.com/oauth/token
   user-info-uri: https://kapi.kakao.com/v2/user/me

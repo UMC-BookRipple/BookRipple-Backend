@@ -33,7 +33,6 @@ public class EmailCodeService {
     String key = generateKey(email, purpose);
 
     String savedCode = codeStore.get(key)
-        // 시간 만료로 삭제되었거나, 요청한 적 없음
         .orElseThrow(() -> new ApiException(AuthErrorCode.NOT_FOUND_VERIFICATION_CODE));
 
     if (!savedCode.equals(inputCode)) {
