@@ -30,7 +30,7 @@ public class BookQueryServiceImpl implements BookQueryService {
       String searchTarget, SearchLogType type) {
     // 최소 검증
     if (keyword == null || keyword.isBlank()) {
-      throw new IllegalArgumentException("keyword must not be blank");
+      throw new IllegalArgumentException("검색어를 입력하세요");
     }
     if (start < 1) {
       start = 1;
@@ -59,7 +59,7 @@ public class BookQueryServiceImpl implements BookQueryService {
   @Transactional
   public BookRes getOrCreateByAladinItemId(Long itemId) {
     if (itemId == null) {
-      throw new IllegalArgumentException("aladinItemId must not be null");
+      throw new IllegalArgumentException("도서가 존재하지 않습니다");
     }
 
     // 1) 캐시 히트
@@ -77,7 +77,7 @@ public class BookQueryServiceImpl implements BookQueryService {
             : lookUp.getItem().get(0);
 
     if (it == null) {
-      throw new IllegalStateException("Aladin lookup returned empty result");
+      throw new IllegalArgumentException("도서가 존재하지 않습니다");
     }
 
     // (선택) isbn13로 중복 탐지하고 싶으면 여기서 findByIsbn13 추가
