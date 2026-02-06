@@ -1,8 +1,7 @@
 package com.bookripple.api.domain.library.controller;
 
 import com.bookripple.api.common.code.CommonSuccessCode;
-import com.bookripple.api.domain.library.dto.LibraryReq;
-import com.bookripple.api.domain.library.dto.LibraryRes;
+import com.bookripple.api.domain.library.dto.LibraryDto;
 import com.bookripple.api.global.annotation.PreventDuplicate;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -54,15 +53,16 @@ public class LibraryController {
             summary = "내 책장 도서 삭제",
             description = "내 책장에서 도서를 선택 삭제합니다."
     )
-    public ApiResponse<LibraryRes.Delete> deleteBooks(
+    public ApiResponse<LibraryDto.DeleteRes> deleteBooks(
             @AuthenticationPrincipal Long memberId,
+            @RequestParam LibraryStatus status,
             @Parameter(description = "삭제할 도서의 bookId 리스트", example = "[1, 2, 3]")
-            @Valid @RequestBody LibraryReq.Delete request
+            @Valid @RequestBody LibraryDto.DeleteReq request
 
     ) {
         return ApiResponse.onSuccess(
                 CommonSuccessCode.OK,
-                libraryQueryService.deleteBooks(memberId, request)
+                libraryQueryService.deleteBooks(memberId, status, request)
         );
     }
 }

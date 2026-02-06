@@ -2,8 +2,7 @@ package com.bookripple.api.domain.library.service;
 
 import java.util.List;
 
-import com.bookripple.api.domain.library.dto.LibraryReq;
-import com.bookripple.api.domain.library.dto.LibraryRes;
+import com.bookripple.api.domain.library.dto.LibraryDto;
 import com.bookripple.api.domain.reading.entity.ReadingProgress;
 import com.bookripple.api.domain.reading.repository.ReadingProgressRepository;
 import org.springframework.data.domain.PageRequest;
@@ -21,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class LibraryQueryServiceImpl implements LibraryQueryService {
 
     private final LibraryItemRepository libraryItemRepository;
@@ -74,14 +73,14 @@ public class LibraryQueryServiceImpl implements LibraryQueryService {
     }
 
     @Override
-    public LibraryRes.Delete deleteBooks(Long memberId, LibraryReq.Delete request) {
+    public LibraryDto.DeleteRes deleteBooks(Long memberId, LibraryStatus status, LibraryDto.DeleteReq request) {
 
         long deleted = libraryItemRepository.deleteByMemberIdAndStatusAndBook_IdIn(
                 memberId,
-                request.getCategory(),
+                status,
                 request.getBookIds()
         );
 
-        return LibraryRes.Delete.of(deleted);
+        return LibraryDto.DeleteRes.of(deleted);
     }
 }

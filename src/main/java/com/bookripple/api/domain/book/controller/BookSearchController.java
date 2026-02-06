@@ -5,12 +5,14 @@ import com.bookripple.api.common.code.CommonSuccessCode;
 import com.bookripple.api.common.response.ApiResponse;
 import com.bookripple.api.domain.book.dto.BookRes;
 import com.bookripple.api.domain.book.dto.BookSearchRes;
+import com.bookripple.api.domain.book.enums.SearchLogType;
 import com.bookripple.api.domain.book.service.BookQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,14 +38,16 @@ public class BookSearchController {
       description = "알라딘 오픈 API를 활용한 도서 검색 기능입니다."
   )
   public ApiResponse<BookSearchRes> search(
+          @AuthenticationPrincipal Long memberId,
       @RequestParam @NotBlank @Size(max = 100) String keyword,
       @RequestParam(defaultValue = "1") int start,
       @RequestParam(defaultValue = "20") int size,
       @RequestParam(defaultValue = "Keyword") String queryType,
-      @RequestParam(defaultValue = "Book") String searchTarget
+      @RequestParam(defaultValue = "Book") String searchTarget,
+          @RequestParam(defaultValue = "BOOK") SearchLogType type
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
-        bookQueryService.searchFromAladin(keyword, start, size, queryType, searchTarget)
+        bookQueryService.searchFromAladin(memberId, keyword, start, size, queryType, searchTarget, type)
     );
   }
 

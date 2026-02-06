@@ -7,6 +7,7 @@ import com.bookripple.api.domain.book.converter.BookConverter;
 import com.bookripple.api.domain.book.dto.BookRes;
 import com.bookripple.api.domain.book.dto.BookSearchRes;
 import com.bookripple.api.domain.book.entity.Book;
+import com.bookripple.api.domain.book.enums.SearchLogType;
 import com.bookripple.api.domain.book.repository.BookRepository;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
@@ -19,16 +20,17 @@ public class BookQueryServiceImpl implements BookQueryService {
 
   private final BookRepository bookRepository;
   private final AladinService aladinService;
+  private final SearchHistoryCommandService searchHistoryCommandService;
 
 
   //1 알라딘 검색
   @Override
-  @Transactional(readOnly = true)
-  public BookSearchRes searchFromAladin(String keyword, int start, int size, String queryType,
-      String searchTarget) {
+  @Transactional
+  public BookSearchRes searchFromAladin(Long memberId, String keyword, int start, int size, String queryType,
+      String searchTarget, SearchLogType type) {
     // 최소 검증
     if (keyword == null || keyword.isBlank()) {
-      throw new IllegalArgumentException("keyword must not be blank");
+      throw new IllegalArgumentException("검색어를 입력하세요");
     }
     if (start < 1) {
       start = 1;
@@ -41,9 +43,15 @@ public class BookQueryServiceImpl implements BookQueryService {
     }
 
     AladinSearchResDto resDto =
-        aladinService.search(keyword, start, size, queryType, searchTarget);
+            aladinService.search(keyword, start, size, queryType, searchTarget);
 
-    return BookConverter.toBookSearchRes(resDto);
+    if (memberId != null) {
+      String normalized = keyword.trim();
+      if (!normalized.isBlank()) {
+        searchHistoryCommandService.saveOrRefresh(memberId, normalized, type);
+      }
+    }
+      return BookConverter.toBookSearchRes(resDto);
   }
 
   //2. 알라딘 도서 상세 조회 및 저장
@@ -51,7 +59,7 @@ public class BookQueryServiceImpl implements BookQueryService {
   @Transactional
   public BookRes getOrCreateByAladinItemId(Long itemId) {
     if (itemId == null) {
-      throw new IllegalArgumentException("aladinItemId must not be null");
+      throw new IllegalArgumentException("도서가 존재하지 않습니다");
     }
 
     // 1) 캐시 히트
@@ -69,7 +77,7 @@ public class BookQueryServiceImpl implements BookQueryService {
             : lookUp.getItem().get(0);
 
     if (it == null) {
-      throw new IllegalStateException("Aladin lookup returned empty result");
+      throw new IllegalArgumentException("도서가 존재하지 않습니다");
     }
 
     // (선택) isbn13로 중복 탐지하고 싶으면 여기서 findByIsbn13 추가
