@@ -54,6 +54,7 @@ public class ReadingProgress extends BaseEntity {
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
+    @PrePersist
     // 초기값 설정
     private void initDefaults() {
         this.readingTime = 0;
@@ -99,9 +100,9 @@ public class ReadingProgress extends BaseEntity {
         }
     }
 
-
-
     private int clamp(int v, int min, int max) {
         return Math.min(Math.max(v, min), max);
     }
+
+
 }
