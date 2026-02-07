@@ -51,7 +51,7 @@ public class LibraryQueryServiceImpl implements LibraryQueryService {
             return LibraryItemListRes.of(items, hasNext, nextLastId);
         }
 
-        // reading, completed 기준 조회
+        // reading, completed 기준 조회하는 경우
         List<LibraryItem> fetched = (lastId == null)
                 ? libraryItemRepository.findByMemberIdAndStatusOrderByIdDesc(memberId, status, pageable)
                 : libraryItemRepository.findByMemberIdAndStatusAndIdLessThanOrderByIdDesc(
@@ -82,5 +82,13 @@ public class LibraryQueryServiceImpl implements LibraryQueryService {
         );
 
         return LibraryDto.DeleteRes.of(deleted);
+    }
+
+    @Override
+    public LibraryItemRes getMyLibraryBookDetail(Long memberId, Long bookId) {
+        LibraryItem item = libraryItemRepository.findByMemberIdAndBookId(memberId, bookId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 도서가 책장에 없습니다."));
+
+        return LibraryItemRes.from(item);
     }
 }

@@ -8,7 +8,6 @@ import com.bookripple.api.domain.library.enums.LibraryStatus;
 
 import com.bookripple.api.domain.reading.entity.ReadingProgress;
 import lombok.Builder;
-import lombok.Getter;
 
 @Builder
 public record LibraryItemRes(
@@ -32,16 +31,15 @@ public record LibraryItemRes(
                 .build();
     }
 
-    // LIKED 탭 전용 (ReadingProgress → LibraryItemRes)
     public static LibraryItemRes from(ReadingProgress rp) {
         Book book = rp.getBook();
         return LibraryItemRes.builder()
-                .libraryItemId(rp.getId())     // ⭐ 커서용 progressId
+                .libraryItemId(rp.getId())
                 .bookId(book.getId())
                 .title(book.getTitle())
                 .coverUrl(book.getBookCover())
                 .authors(List.of(book.getAuthor()))
-                .status(LibraryStatus.LIKED)   // ⭐ 좋아요 탭
+                .status(LibraryStatus.LIKED)
                 .build();
     }
 }

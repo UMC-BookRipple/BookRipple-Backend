@@ -1,7 +1,9 @@
 package com.bookripple.api.domain.library.controller;
 
 import com.bookripple.api.common.code.CommonSuccessCode;
+import com.bookripple.api.domain.book.dto.BookRes;
 import com.bookripple.api.domain.library.dto.LibraryDto;
+import com.bookripple.api.domain.library.dto.LibraryItemRes;
 import com.bookripple.api.global.annotation.PreventDuplicate;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -65,6 +67,23 @@ public class LibraryController {
                 libraryQueryService.deleteBooks(memberId, status, request)
         );
     }
+
+    //3. 내 책장 도서 상세 조회 API
+    @GetMapping("/books/{bookId}")
+    @Operation(
+            summary = "내 책장 도서 상세 조회",
+            description = "내 책장 도서 상세정보와 진행률을 조회합니다."
+    )
+    public ApiResponse<LibraryItemRes> getMyLibraryBookDetail(
+            @AuthenticationPrincipal Long memberId,
+            @PathVariable Long bookId
+    ) {
+        return ApiResponse.onSuccess(
+                CommonSuccessCode.OK,
+                libraryQueryService.getMyLibraryBookDetail(memberId, bookId)
+        );
+    }
+
 }
 
 

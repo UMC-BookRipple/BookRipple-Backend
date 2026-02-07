@@ -20,7 +20,6 @@ public class BookCommandServiceImpl implements BookCommandService {
 
     private final BookRepository bookRepository;
     private final MemberRepository memberRepository;
-    private final ReadingProgressRepository readingProgressRepository;
     private final ReadingStore store;
 
     @Override

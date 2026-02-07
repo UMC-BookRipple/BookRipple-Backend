@@ -1,5 +1,9 @@
 package com.bookripple.api.domain.reading.service;
 
+import com.bookripple.api.common.code.BookErrorCode;
+import com.bookripple.api.common.code.MemberErrorCode;
+import com.bookripple.api.common.code.ReadingErrorCode;
+import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.domain.library.entity.LibraryItem;
 import com.bookripple.api.domain.library.enums.LibraryStatus;
 import com.bookripple.api.domain.library.repository.LibraryItemRepository;
@@ -34,7 +38,7 @@ public class ReadingServiceImpl implements ReadingService {
         Long bookId = req.getBookId();
 
         store.findActiveSession(memberId, bookId).ifPresent(s -> {
-            throw new IllegalStateException("ACTIVE_SESSION_ALREADY_EXISTS");
+            throw new ApiException(ReadingErrorCode.ACTIVE_SESSION_ALREADY_EXISTS);
         });
 
         var pausedOpt = store.findPausedSession(memberId, bookId);
@@ -45,9 +49,9 @@ public class ReadingServiceImpl implements ReadingService {
         }
 
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("member not found"));
+                .orElseThrow(() -> new ApiException(MemberErrorCode.MEMBER_NOT_FOUND));
         Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new IllegalArgumentException("book not found"));
+                .orElseThrow(() -> new ApiException(BookErrorCode.NO_BOOK));
 
         ReadingSession session = ReadingConverter.toSession(member, book);
         store.saveSession(session);
@@ -63,7 +67,7 @@ public class ReadingServiceImpl implements ReadingService {
     @Override
     public ReadingDto.PauseRes pause(Long memberId, Long sessionId) {
         ReadingSession session = store.findSessionByIdAndMember(sessionId, memberId)
-                .orElseThrow(() -> new IllegalArgumentException("session not found"));
+                .orElseThrow(() -> new ApiException(ReadingErrorCode.NO_READING_SESSION));
 
         session.pause();
 
@@ -73,7 +77,7 @@ public class ReadingServiceImpl implements ReadingService {
     @Override
     public ReadingDto.EndRes end(Long memberId, ReadingDto.EndReq req) {
         ReadingSession session = store.findSessionByIdAndMember(req.getSessionId(), memberId)
-                .orElseThrow(() -> new IllegalArgumentException("session not found"));
+                .orElseThrow(() -> new ApiException(ReadingErrorCode.NO_READING_SESSION));
 
         int sessionSeconds = session.end();
 
@@ -100,9 +104,9 @@ public class ReadingServiceImpl implements ReadingService {
     @Override
     public ReadingDto.CompleteRes complete(Long memberId, ReadingDto.CompleteReq req) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("member not found"));
+                .orElseThrow(() -> new ApiException(MemberErrorCode.MEMBER_NOT_FOUND));
         Book book = bookRepository.findById(req.getBookId())
-                .orElseThrow(() -> new IllegalArgumentException("book not found"));
+                .orElseThrow(() -> new ApiException(BookErrorCode.NO_BOOK));
 
         ReadingProgress progress = store.getOrCreateProgress(member, book);
         progress.markCompleted();
