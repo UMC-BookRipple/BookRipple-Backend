@@ -37,6 +37,7 @@ public class BlindSalePostController {
     }
 
     // 판매자용 내 판매 목록 조회 (무한 스크롤)
+    @Operation(summary = "내 블라인드 북 판매 게시글 목록 조회", description = "판매자용 내 판매 목록 조회 (무한 스크롤)")
     @GetMapping("/me")
     public ApiResponse<BlindSalePostResDto.SliceResponse> getMyList(
             @AuthenticationPrincipal Long memberId,
@@ -50,6 +51,7 @@ public class BlindSalePostController {
     }
 
     // 판매자용 판매 도서 상세 정보 조회 (기본 상세 페이지)
+    @Operation(summary = "블라인드 북 판매 게시글 상세 조회", description = "판매자용 글 상세 정보 조회")
     @GetMapping("/{blind-book-id}")
     public ApiResponse<BlindSalePostResDto.Detail> getPostDetail(
             @PathVariable("blind-book-id") Long blindBookId) {
@@ -59,6 +61,7 @@ public class BlindSalePostController {
     }
 
     // 판매자용 구매 요청자 명단 조회 (판매요청 인원 클릭 시)
+    @Operation(summary = "구매 요청자 명단 조회", description = "판매자용 구매 요청자 명단 조회")
     @GetMapping("/{blind-book-id}/requests")
     public ApiResponse<BlindSalePostResDto.PurchaseRequestList> getPurchaseRequests(
             @PathVariable("blind-book-id") Long blindBookId) {
@@ -68,6 +71,7 @@ public class BlindSalePostController {
     }
 
     // 판매자용 글 수정하기
+    @Operation(summary = "블라인드 북 판매 게시글 수정", description = "판매자용 글 수정하기")
     @PreventDuplicate
     @PatchMapping("/{blind-book-id}")
     public ApiResponse<String> update(
@@ -80,6 +84,7 @@ public class BlindSalePostController {
     }
 
     // 판매자용 글 삭제하기
+    @Operation(summary = "블라인드 북 판매 게시글 삭제", description = "판매자용 글 삭제하기")
     @PreventDuplicate
     @DeleteMapping("/{blind-book-id}")
     public ApiResponse<String> delete(
@@ -92,6 +97,7 @@ public class BlindSalePostController {
 
     // [GET] /api/v1/blind-books?status=SALE
     // 구매자용 블라인드 북 판매 목록 조회 (무한 스크롤)
+    @Operation(summary = "구매자용 블라인드 북 판매 게시글 목록 조회", description = "구매자용 블라인드 북 판매 목록 조회 (무한 스크롤)")
     @GetMapping
     public ApiResponse<BlindSalePostResDto.BuyerSliceResponse<BlindSalePostResDto.BuyerListElement>> getAllPosts(
             @RequestParam(value = "status", required = false) String status,
@@ -107,6 +113,7 @@ public class BlindSalePostController {
 
     // [GET] /api/v1/blind-books/my-requests
     // 구매자용 내가 구매요청 보낸 책 목록 조회 (무한 스크롤)
+    @Operation(summary = "내가 구매 요청한 블라인드 북 목록 조회", description = "구매자용 내가 구매요청 보낸 책 목록 조회 (무한 스크롤)")
     @GetMapping("/my-requests")
     public ApiResponse<BlindSalePostResDto.BuyerSliceResponse<BlindSalePostResDto.MyRequestListElement>> getMyRequests(
             @AuthenticationPrincipal Long memberId,
@@ -118,6 +125,7 @@ public class BlindSalePostController {
     }
 
     // [GET] /api/v1/blind-books/{blind-book-id}/buyer
+    @Operation(summary = "구매자용 블라인드 북 판매 게시글 상세 조회", description = "구매자용 블라인드 북 판매 게시글 상세 정보 조회")
     @GetMapping("/{blind-book-id}/buyer")
     public ApiResponse<BlindSalePostResDto.BuyerDetail> getPostDetailForBuyer(
             @AuthenticationPrincipal Long memberId,

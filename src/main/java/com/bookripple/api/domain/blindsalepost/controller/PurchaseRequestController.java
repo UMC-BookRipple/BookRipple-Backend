@@ -7,6 +7,8 @@ import com.bookripple.api.domain.blindsalepost.dto.PurchaseRequestResDto;
 import com.bookripple.api.domain.blindsalepost.dto.PurchaseRequestResDto.Create;
 import com.bookripple.api.domain.blindsalepost.service.PurchaseRequestService;
 import com.bookripple.api.global.annotation.PreventDuplicate;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "PurchaseRequest", description = "구매 요청 관련 API")
 @RestController
 @RequiredArgsConstructor
 @Validated
@@ -25,6 +28,7 @@ public class PurchaseRequestController {
 
   private final PurchaseRequestService purchaseRequestService;
 
+  @Operation(summary = "구매 요청 생성", description = "블라인드 북 구매 요청을 생성합니다.")
   @PreventDuplicate
   @PostMapping("/{blindSalePostId}/create")
   public ApiResponse<Create> createPurchaseRequest(
@@ -35,6 +39,7 @@ public class PurchaseRequestController {
         purchaseRequestService.createPurchaseRequest(memberId, blindSalePostId));
   }
 
+  @Operation(summary = "구매 요청 취소", description = "블라인드 북 구매 요청을 취소합니다.")
   @PreventDuplicate
   @PatchMapping("/{purchaseRequestId}/cancel")
   public ApiResponse<PurchaseRequestResDto.Decision> cancelPurchaseRequest(
@@ -45,6 +50,7 @@ public class PurchaseRequestController {
         purchaseRequestService.cancelPurchaseRequest(memberId, purchaseRequestId));
   }
 
+  @Operation(summary = "구매 요청 승인", description = "판매자가 블라인드 북 구매 요청을 승인합니다.")
   @PreventDuplicate
   @PatchMapping("/{purchaseRequestId}/approve")
   public ApiResponse<PurchaseRequestResDto.Decision> approvePurchaseRequest(
