@@ -36,6 +36,9 @@ public class ReadingProgress extends BaseEntity {
     @Column(name = "reading_time", nullable = false)
     private int readingTime;
 
+    @Column(name = "last_page", nullable = false)
+    private int lastPage;
+
     @Column(name = "progress", nullable = false, precision = 5, scale = 2)
     private BigDecimal progress;
 
@@ -81,4 +84,26 @@ public class ReadingProgress extends BaseEntity {
     public void toggleLiked(boolean liked) {
         this.isLiked = liked;
     }
+
+    // lastPage 기반으로 진행률 갱신
+    public void updateLastPage(int pagesReadEnd, int totalPages) {
+        if (totalPages <= 0) return; // 혹은 예외
+        if (pagesReadEnd < 0) pagesReadEnd = 0;
+        if (pagesReadEnd > totalPages) pagesReadEnd = totalPages;
+
+        this.lastPage = pagesReadEnd;
+
+        if (this.lastPage >= totalPages) {
+            this.isCompleted = true;
+        }
+    }
+
+    public int getProgressPercent(int totalPages) {
+        if (totalPages <= 0) return 0;
+        int safeLast = Math.min(Math.max(this.lastPage, 0), totalPages);
+
+        // 반올림
+        return (int) Math.round((safeLast * 100.0) / totalPages);
+    }
+
 }
