@@ -49,7 +49,7 @@ public class TradeServiceImpl implements TradeService {
 
     @Override
     @Transactional
-    public void preparePayment(Long memberId, Long tradeId, TradeReqDto.PreparePayment dto) {
+    public TradeResDto.PreparePaymentResponse preparePayment(Long memberId, Long tradeId, TradeReqDto.PreparePayment dto) {
         // 1. 거래 조회 및 권한 확인
         Trade trade = tradeRepository.findById(tradeId)
                 .orElseThrow(() -> new ApiException(TradeErrorCode.TRADE_NOT_FOUND));
@@ -58,15 +58,21 @@ public class TradeServiceImpl implements TradeService {
             throw new ApiException(TradeErrorCode.NOT_TRADE_PARTICIPANT);
         }
 
+        // orderId 생성
+        String orderId = "ORDER_" + UUID.randomUUID().toString();
+
         // 2. 한 줄 주소 업데이트
         trade.updateShippingAddress(dto.address());
 
         // 3. 컨버터를 통해 엔티티 생성 및 저장
-        Payment payment = TradeConverter.toPayment(trade, dto);
+        Payment payment = TradeConverter.toPayment(trade, dto, orderId);
         paymentRepository.save(payment);
 
         Settlement settlement = TradeConverter.toSettlement(trade);
         settlementRepository.save(settlement);
+
+        // 프론트에 orderId와 amount 반환
+        return new TradeResDto.PreparePaymentResponse(orderId, trade.getAmount());
     }
 
     @Override

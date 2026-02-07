@@ -10,4 +10,9 @@ public class TradeResDto {
             String buyerNickname,    // 구매자 닉네임
             String shippingAddress   // 구매자가 입력한 한 줄 주소
     ) {}
+
+    public record PreparePaymentResponse(
+            String orderId,
+            Integer amount
+    ) {}
 }
