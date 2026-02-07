@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @Validated
 @Tag(
-        name = "Reading",
+        name = "독서하기",
         description = "독서 세션 관련 API"
 )
 @RequestMapping("/api/v1/reading")

@@ -8,6 +8,9 @@ import com.bookripple.api.domain.memo.service.MemoCommandService;
 import com.bookripple.api.domain.memo.service.MemoQueryService;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
 import com.bookripple.api.global.validation.ValidationGroups;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "메모", description = "메모 조회, 수정, 삭제 API")
 @RequestMapping("/api/v1/memos")
 public class MemoController {
 
@@ -24,6 +28,10 @@ public class MemoController {
 
     // 메모 상세 조회
     @GetMapping("/{memoId}")
+    @Operation(
+            summary = "메모 상세 조회",
+            description = "메모의 상세 정보를 조회합니다."
+    )
     public ApiResponse<Item> getMemoDetail(
             @AuthenticationPrincipal Long memberId,
             @PathVariable Long memoId
@@ -35,6 +43,10 @@ public class MemoController {
 
     // 메모 수정
     @PatchMapping("/{memoId}")
+    @Operation(
+            summary = "메모 수정",
+            description = "메모의 내용을 수정합니다."
+    )
     public ApiResponse<IdRes> updateMemo(
             @AuthenticationPrincipal Long memberId,
             @PathVariable Long memoId,
@@ -48,6 +60,10 @@ public class MemoController {
 
     // 메모 삭제
     @DeleteMapping("/{memoId}")
+    @Operation(
+            summary = "메모 삭제",
+            description = "메모를 삭제합니다."
+    )
     public ApiResponse<IdRes> deleteMemo(
             @AuthenticationPrincipal Long memberId,
             @PathVariable Long memoId
