@@ -1,5 +1,9 @@
 package com.bookripple.api.domain.book.service;
 
+import com.bookripple.api.common.code.BookErrorCode;
+import com.bookripple.api.common.code.MemoErrorCode;
+import com.bookripple.api.common.code.SearchErrorCode;
+import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.domain.aladin.dto.AladinItemLookUpResDto;
 import com.bookripple.api.domain.aladin.dto.AladinSearchResDto;
 import com.bookripple.api.domain.aladin.service.AladinService;
@@ -30,7 +34,7 @@ public class BookQueryServiceImpl implements BookQueryService {
       String searchTarget, SearchLogType type) {
     // 최소 검증
     if (keyword == null || keyword.isBlank()) {
-      throw new IllegalArgumentException("검색어를 입력하세요");
+      throw new ApiException(SearchErrorCode.NO_SEARCH_KEYWORD);
     }
     if (start < 1) {
       start = 1;
@@ -59,7 +63,7 @@ public class BookQueryServiceImpl implements BookQueryService {
   @Transactional
   public BookRes getOrCreateByAladinItemId(Long itemId) {
     if (itemId == null) {
-      throw new IllegalArgumentException("도서가 존재하지 않습니다");
+      throw new ApiException(BookErrorCode.NO_BOOK);
     }
 
     // 1) 캐시 히트
@@ -77,11 +81,8 @@ public class BookQueryServiceImpl implements BookQueryService {
             : lookUp.getItem().get(0);
 
     if (it == null) {
-      throw new IllegalArgumentException("도서가 존재하지 않습니다");
+      throw new ApiException(BookErrorCode.NO_BOOK);
     }
-
-    // (선택) isbn13로 중복 탐지하고 싶으면 여기서 findByIsbn13 추가
-    // 지금은 “없으면 저장”만 한다고 했으니 생략 가능
 
     Book book = Book.builder()
         .aladinBookId(it.getItemId())
@@ -100,7 +101,6 @@ public class BookQueryServiceImpl implements BookQueryService {
     return BookConverter.toBookRes(saved);
   }
 
-  // "yyyy-MM-dd" 형식의 문자열을 LocalDate로 변환
   private LocalDate parsePublishedAt(String pubDate) {
     if (pubDate == null || pubDate.isBlank()) {
       return null;

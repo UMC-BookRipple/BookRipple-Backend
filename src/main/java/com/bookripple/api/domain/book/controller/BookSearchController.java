@@ -51,10 +51,10 @@ public class BookSearchController {
     );
   }
 
-  // 2) 알라딘 도서 상세 조회 API
+  // 2) 알라딘 도서 상세조회 -> 등록 API
   @GetMapping("/aladin/{aladinItemId}")
   @Operation(
-      summary = "알라딘 도서 상세 조회",
+      summary = "알라딘 도서 등록",
       description = "알라딘 도서 상세 정보를 조회하고, DB로 가져옵니다."
   )
   public ApiResponse<BookRes> getOrCreateByAladinItemId(

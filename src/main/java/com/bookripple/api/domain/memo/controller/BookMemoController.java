@@ -8,6 +8,8 @@ import com.bookripple.api.domain.memo.service.MemoCommandService;
 import com.bookripple.api.domain.memo.service.MemoQueryService;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
 import com.bookripple.api.global.validation.ValidationGroups;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "독서 메모", description = "독서 메모 생성 및 조회 API")
 @RequestMapping("/api/v1/books/{bookId}/memos")
 public class BookMemoController {
 
@@ -24,7 +27,9 @@ public class BookMemoController {
 
     // 메모 생성:
     @PostMapping
+    @Operation(summary = "책 별 메모 생성", description = "특정 책에 대한 메모를 생성합니다.")
     public ApiResponse<IdRes> createMemo(
+
             @AuthenticationPrincipal Long memberId,
             @PathVariable Long bookId,
             @Validated(ValidationGroups.MemoGroup.class)
@@ -37,6 +42,7 @@ public class BookMemoController {
 
     // 책 별 메모 목록 조회
     @GetMapping
+    @Operation(summary = "책 별 메모 목록 조회", description = "특정 책에 대한 메모 목록을 조회합니다.")
     public ApiResponse<MemoList> getBookMemos(
             @AuthenticationPrincipal Long memberId,
             @PathVariable Long bookId,
