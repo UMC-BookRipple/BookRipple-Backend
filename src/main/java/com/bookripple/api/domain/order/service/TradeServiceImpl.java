@@ -2,6 +2,7 @@ package com.bookripple.api.domain.order.service;
 
 import com.bookripple.api.common.code.CommonErrorCode;
 import com.bookripple.api.common.code.PurchaseRequestErrorCode;
+import com.bookripple.api.common.code.TradeErrorCode;
 import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.domain.blindsalepost.entity.PurchaseRequest;
 import com.bookripple.api.domain.blindsalepost.enums.PostStatus;
@@ -51,10 +52,10 @@ public class TradeServiceImpl implements TradeService {
     public void preparePayment(Long memberId, Long tradeId, TradeReqDto.PreparePayment dto) {
         // 1. 거래 조회 및 권한 확인
         Trade trade = tradeRepository.findById(tradeId)
-                .orElseThrow(() -> new RuntimeException("거래를 찾을 수 없습니다."));
+                .orElseThrow(() -> new ApiException(TradeErrorCode.TRADE_NOT_FOUND));
 
         if (!trade.getBuyer().getId().equals(memberId)) {
-            throw new RuntimeException("구매 권한이 없습니다.");
+            throw new ApiException(TradeErrorCode.NOT_TRADE_PARTICIPANT);
         }
 
         // 2. 한 줄 주소 업데이트
@@ -109,10 +110,10 @@ public class TradeServiceImpl implements TradeService {
     public void cancelTradeBeforePayment(Long memberId, Long tradeId) {
         // 1. 거래 조회 및 권한 확인
         Trade trade = tradeRepository.findById(tradeId)
-                .orElseThrow(() -> new ApiException(CommonErrorCode.NOT_FOUND));
+                .orElseThrow(() -> new ApiException(TradeErrorCode.TRADE_NOT_FOUND));
 
         if (!trade.getBuyer().getId().equals(memberId)) {
-            throw new ApiException(CommonErrorCode.FORBIDDEN);
+            throw new ApiException(TradeErrorCode.NOT_TRADE_PARTICIPANT);
         }
 
         // 2. 현재 상태 확인 (결제 대기 중인 REQUESTED 상태일 때만 취소 가능)
@@ -156,10 +157,10 @@ public class TradeServiceImpl implements TradeService {
     public void startShipping(Long memberId, Long tradeId, TradeReqDto.StartShipping dto) {
         // 1. 거래 조회 및 판매자 권한 검증
         Trade trade = tradeRepository.findById(tradeId)
-                .orElseThrow(() -> new ApiException(CommonErrorCode.NOT_FOUND));
+                .orElseThrow(() -> new ApiException(TradeErrorCode.TRADE_NOT_FOUND));
 
         if (!trade.getSeller().getId().equals(memberId)) {
-            throw new ApiException(CommonErrorCode.FORBIDDEN);
+            throw new ApiException(TradeErrorCode.NOT_TRADE_PARTICIPANT);
         }
 
         // 2. 상태 확인: 결제 완료(PAID) 상태에서만 배송 가능
@@ -194,11 +195,11 @@ public class TradeServiceImpl implements TradeService {
     public TradeResDto.SellerTradeDetail getSellerTradeDetail(Long memberId, Long tradeId) {
         // 1. 거래 조회
         Trade trade = tradeRepository.findById(tradeId)
-                .orElseThrow(() -> new ApiException(CommonErrorCode.NOT_FOUND));
+                .orElseThrow(() -> new ApiException(TradeErrorCode.TRADE_NOT_FOUND));
 
         // 2. 요청자가 해당 거래의 판매자인지 체크
         if (!trade.getSeller().getId().equals(memberId)) {
-            throw new ApiException(CommonErrorCode.FORBIDDEN);
+            throw new ApiException(TradeErrorCode.NOT_TRADE_PARTICIPANT);
         }
 
         // 3. 컨버터를 통해 DTO 반환
