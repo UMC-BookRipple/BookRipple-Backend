@@ -25,7 +25,7 @@ public class ReadingRecord extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 일단 안 쓰는 값
+    // 페이지 입력
     @Column(name = "start_page", nullable = false)
     private int startPage;
 
@@ -62,4 +62,22 @@ public class ReadingRecord extends BaseEntity {
             this.content = "";
         }
     }
+
+    // lastPage 기반으로 진행률 갱신
+    public void updateLastPage(int pagesReadEnd, int totalPages) {
+        if (totalPages <= 0) return; // 혹은 예외
+        if (pagesReadEnd < 0) pagesReadEnd = 0;
+        if (pagesReadEnd > totalPages) pagesReadEnd = totalPages;
+
+        this.endPage = pagesReadEnd;
+    }
+
+    public int getProgressPercent(int totalPages) {
+        if (totalPages <= 0) return 0;
+        int safeLast = Math.min(Math.max(this.endPage, 0), totalPages);
+
+        // 반올림
+        return (int) Math.round((safeLast * 100.0) / totalPages);
+    }
+
 }
