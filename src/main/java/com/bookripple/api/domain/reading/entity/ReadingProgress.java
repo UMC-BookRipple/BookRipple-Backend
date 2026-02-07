@@ -1,6 +1,7 @@
 package com.bookripple.api.domain.reading.entity;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import com.bookripple.api.domain.book.entity.Book;
 import com.bookripple.api.domain.member.entity.Member;
@@ -54,7 +55,6 @@ public class ReadingProgress extends BaseEntity {
     private Book book;
 
     // 초기값 설정
-    @PrePersist
     private void initDefaults() {
         this.readingTime = 0;
         this.progress = BigDecimal.ZERO;
@@ -82,4 +82,26 @@ public class ReadingProgress extends BaseEntity {
         this.isLiked = liked;
     }
 
+    public void applyRecord(ReadingRecord record, int totalPages) {
+        if (totalPages <= 0) return;
+
+        int end = clamp(record.getEndPage(), 0, totalPages);
+
+        BigDecimal percent = BigDecimal.valueOf(end)
+                .multiply(BigDecimal.valueOf(100))
+                .divide(BigDecimal.valueOf(totalPages), 2, RoundingMode.DOWN);
+
+        this.progress = percent;
+
+        if (end >= totalPages) {
+            this.isCompleted = true;
+            this.progress = BigDecimal.valueOf(100);
+        }
+    }
+
+
+
+    private int clamp(int v, int min, int max) {
+        return Math.min(Math.max(v, min), max);
+    }
 }

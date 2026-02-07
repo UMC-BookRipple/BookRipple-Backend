@@ -3,6 +3,7 @@ package com.bookripple.api.domain.reading.service;
 import com.bookripple.api.domain.library.entity.LibraryItem;
 import com.bookripple.api.domain.library.enums.LibraryStatus;
 import com.bookripple.api.domain.library.repository.LibraryItemRepository;
+import com.bookripple.api.domain.reading.entity.ReadingRecord;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,19 +77,25 @@ public class ReadingServiceImpl implements ReadingService {
 
         int sessionSeconds = session.end();
 
-        var record = ReadingConverter.toRecord(session, sessionSeconds, req.getContent());
+        // startPage는 주로 1로 고정해줌
+        int startPage = req.getPagesReadStart() <= 0 ? 1 : req.getPagesReadStart();
+        int endPage = req.getPagesReadEnd();
+
+        ReadingRecord record = ReadingConverter.toRecord(session, sessionSeconds, startPage, endPage);
         store.saveRecord(record);
 
         ReadingProgress progress = store.getOrCreateProgress(session.getMember(), session.getBook());
         progress.addReadingTime(sessionSeconds);
 
-        // 완독이 아니면 진행중으로 둠
-        if (!progress.isCompleted()) {
-            upsertLibraryStatus(session.getMember(), session.getBook(), LibraryStatus.READING);
-        }
+        int totalPages = session.getBook().getTotalPage();
+        progress.applyRecord(record, totalPages);
+
+        upsertLibraryStatus(session.getMember(), session.getBook(),
+                progress.isCompleted() ? LibraryStatus.COMPLETED : LibraryStatus.READING);
 
         return ReadingConverter.toEndRes(record, sessionSeconds, progress);
     }
+
 
     @Override
     public ReadingDto.CompleteRes complete(Long memberId, ReadingDto.CompleteReq req) {

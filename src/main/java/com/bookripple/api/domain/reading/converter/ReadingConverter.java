@@ -11,10 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ReadingConverter {
 
-    private static final int DUMMY_PAGE = 1;
-
-    /* ===== Entity 생성 ===== */
-
     public static ReadingSession toSession(Member member, Book book) {
         return ReadingSession.builder()
                 .member(member)
@@ -22,16 +18,16 @@ public class ReadingConverter {
                 .build();
     }
 
-    public static ReadingRecord toRecord(ReadingSession session, int sessionSeconds, String content) {
+    public static ReadingRecord toRecord(ReadingSession session, int sessionSeconds, int startPage, int endPage) {
         return ReadingRecord.builder()
                 .member(session.getMember())
                 .book(session.getBook())
-                .startPage(DUMMY_PAGE)
-                .endPage(DUMMY_PAGE)
+                .startPage(startPage)
+                .endPage(endPage)
                 .readingTime(sessionSeconds)
-                .content(content == null ? "" : content)
                 .build();
     }
+
 
     /* ===== Response DTO 생성 ===== */
 

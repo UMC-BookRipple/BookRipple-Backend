@@ -36,10 +36,6 @@ public class ReadingRecord extends BaseEntity {
     @Column(name = "reading_time", nullable = false)
     private int readingTime;
 
-    @Lob
-    @Column(name = "content", nullable = false)
-    private String content;
-
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
@@ -50,34 +46,11 @@ public class ReadingRecord extends BaseEntity {
 
     @PrePersist
     private void initDefaultsAndValidate() {
-        // 페이지 기반 기능 미사용 → 우선 값은 1
-        if (this.startPage == 0) this.startPage = 1;
-        if (this.endPage == 0) this.endPage = 1;
+        if (this.startPage < 0) this.startPage = 0;
+        if (this.endPage < 0) this.endPage = 0;
 
-        if (this.readingTime < 0) {
-            throw new IllegalArgumentException("readingTime must be >= 0");
-        }
-
-        if (this.content == null) {
-            this.content = "";
-        }
+        if (this.readingTime < 0) throw new IllegalArgumentException("readingTime must be >= 0");
     }
 
-    // lastPage 기반으로 진행률 갱신
-    public void updateLastPage(int pagesReadEnd, int totalPages) {
-        if (totalPages <= 0) return; // 혹은 예외
-        if (pagesReadEnd < 0) pagesReadEnd = 0;
-        if (pagesReadEnd > totalPages) pagesReadEnd = totalPages;
-
-        this.endPage = pagesReadEnd;
-    }
-
-    public int getProgressPercent(int totalPages) {
-        if (totalPages <= 0) return 0;
-        int safeLast = Math.min(Math.max(this.endPage, 0), totalPages);
-
-        // 반올림
-        return (int) Math.round((safeLast * 100.0) / totalPages);
-    }
 
 }
