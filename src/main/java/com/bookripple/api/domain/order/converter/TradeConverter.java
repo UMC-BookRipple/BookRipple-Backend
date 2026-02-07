@@ -23,7 +23,7 @@ public class TradeConverter {
         return Payment.builder()
                 .trade(trade)
                 .provider(dto.provider())
-                .paymentKey("ORDER_" + UUID.randomUUID()) // 임시 키 생성
+                .paymentKey(null)
                 .status(PaymentStatus.READY)
                 .amount(trade.getAmount())
                 .build();
