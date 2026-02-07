@@ -7,12 +7,15 @@ import com.bookripple.api.domain.blindsalepost.dto.BlindSalePostResDto;
 import com.bookripple.api.domain.blindsalepost.enums.PostStatus;
 import com.bookripple.api.domain.blindsalepost.service.BlindSalePostService;
 import com.bookripple.api.global.annotation.PreventDuplicate;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+@Tag( name = "Blind Sale Post", description = "블라인드 북 판매 게시글 관련 API")
 @RestController
 @RequestMapping("/api/v1/blind-books") // API 리스트에 정의된 공통 경로
 @RequiredArgsConstructor
@@ -22,6 +25,7 @@ public class BlindSalePostController {
     private final BlindSalePostService blindSalePostService;
 
     // 판매자용 판매 도서 등록
+    @Operation(summary = "블라인드 북 판매 게시글 생성", description = "판매자용 판매")
     @PreventDuplicate
     @PostMapping
     public ApiResponse<BlindSalePostResDto.Create> create(
