@@ -6,6 +6,7 @@ import com.bookripple.api.domain.blindsalepost.dto.BlindSalePostReqDto;
 import com.bookripple.api.domain.blindsalepost.dto.BlindSalePostResDto;
 import com.bookripple.api.domain.blindsalepost.enums.PostStatus;
 import com.bookripple.api.domain.blindsalepost.service.BlindSalePostService;
+import com.bookripple.api.global.annotation.PreventDuplicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ public class BlindSalePostController {
     private final BlindSalePostService blindSalePostService;
 
     // 판매자용 판매 도서 등록
+    @PreventDuplicate
     @PostMapping
     public ApiResponse<BlindSalePostResDto.Create> create(
             @AuthenticationPrincipal Long memberId,
@@ -62,6 +64,7 @@ public class BlindSalePostController {
     }
 
     // 판매자용 글 수정하기
+    @PreventDuplicate
     @PatchMapping("/{blind-book-id}")
     public ApiResponse<String> update(
             @AuthenticationPrincipal Long memberId,
@@ -73,6 +76,7 @@ public class BlindSalePostController {
     }
 
     // 판매자용 글 삭제하기
+    @PreventDuplicate
     @DeleteMapping("/{blind-book-id}")
     public ApiResponse<String> delete(
             @AuthenticationPrincipal Long memberId,

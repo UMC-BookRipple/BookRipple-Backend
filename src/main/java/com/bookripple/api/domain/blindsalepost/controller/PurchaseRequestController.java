@@ -6,6 +6,7 @@ import com.bookripple.api.common.response.ApiResponse;
 import com.bookripple.api.domain.blindsalepost.dto.PurchaseRequestResDto;
 import com.bookripple.api.domain.blindsalepost.dto.PurchaseRequestResDto.Create;
 import com.bookripple.api.domain.blindsalepost.service.PurchaseRequestService;
+import com.bookripple.api.global.annotation.PreventDuplicate;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,6 +25,7 @@ public class PurchaseRequestController {
 
   private final PurchaseRequestService purchaseRequestService;
 
+  @PreventDuplicate
   @PostMapping("/{blindSalePostId}/create")
   public ApiResponse<Create> createPurchaseRequest(
       @AuthenticationPrincipal Long memberId,
@@ -33,6 +35,7 @@ public class PurchaseRequestController {
         purchaseRequestService.createPurchaseRequest(memberId, blindSalePostId));
   }
 
+  @PreventDuplicate
   @PatchMapping("/{purchaseRequestId}/cancel")
   public ApiResponse<PurchaseRequestResDto.Decision> cancelPurchaseRequest(
       @AuthenticationPrincipal Long memberId,
@@ -42,6 +45,7 @@ public class PurchaseRequestController {
         purchaseRequestService.cancelPurchaseRequest(memberId, purchaseRequestId));
   }
 
+  @PreventDuplicate
   @PatchMapping("/{purchaseRequestId}/approve")
   public ApiResponse<PurchaseRequestResDto.Decision> approvePurchaseRequest(
       @AuthenticationPrincipal Long memberId,

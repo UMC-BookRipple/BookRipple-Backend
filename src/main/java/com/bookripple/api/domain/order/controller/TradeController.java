@@ -5,6 +5,7 @@ import com.bookripple.api.common.response.ApiResponse;
 import com.bookripple.api.domain.order.dto.TradeReqDto;
 import com.bookripple.api.domain.order.dto.TradeResDto;
 import com.bookripple.api.domain.order.service.TradeService;
+import com.bookripple.api.global.annotation.PreventDuplicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ public class TradeController {
 
     // [POST] /api/v1/trades/{tradeId}/prepare
     // 결제 전 배송지 확정 및 결제 객체 생성
+    @PreventDuplicate
     @PostMapping("/{tradeId}/prepare")
     public ApiResponse<String> preparePayment(
             @AuthenticationPrincipal Long memberId,
@@ -31,6 +33,7 @@ public class TradeController {
     /**
      * [4-1단계] 결제 승인: 토스 인증 성공 후 최종 결제 처리
      */
+    @PreventDuplicate
     @PostMapping("/{tradeId}/confirm")
     public ApiResponse<String> confirmPayment(
             @AuthenticationPrincipal Long memberId,
@@ -46,6 +49,7 @@ public class TradeController {
     /**
      * [4-2단계] 결제 전 취소: 구매자가 결제 전 단계에서 취소 시 상태 복구
      */
+    @PreventDuplicate
     @PatchMapping("/{tradeId}/cancel")
     public ApiResponse<String> cancelTradeBeforePayment(
             @AuthenticationPrincipal Long memberId,
@@ -72,6 +76,7 @@ public class TradeController {
     /**
      * [5단계 - 제출] 배송 정보 등록 및 상태 변경
      */
+    @PreventDuplicate
     @PatchMapping("/{tradeId}/shipping")
     public ApiResponse<String> submitShippingInfo(
             @AuthenticationPrincipal Long memberId,
