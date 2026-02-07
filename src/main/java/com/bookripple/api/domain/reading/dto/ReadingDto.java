@@ -25,7 +25,8 @@ public class ReadingDto {
     @Getter @NoArgsConstructor @AllArgsConstructor
     public static class EndReq {
         private Long sessionId;
-        private String content; // optional
+        private int pagesReadStart; // 이번 세션 시작 시점 페이지
+        private int pagesReadEnd; // 이번 세션 종료 시점 페이지
     }
 
     @Getter @Builder
@@ -33,7 +34,7 @@ public class ReadingDto {
         private Long recordId;
         private int readingTime;      // 이번 세션 seconds
         private int totalReadingTime; // 누적 seconds
-        private BigDecimal progress;  // 0 or 100
+        private BigDecimal progress; // 계산 로직 필요
         private boolean isCompleted;
     }
 

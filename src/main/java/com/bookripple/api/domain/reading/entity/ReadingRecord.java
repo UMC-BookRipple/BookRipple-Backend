@@ -25,7 +25,7 @@ public class ReadingRecord extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 일단 안 쓰는 값
+    // 페이지 입력
     @Column(name = "start_page", nullable = false)
     private int startPage;
 
@@ -35,10 +35,6 @@ public class ReadingRecord extends BaseEntity {
     // 총 독서 시간 (분)
     @Column(name = "reading_time", nullable = false)
     private int readingTime;
-
-    @Lob
-    @Column(name = "content", nullable = false)
-    private String content;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "book_id", nullable = false)
@@ -50,16 +46,11 @@ public class ReadingRecord extends BaseEntity {
 
     @PrePersist
     private void initDefaultsAndValidate() {
-        // 페이지 기반 기능 미사용 → 우선 값은 1
-        if (this.startPage == 0) this.startPage = 1;
-        if (this.endPage == 0) this.endPage = 1;
+        if (this.startPage < 0) this.startPage = 0;
+        if (this.endPage < 0) this.endPage = 0;
 
-        if (this.readingTime < 0) {
-            throw new IllegalArgumentException("readingTime must be >= 0");
-        }
-
-        if (this.content == null) {
-            this.content = "";
-        }
+        if (this.readingTime < 0) throw new IllegalArgumentException("readingTime must be >= 0");
     }
+
+
 }
