@@ -1,5 +1,6 @@
 package com.bookripple.api.domain.library.service;
 
+import com.bookripple.api.domain.library.dto.LibraryBookDetailRes;
 import com.bookripple.api.domain.library.dto.LibraryDto;
 import com.bookripple.api.domain.library.dto.LibraryItemListRes;
 import com.bookripple.api.domain.library.dto.LibraryItemRes;
@@ -16,5 +17,5 @@ public interface LibraryQueryService {
 
     LibraryDto.DeleteRes deleteBooks(Long memberId, LibraryStatus status, LibraryDto.DeleteReq request);
 
-    LibraryItemRes getMyLibraryBookDetail(Long memberId, Long bookId);
+    LibraryBookDetailRes getMyLibraryBookDetail(Long memberId, Long bookId);
 }

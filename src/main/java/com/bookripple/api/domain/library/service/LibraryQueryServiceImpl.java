@@ -2,6 +2,9 @@ package com.bookripple.api.domain.library.service;
 
 import java.util.List;
 
+import com.bookripple.api.common.code.LibraryErrorCode;
+import com.bookripple.api.common.error.ApiException;
+import com.bookripple.api.domain.library.dto.LibraryBookDetailRes;
 import com.bookripple.api.domain.library.dto.LibraryDto;
 import com.bookripple.api.domain.reading.entity.ReadingProgress;
 import com.bookripple.api.domain.reading.repository.ReadingProgressRepository;
@@ -85,10 +88,13 @@ public class LibraryQueryServiceImpl implements LibraryQueryService {
     }
 
     @Override
-    public LibraryItemRes getMyLibraryBookDetail(Long memberId, Long bookId) {
+    public LibraryBookDetailRes getMyLibraryBookDetail(Long memberId, Long bookId) {
         LibraryItem item = libraryItemRepository.findByMemberIdAndBookId(memberId, bookId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 도서가 책장에 없습니다."));
+                .orElseThrow(() -> new ApiException(LibraryErrorCode.NO_LIBRARY_BOOK));
 
-        return LibraryItemRes.from(item);
+
+        ReadingProgress progress = readingProgressRepository.findByMemberIdAndBookId(memberId, bookId);
+
+        return LibraryBookDetailRes.of(item, progress);
     }
 }
