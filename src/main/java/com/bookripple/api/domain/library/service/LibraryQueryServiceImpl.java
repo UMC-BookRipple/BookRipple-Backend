@@ -89,7 +89,7 @@ public class LibraryQueryServiceImpl implements LibraryQueryService {
 
     @Override
     public LibraryBookDetailRes getMyLibraryBookDetail(Long memberId, Long bookId) {
-        LibraryItem item = libraryItemRepository.findByMemberIdAndBookId(memberId, bookId)
+        LibraryItem item = libraryItemRepository.findByMemberIdAndBook_Id(memberId, bookId)
                 .orElseThrow(() -> new ApiException(LibraryErrorCode.NO_LIBRARY_BOOK));
 
 

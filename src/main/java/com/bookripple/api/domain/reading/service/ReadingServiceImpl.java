@@ -81,9 +81,21 @@ public class ReadingServiceImpl implements ReadingService {
 
         int sessionSeconds = session.end();
 
-        // startPage는 주로 1로 고정해줌
+        // startPage 입력이 0일 시 1로 고정
         int startPage = req.getPagesReadStart() <= 0 ? 1 : req.getPagesReadStart();
         int endPage = req.getPagesReadEnd();
+
+        int totalPages = session.getBook().getTotalPage();
+
+        // endPage 유효성 검증
+        if (endPage <= 0 || endPage > totalPages) {
+            throw new ApiException(ReadingErrorCode.INVALID_END_PAGE);
+        }
+
+        // startPage <= endPage
+        if (startPage > endPage) {
+            throw new ApiException(ReadingErrorCode.INVALID_PAGE_RANGE);
+        }
 
         ReadingRecord record = ReadingConverter.toRecord(session, sessionSeconds, startPage, endPage);
         store.saveRecord(record);
@@ -91,7 +103,7 @@ public class ReadingServiceImpl implements ReadingService {
         ReadingProgress progress = store.getOrCreateProgress(session.getMember(), session.getBook());
         progress.addReadingTime(sessionSeconds);
 
-        int totalPages = session.getBook().getTotalPage();
+
         progress.applyRecord(record, totalPages);
 
         upsertLibraryStatus(session.getMember(), session.getBook(),
@@ -117,7 +129,7 @@ public class ReadingServiceImpl implements ReadingService {
     }
 
     private void markAsReadingIfNotCompleted(Member member, Book book) {
-        LibraryItem item = libraryItemRepository.findByMemberIdAndBookId(member.getId(), book.getId())
+        LibraryItem item = libraryItemRepository.findByMemberIdAndBook_Id(member.getId(), book.getId())
                 .orElseGet(() -> LibraryItem.builder()
                         .member(member)
                         .book(book)
@@ -125,7 +137,7 @@ public class ReadingServiceImpl implements ReadingService {
                         .build()
                 );
 
-        // 이미 완독 상태면 유지하는 쪽으로.
+        // 이미 완독 상태면 유지
         if (item.getStatus() != LibraryStatus.COMPLETED) {
             item.setStatus(LibraryStatus.READING);
         }
@@ -134,7 +146,7 @@ public class ReadingServiceImpl implements ReadingService {
     }
 
     private void upsertLibraryStatus(Member member, Book book, LibraryStatus targetStatus) {
-        LibraryItem item = libraryItemRepository.findByMemberIdAndBookId(member.getId(), book.getId())
+        LibraryItem item = libraryItemRepository.findByMemberIdAndBook_Id(member.getId(), book.getId())
                 .orElseGet(() -> LibraryItem.builder()
                         .member(member)
                         .book(book)
