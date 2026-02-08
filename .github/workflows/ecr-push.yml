@@ -20,8 +20,14 @@ jobs:
           distribution: temurin
           java-version: "17"
 
+      - name: Give permission to execute gradlew
+        run: chmod +x ./gradlew
+
       - name: Build jar (app.jar)
-        run: ./gradlew clean bootJar -x test
+        run: ./gradlew clean build -x test
+
+      - name: Verify jar build output
+        run: ls -al build/libs/
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
