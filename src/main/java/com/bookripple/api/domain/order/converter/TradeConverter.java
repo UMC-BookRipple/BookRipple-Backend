@@ -19,11 +19,12 @@ public class TradeConverter {
     /**
      * [4단계] 결제(Payment) READY 상태 객체 생성
      */
-    public static Payment toPayment(Trade trade, TradeReqDto.PreparePayment dto) {
+    public static Payment toPayment(Trade trade, TradeReqDto.PreparePayment dto, String orderId) {
         return Payment.builder()
                 .trade(trade)
                 .provider(dto.provider())
-                .paymentKey("ORDER_" + UUID.randomUUID()) // 임시 키 생성
+                .paymentKey(null)
+                .orderId(orderId) // 고유 주문 ID 생성
                 .status(PaymentStatus.READY)
                 .amount(trade.getAmount())
                 .build();

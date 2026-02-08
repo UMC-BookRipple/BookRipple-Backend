@@ -30,6 +30,9 @@ public class Payment {
     @Column(nullable = false, length = 200)
     private String paymentKey;
 
+    @Column(name = "order_id", nullable = false, unique = true, length = 100)
+    private String orderId;  // 추가
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PaymentStatus status;
