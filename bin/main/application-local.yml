@@ -1,0 +1,58 @@
+spring:
+  datasource:
+    url: ${LOCAL_DB_URL}
+    username: ${LOCAL_DB_USER}
+    password: ${LOCAL_DB_PW}
+    driver-class-name: ${LOCAL_DB_DRIVER:com.mysql.cj.jdbc.Driver}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+    protocol: smtp
+    default-encoding: UTF-8
+
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-expiration-ms: ${JWT_ACCESS_TOKEN_EXPIRATION_MS:1800000}
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+
+gemini:
+  api:
+    key: ${GEMINI_KEY}
+    url: ${GEMINI_URL}
+
+
+aladin:
+  base-url: ${ALADIN_BASE_URL}
+  ttb-key: ${ALADIN_TTB_KEY}
+  output: js
+  version: 20131101
+
+kakao:
+  client-id: ${KAKAO_CLIENT_ID}
+  client-secret: ${KAKAO_CLIENT_SECRET}
+  redirect-uri: ${KAKAO_REDIRECT_URI}  # 로컬 테스트 주소
+  token-uri: https://kauth.kakao.com/oauth/token
+  user-info-uri: https://kapi.kakao.com/v2/user/me
+
+toss:
+  payment:
+    client-key: ${TOSS_PAYMENT_CLIENT_KEY}
+    secret-key: ${TOSS_PAYMENT_SECRET_KEY}
+    base-url: https://api.tosspayments.com/v1/payments

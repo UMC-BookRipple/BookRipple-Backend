@@ -1,0 +1,67 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PW}
+    driver-class-name: ${DB_DRIVER:com.mysql.cj.jdbc.Driver}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+  jwt:
+    secret: ${JWT_SECRET}
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-expiration-ms: ${JWT_ACCESS_TOKEN_EXPIRATION_MS:1800000}
+
+logging:
+  level:
+    root: INFO
+
+gemini:
+  api:
+    key: ${GEMINI_KEY}
+    url: ${GEMINI_URL}
+
+server:
+  forward-headers-strategy: framework
+  tomcat:
+    basedir: ${APP_DIR:/home/ec2-user/app}/tomcat
+    accesslog:
+      enabled: true
+      directory: ${APP_DIR:/home/ec2-user/app}/logs
+      prefix: access
+      suffix: .log
+      pattern: '%h %l %u %t "%r" %s %b %D'
+
+kakao:
+  client-id: ${KAKAO_CLIENT_ID}
+  client-secret: ${KAKAO_CLIENT_SECRET}
+  redirect-uri: ${KAKAO_REDIRECT_URI} # TODO: 프론트엔드 배포 후 변경 필요
+  token-uri: https://kauth.kakao.com/oauth/token
+  user-info-uri: https://kapi.kakao.com/v2/user/me
+
+toss:
+  payment:
+    client-key: ${TOSS_PAYMENT_CLIENT_KEY}
+    secret-key: ${TOSS_PAYMENT_SECRET_KEY}
+    base-url: https://api.tosspayments.com/v1/payments
+
+
+aladin:
+  base-url: ${ALADIN_BASE_URL}
+  ttb-key: ${ALADIN_TTB_KEY}
+  output: js
+  version: 20131101
