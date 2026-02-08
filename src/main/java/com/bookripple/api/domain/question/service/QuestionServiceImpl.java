@@ -3,6 +3,7 @@ package com.bookripple.api.domain.question.service;
 import com.bookripple.api.common.code.BookErrorCode;
 import com.bookripple.api.common.code.CommonErrorCode;
 import com.bookripple.api.common.code.QuestionErrorCode;
+import com.bookripple.api.common.code.ReadingErrorCode;
 import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.domain.ai.dto.AiResDto.AiQuestion;
 import com.bookripple.api.domain.ai.enums.AiQuestionType;
@@ -35,7 +36,6 @@ import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -97,7 +97,9 @@ public class QuestionServiceImpl implements QuestionService {
       throw new ApiException(BookErrorCode.NO_BOOK);
     }
 
-    ReadingProgress readingProgress = progressRepository.findByMemberIdAndBookId(memberId, bookId);
+    ReadingProgress readingProgress = Optional.ofNullable(
+            progressRepository.findByMemberIdAndBookId(memberId, bookId))
+        .orElseThrow(() -> new ApiException(ReadingErrorCode.NO_READING_SESSION));
 
     if (readingProgress.getProgress().compareTo(new BigDecimal("50")) < 0) {
       throw new ApiException(QuestionErrorCode.INSUFFICIENT_PROGRESS);
@@ -159,6 +161,14 @@ public class QuestionServiceImpl implements QuestionService {
     Book book = bookRepository.findById(bookId)
         .orElseThrow(() -> new ApiException(BookErrorCode.NO_BOOK));
 
+    ReadingProgress progress = Optional.ofNullable(
+            progressRepository.findByMemberIdAndBookId(memberId, bookId))
+        .orElseThrow(() -> new ApiException(ReadingErrorCode.NO_READING_SESSION));
+
+    if (!progress.isCompleted()) {
+      throw new ApiException(QuestionErrorCode.INSUFFICIENT_PROGRESS_2);
+    }
+
     AiQuestion aiQuestion = aiService.generateQuestions(AiQuestionType.AFTER, book.getTitle(),
         BigDecimal.valueOf(100));
 
@@ -185,7 +195,9 @@ public class QuestionServiceImpl implements QuestionService {
     Book book = bookRepository.findById(bookId)
         .orElseThrow(() -> new ApiException(BookErrorCode.NO_BOOK));
 
-    ReadingProgress progress = progressRepository.findByMemberIdAndBookId(memberId, bookId);
+    ReadingProgress progress = Optional.ofNullable(
+            progressRepository.findByMemberIdAndBookId(memberId, bookId))
+        .orElseThrow(() -> new ApiException(ReadingErrorCode.NO_READING_SESSION));
 
     AiQuestion aiQuestion = aiService.generateQuestions(AiQuestionType.DURING, book.getTitle(),
         progress.getProgress());
@@ -221,6 +233,9 @@ public class QuestionServiceImpl implements QuestionService {
 
     if (lastId == null) {
       lastId = Long.MAX_VALUE;
+    }
+    if (!bookRepository.existsById(bookId)) {
+      throw new ApiException(BookErrorCode.NO_BOOK);
     }
 
     Slice<ReadingQuestion> readingQuestionSlice = readingQuestionRepository.findByMemberIdAndBookIdAndIdLessThanOrderByIdDesc(
