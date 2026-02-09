@@ -53,4 +53,21 @@ public class BookMemoController {
                 memoQueryService.getBookMemos(memberId, bookId, lastId, size)
         );
     }
+
+    @GetMapping("/me")
+    @Operation(
+            summary = "내가 쓴 책 별 메모 목록 조회",
+            description = "특정 책에 대해 내가 쓴 메모 목록을 조회합니다."
+    )
+    public ApiResponse<MemoList> getMyBookMemos(
+            @AuthenticationPrincipal Long memberId,
+            @PathVariable Long bookId,
+            @RequestParam(required = false) Long lastId,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        return ApiResponse.onSuccess(CommonSuccessCode.OK,
+                memoQueryService.getMyBookMemos(memberId, bookId, lastId, size)
+        );
+    }
+
 }

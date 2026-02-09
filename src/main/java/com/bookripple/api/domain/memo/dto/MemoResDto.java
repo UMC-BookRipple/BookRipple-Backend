@@ -17,4 +17,10 @@ public class MemoResDto {
             Long lastId,
             boolean hasNext
     ) {}
+
+    public record MyMemoList(
+            List<Item> items,
+            Long lastId,
+            boolean hasNext
+    ) {}
 }
