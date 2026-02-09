@@ -18,6 +18,8 @@ public class MemoConverter {
         return new Item(
                 memo.getId(),
                 writerName,
+                memo.getBook().getId(),
+                memo.getBook().getTitle(),
                 memo.getMemoTitle(),
                 memo.getContext(),
                 memo.getPage()
