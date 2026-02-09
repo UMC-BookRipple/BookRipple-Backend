@@ -5,6 +5,7 @@ import com.bookripple.api.common.code.MemoErrorCode;
 import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.domain.book.repository.BookRepository;
 import com.bookripple.api.domain.memo.converter.MemoConverter;
+import com.bookripple.api.domain.memo.dto.MemoResDto;
 import com.bookripple.api.domain.memo.dto.MemoResDto.Item;
 import com.bookripple.api.domain.memo.dto.MemoResDto.MemoList;
 import com.bookripple.api.domain.memo.entity.Memo;
@@ -54,4 +55,48 @@ public class MemoQueryServiceImpl implements MemoQueryService {
                 .orElseThrow(() -> new ApiException(MemoErrorCode.NO_MEMO));
         return MemoConverter.toItem(memo, viewerMemberId);
     }
+
+    @Override
+    public MemoResDto.MyMemoList getMyMemos(Long memberId, Long lastMemoId, int size) {
+
+        Long cursor = (lastMemoId == null) ? Long.MAX_VALUE : lastMemoId;
+        Pageable pageable = PageRequest.of(0, size);
+
+        Slice<Memo> memoSlice =
+                memoRepository.findByMemberIdAndIdLessThanOrderByIdDesc(memberId, cursor, pageable);
+
+        List<Item> items = memoSlice.getContent().stream()
+                .map(memo -> MemoConverter.toItem(memo, memberId))
+                .toList();
+
+        Long nextCursor = items.isEmpty() ? null : items.get(items.size() - 1).memoId();
+
+        return new MemoResDto.MyMemoList(items, nextCursor, memoSlice.hasNext());
+    }
+
+    @Override
+    public MemoResDto.MemoList getMyBookMemos(Long memberId, Long bookId, Long lastId, int size) {
+
+        if (!bookRepository.existsById(bookId)) {
+            throw new ApiException(BookErrorCode.NO_BOOK);
+        }
+
+        Long cursor = (lastId == null) ? Long.MAX_VALUE : lastId;
+        Pageable pageable = PageRequest.of(0, size);
+
+        Slice<Memo> memoSlice =
+                memoRepository.findByBookIdAndMemberIdAndIdLessThanOrderByIdDesc(
+                        bookId, memberId, cursor, pageable
+                );
+
+        List<Item> items = memoSlice.getContent().stream()
+                .map(memo -> MemoConverter.toItem(memo, memberId)) // viewer = 나
+                .toList();
+
+        Long nextCursor = items.isEmpty() ? null : items.get(items.size() - 1).memoId();
+
+        return MemoConverter.toMemoList(items, nextCursor, memoSlice.hasNext());
+    }
+
+
 }

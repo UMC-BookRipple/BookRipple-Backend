@@ -32,7 +32,7 @@ public class ReadingRecord extends BaseEntity {
     @Column(name = "end_page", nullable = false)
     private int endPage;
 
-    // 총 독서 시간 (분)
+    // 총 독서 시간 (초)
     @Column(name = "reading_time", nullable = false)
     private int readingTime;
 
