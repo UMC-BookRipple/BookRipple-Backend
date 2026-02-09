@@ -43,8 +43,8 @@ public class TradeController {
     public ApiResponse<String> confirmPayment(
             @AuthenticationPrincipal Long memberId,
             @PathVariable Long tradeId,
-            @RequestParam String paymentKey,
-            @RequestParam String orderId,
+            @RequestParam(required = false) String paymentKey,
+            @RequestParam(required = false) String orderId,
             @RequestParam Integer amount) {
 
         tradeService.confirmPayment(memberId, tradeId, paymentKey, orderId, amount);
