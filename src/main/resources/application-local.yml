@@ -6,7 +6,7 @@ spring:
     driver-class-name: ${LOCAL_DB_DRIVER:com.mysql.cj.jdbc.Driver}
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     show-sql: true
 
   mail:
