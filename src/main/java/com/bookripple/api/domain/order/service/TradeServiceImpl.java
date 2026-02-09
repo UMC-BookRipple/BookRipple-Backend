@@ -1,6 +1,8 @@
 package com.bookripple.api.domain.order.service;
 
+import com.bookripple.api.common.code.PaymentErrorCode;
 import com.bookripple.api.common.code.PurchaseRequestErrorCode;
+import com.bookripple.api.common.code.SettlementErrorCode;
 import com.bookripple.api.common.code.TradeErrorCode;
 import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.domain.blindsalepost.entity.PurchaseRequest;
@@ -72,16 +74,26 @@ public class TradeServiceImpl implements TradeService {
 
     @Override
     @Transactional
-    public void confirmPayment(Long memberId, Long tradeId, String paymentKey, String orderId, Integer amount) {
+    public void confirmPayment(Long memberId, Long tradeId) {
         // 2. 거래 및 기존 데이터 조회
         Trade trade = tradeRepository.findById(tradeId)
                 .orElseThrow(() -> new ApiException(TradeErrorCode.TRADE_NOT_FOUND));
-        Payment payment = paymentRepository.findByTradeId(tradeId).orElseThrow();
-        Settlement settlement = settlementRepository.findByTradeId(tradeId).orElseThrow();
+        // prepare 단계에서 생성된 Payment와 Settlement를 가져옵니다.
+        Payment payment = paymentRepository.findByTradeId(tradeId)
+                .orElseThrow(() -> new ApiException(PaymentErrorCode.PAYMENT_NOT_FOUND));
+
+        Settlement settlement = settlementRepository.findByTradeId(tradeId)
+                .orElseThrow(() -> new ApiException(SettlementErrorCode.SETTLEMENT_NOT_FOUND));
+
+        // 2. 권한 확인 (구매자 본인인지)
+        if (!trade.getBuyer().getId().equals(memberId)) {
+            throw new ApiException(TradeErrorCode.NOT_TRADE_PARTICIPANT);
+        }
 
         // 3. 결제(Payment) 정보 업데이트: READY -> DONE
+        // 3. 결제 상태 업데이트 (서버가 직접 Mock Key 생성)
         payment.updatePaymentSuccess(
-                paymentKey != null ? paymentKey : "toss_key_" + UUID.randomUUID(),
+                "MOCK_KEY_" + UUID.randomUUID().toString().substring(0, 8), // 내부 생성
                 PaymentStatus.DONE,
                 LocalDateTime.now()
         );
