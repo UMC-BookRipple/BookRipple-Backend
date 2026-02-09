@@ -20,7 +20,12 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
       "AND (:keyword IS NULL OR q.content LIKE CONCAT('%', :keyword, '%')) " +
       "AND (" +
       "   (:onlyMine = true AND q.member.id = :memberId " +
-      "    AND EXISTS (SELECT a FROM Answer a WHERE a.question = q AND a.member.id = :memberId)) " +
+      "     AND (" +
+      "       q.type != com.bookripple.api.domain.question.enums.QuestionType.AI_AFTER_READING " +
+      "       OR " +
+      "       EXISTS (SELECT a FROM Answer a WHERE a.question = q AND a.member.id = :memberId)" +
+      "       )" +
+      "   )" +
       "   OR " +
       "   (:onlyMine = false AND q.member.id != :memberId) " +
       ") " +
