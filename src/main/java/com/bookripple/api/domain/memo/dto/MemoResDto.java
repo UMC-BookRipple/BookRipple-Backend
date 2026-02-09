@@ -7,6 +7,8 @@ public class MemoResDto {
     public record Item(
             Long memoId,
             String writerName,
+            Long bookId,
+            String bookTitle,
             String memoTitle,
             String context,
             String page

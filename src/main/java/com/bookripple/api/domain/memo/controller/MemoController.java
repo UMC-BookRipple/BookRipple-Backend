@@ -26,6 +26,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/memos")
 public class MemoController {
 
+
+
     private final MemoQueryService memoQueryService;
     private final MemoCommandService memoCommandService;
 
