@@ -4,8 +4,10 @@ import com.bookripple.api.common.code.BookErrorCode;
 import com.bookripple.api.common.code.CommonErrorCode;
 import com.bookripple.api.common.code.RecommendErrorCode;
 import com.bookripple.api.common.error.ApiException;
+import com.bookripple.api.domain.book.dto.BookRes;
 import com.bookripple.api.domain.book.entity.Book;
 import com.bookripple.api.domain.book.repository.BookRepository;
+import com.bookripple.api.domain.book.service.BookQueryService;
 import com.bookripple.api.domain.member.entity.Member;
 import com.bookripple.api.domain.member.repository.MemberRepository;
 import com.bookripple.api.domain.recommendation.converter.RecommendConverter;
@@ -35,6 +37,7 @@ public class RecommendServiceImpl implements RecommendService {
   private final MemberRepository memberRepository;
   private final BookRepository bookRepository;
   private final RecommendRepository recommendRepository;
+  private final BookQueryService bookQueryService;
 
   @Override
   @Transactional
@@ -45,8 +48,9 @@ public class RecommendServiceImpl implements RecommendService {
     Book sourceBook = bookRepository.findById(sourceBookId)
         .orElseThrow(() -> new ApiException(BookErrorCode.NO_BOOK));
 
-    Book targetBook = bookRepository.findById(request.targetBookId())
-        .orElseThrow(() -> new ApiException(BookErrorCode.NO_BOOK));
+    BookRes target = bookQueryService.getOrCreateByAladinItemId(request.targetBookAladinId());
+
+    Book targetBook = bookRepository.getReferenceById(target.getBookId());
 
     Recommendation recommendation = RecommendConverter.toRecommendation(member, sourceBook,
         targetBook, request.content());
