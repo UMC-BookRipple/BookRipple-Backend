@@ -2,16 +2,19 @@ package com.bookripple.api.domain.toss.client;
 
 import com.bookripple.api.domain.toss.config.TossPaymentConfig;
 import com.bookripple.api.domain.toss.dto.TossPaymentDto;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 @Component
-@RequiredArgsConstructor
 public class TossPaymentClient {
 
-    private final RestClient tossRestClient; // TossPaymentConfig에서 만든 빈 주입
+    private final RestClient tossRestClient;
+
+    public TossPaymentClient(@Qualifier("tossRestClient") RestClient tossRestClient) {
+        this.tossRestClient = tossRestClient;
+    }
 
 
     /**

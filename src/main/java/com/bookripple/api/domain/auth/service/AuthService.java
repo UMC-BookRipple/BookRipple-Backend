@@ -17,7 +17,7 @@ import com.bookripple.api.global.dto.GlobalDto;
 import com.bookripple.api.global.security.JwtTokenProvider;
 import java.util.Map;
 import java.util.UUID;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,7 +28,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 
 @Service
-@RequiredArgsConstructor
 public class AuthService {
 
   private final MemberRepository memberRepository;
@@ -52,6 +51,21 @@ public class AuthService {
 
   @Value("${kakao.user-info-uri}")
   private String kakaoUserInfoUri;
+
+  public AuthService(
+      MemberRepository memberRepository,
+      PasswordEncoder passwordEncoder,
+      JwtTokenProvider jwtTokenProvider,
+      EmailVerificationService emailVerificationService,
+      @Qualifier("restClient") RestClient restClient,
+      TokenBlacklistService tokenBlacklistService) {
+    this.memberRepository = memberRepository;
+    this.passwordEncoder = passwordEncoder;
+    this.jwtTokenProvider = jwtTokenProvider;
+    this.emailVerificationService = emailVerificationService;
+    this.restClient = restClient;
+    this.tokenBlacklistService = tokenBlacklistService;
+  }
 
 
   /**
