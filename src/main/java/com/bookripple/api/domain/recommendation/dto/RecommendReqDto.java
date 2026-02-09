@@ -9,7 +9,7 @@ public class RecommendReqDto {
   @Builder
   public record Create(
       @Min(1)
-      Long targetBookId,
+      Long targetBookAladinId,
       @NotBlank
       String content
   ) {
