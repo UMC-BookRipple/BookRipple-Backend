@@ -53,12 +53,6 @@ kakao:
   token-uri: https://kauth.kakao.com/oauth/token
   user-info-uri: https://kapi.kakao.com/v2/user/me
 
-toss:
-  payment:
-    client-key: ${TOSS_PAYMENT_CLIENT_KEY}
-    secret-key: ${TOSS_PAYMENT_SECRET_KEY}
-    base-url: https://api.tosspayments.com/v1/payments
-
 
 aladin:
   base-url: ${ALADIN_BASE_URL}
