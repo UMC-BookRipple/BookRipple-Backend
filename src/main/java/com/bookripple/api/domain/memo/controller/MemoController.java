@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "메모", description = "메모 조회, 수정, 삭제 API")
+@Tag(name = "독서 메모", description = "메모 조회, 수정, 삭제 API")
 @RequestMapping("/api/v1/memos")
 public class MemoController {
 
