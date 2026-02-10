@@ -90,6 +90,19 @@ public class BookQueryServiceImpl implements BookQueryService {
     return BookConverter.toBookSearchRes(resDto, registeredAladinIds);
   }
 
+    // 추천도서용 알라딘 도서 상세 조회 및 저장
+  @Override
+  @Transactional
+  public BookRes getOrCreateByAladinItemId(Long itemId) {
+    if (itemId == null) throw new ApiException(BookErrorCode.NO_BOOK);
+
+    return bookRepository.findByAladinBookId(itemId)
+            .map(BookConverter::toBookRes)
+            .orElseGet(() -> BookConverter.toBookRes(createFromAladinEntity(itemId)));
+
+  }
+
+
   //2. 알라딘 도서 상세 조회 및 저장
   @Override
   @Transactional
