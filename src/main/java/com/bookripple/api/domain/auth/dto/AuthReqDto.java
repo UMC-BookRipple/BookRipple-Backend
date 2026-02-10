@@ -25,6 +25,14 @@ public class AuthReqDto {
 
   @Getter
   @NoArgsConstructor
+  public static class RefreshToken {
+
+    @NotBlank(message = "리프레시 토큰은 필수입니다.")
+    private String refreshToken;
+  }
+
+  @Getter
+  @NoArgsConstructor
   public static class Signup {
 
     @Schema(description = "로그인 아이디", example = "loginid")

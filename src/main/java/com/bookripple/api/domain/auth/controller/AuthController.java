@@ -89,16 +89,34 @@ public class AuthController {
    * 로그아웃
    */
   @PostMapping("/logout")
-  public ResponseEntity<ApiResponse<String>> logout(HttpServletRequest request) {
+  public ResponseEntity<ApiResponse<String>> logout(
+      HttpServletRequest request,
+      @RequestBody(required = false) AuthReqDto.RefreshToken refreshTokenRequest
+  ) {
 
     String accessToken = resolveToken(request);
 
     if (accessToken != null) {
-      authService.logout(accessToken);
+      String refreshToken = refreshTokenRequest != null ? refreshTokenRequest.getRefreshToken() : null;
+      authService.logout(accessToken, refreshToken);
     }
 
     return ResponseEntity.ok(
         ApiResponse.onSuccess(CommonSuccessCode.OK, "로그아웃 되었습니다.")
+    );
+  }
+
+  /**
+   * AccessToken 재발급 (RefreshToken 사용)
+   */
+  @PostMapping("/refresh")
+  public ResponseEntity<ApiResponse<AuthResDto.TokenRefresh>> refresh(
+      @RequestBody @Valid AuthReqDto.RefreshToken request
+  ) {
+    AuthResDto.TokenRefresh result = authService.refreshAccessToken(request.getRefreshToken());
+
+    return ResponseEntity.ok(
+        ApiResponse.onSuccess(CommonSuccessCode.OK, result)
     );
   }
 
