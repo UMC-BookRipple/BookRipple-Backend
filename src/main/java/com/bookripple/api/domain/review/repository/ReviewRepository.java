@@ -44,4 +44,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
   @Modifying(clearAutomatically = true)
   @Query("DELETE FROM Review r WHERE r.member.id = :memberId AND r.id IN :ids")
   void deleteMyReviews(@Param("memberId") Long memberId, @Param("ids") List<Long> ids);
+
+  boolean existsByMemberIdAndBookId(Long memberId, Long bookId);
 }
