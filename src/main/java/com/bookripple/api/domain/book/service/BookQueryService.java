@@ -9,7 +9,7 @@ public interface BookQueryService {
   BookSearchRes searchFromAladin(
       Long memberId, String keyword, int start, int size, String queryType, String searchTarget, SearchLogType type);
 
-  BookRes getOrCreateByAladinItemId(Long itemId);
+  BookRes getOrCreateByAladinItemId(Long memberId, Long itemId);
 
   BookSearchRes getSpecialNewBooks();
 }

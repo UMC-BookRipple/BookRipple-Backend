@@ -1,6 +1,7 @@
 package com.bookripple.api.domain.book.service;
 
 import com.bookripple.api.common.code.BookErrorCode;
+import com.bookripple.api.common.code.MemberErrorCode;
 import com.bookripple.api.common.code.MemoErrorCode;
 import com.bookripple.api.common.code.SearchErrorCode;
 import com.bookripple.api.common.error.ApiException;
@@ -19,6 +20,8 @@ import java.util.Set;
 
 import com.bookripple.api.domain.library.enums.LibraryStatus;
 import com.bookripple.api.domain.library.repository.LibraryItemRepository;
+import com.bookripple.api.domain.member.repository.MemberRepository;
+import com.bookripple.api.domain.reading.repository.ReadingProgressRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +34,9 @@ public class BookQueryServiceImpl implements BookQueryService {
   private final AladinService aladinService;
   private final SearchHistoryCommandService searchHistoryCommandService;
   private final LibraryItemRepository libraryItemRepository;
+  private final MemberRepository memberRepository;
+  private final ReadingProgressRepository readingProgressRepository;
+
 
 
   //1 알라딘 검색
@@ -88,45 +94,52 @@ public class BookQueryServiceImpl implements BookQueryService {
   //2. 알라딘 도서 상세 조회 및 저장
   @Override
   @Transactional
-  public BookRes getOrCreateByAladinItemId(Long itemId) {
-    if (itemId == null) {
-      throw new ApiException(BookErrorCode.NO_BOOK);
-    }
+  public BookRes getOrCreateByAladinItemId(Long memberId, Long itemId) {
+    if (itemId == null) throw new ApiException(BookErrorCode.NO_BOOK);
+    if (memberId == null) throw new ApiException(MemberErrorCode.MEMBER_NOT_FOUND);
 
-    // 1) 캐시 히트
-    return bookRepository.findByAladinBookId(itemId)
-        .map(BookConverter::toBookRes)
-        .orElseGet(() -> createFromAladin(itemId));
+    // 1) Book 캐시 히트 or 생성
+    Book book = bookRepository.findByAladinBookId(itemId)
+            .orElseGet(() -> createFromAladinEntity(itemId));
+
+    // 2) 🔥 등록 처리 (항상 실행)
+    upsertLibraryItemReading(memberId, book);
+    resetReadingProgress(memberId, book);
+
+    // 3) 응답
+    return BookConverter.toBookRes(book);
   }
 
-  private BookRes createFromAladin(Long itemId) {
+
+
+  private Book createFromAladinEntity(Long itemId) {
     AladinItemLookUpResDto lookUp = aladinService.lookup(itemId, null);
 
     AladinItemLookUpResDto.Item it =
-        (lookUp == null || lookUp.getItem() == null || lookUp.getItem().isEmpty())
-            ? null
-            : lookUp.getItem().get(0);
+            (lookUp == null || lookUp.getItem() == null || lookUp.getItem().isEmpty())
+                    ? null
+                    : lookUp.getItem().get(0);
 
     if (it == null) {
       throw new ApiException(BookErrorCode.NO_BOOK);
     }
 
     Book book = Book.builder()
-        .aladinBookId(it.getItemId())
-        .title(it.getTitle())
-        .author(it.getAuthor())
-        .publisher(it.getPublisher())
-        .bookCover(it.getCover())
-        .isbn10(it.getIsbn10())
-        .isbn13(it.getIsbn13())
-        .publishedAt(parsePublishedAt(it.getPubDate()))
-        .totalPage(it.getSubInfo() != null ? it.getSubInfo().getItemPage() : null)
-        .story(it.getDescription())
-        .build();
+            .aladinBookId(it.getItemId())
+            .title(it.getTitle())
+            .author(it.getAuthor())
+            .publisher(it.getPublisher())
+            .bookCover(it.getCover())
+            .isbn10(it.getIsbn10())
+            .isbn13(it.getIsbn13())
+            .publishedAt(parsePublishedAt(it.getPubDate()))
+            .totalPage(it.getSubInfo() != null ? it.getSubInfo().getItemPage() : null)
+            .story(it.getDescription())
+            .build();
 
-    Book saved = bookRepository.save(book);
-    return BookConverter.toBookRes(saved);
+    return bookRepository.save(book);
   }
+
 
   private LocalDate parsePublishedAt(String pubDate) {
     if (pubDate == null || pubDate.isBlank()) {
@@ -140,4 +153,44 @@ public class BookQueryServiceImpl implements BookQueryService {
     AladinSearchResDto dto = aladinService.getSpecialNewBooks();
     return BookConverter.toSpecialNewBooks(dto);
   }
+
+  private void upsertLibraryItemReading(Long memberId, Book book) {
+    var itemOpt = libraryItemRepository.findByMemberIdAndBook_Id(memberId, book.getId());
+
+    if (itemOpt.isPresent()) {
+      itemOpt.get().setStatus(LibraryStatus.READING);
+    } else {
+      libraryItemRepository.save(
+              com.bookripple.api.domain.library.entity.LibraryItem.builder()
+                      .member(memberRepository.getReferenceById(memberId))
+                      .book(book)
+                      .status(LibraryStatus.READING)
+                      .build()
+      );
+    }
+  }
+
+  private void resetReadingProgress(Long memberId, Book book) {
+    var progress = readingProgressRepository
+            .findByMemberIdAndBookId(memberId, book.getId());
+
+    if (progress == null) {
+      readingProgressRepository.save(
+              com.bookripple.api.domain.reading.entity.ReadingProgress.builder()
+                      .member(memberRepository.getReferenceById(memberId))
+                      .book(book)
+                      .readingTime(0)
+                      .progress(java.math.BigDecimal.ZERO)
+                      .isLiked(false)
+                      .isCompleted(false)
+                      .build()
+      );
+    } else {
+      progress.setReadingTime(0);
+      progress.setProgress(java.math.BigDecimal.ZERO);
+      progress.setLiked(false);
+      progress.setCompleted(false);
+    }
+  }
+
 }
