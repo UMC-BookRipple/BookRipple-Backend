@@ -23,6 +23,15 @@ import com.bookripple.api.domain.reading.repository.ReadingStore;
 
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.DayOfWeek;
+import java.time.format.TextStyle;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -103,8 +112,10 @@ public class ReadingServiceImpl implements ReadingService {
         ReadingProgress progress = store.getOrCreateProgress(session.getMember(), session.getBook());
         progress.addReadingTime(sessionSeconds);
 
-
         progress.applyRecord(record, totalPages);
+
+        // 일별 독서 시간 저장
+        store.saveDailyReadingTime(session.getMember(), LocalDate.now(), sessionSeconds);
 
         upsertLibraryStatus(session.getMember(), session.getBook(),
                 progress.isCompleted() ? LibraryStatus.COMPLETED : LibraryStatus.READING);
@@ -158,5 +169,57 @@ public class ReadingServiceImpl implements ReadingService {
         item.setStatus(targetStatus);
 
         libraryItemRepository.save(item);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ReadingDto.WeeklyReadingGraphRes getWeeklyReadingGraph(Long memberId) {
+        memberRepository.findById(memberId)
+                .orElseThrow(() -> new ApiException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        // 지난 7일 데이터 조회 (오늘 기준)
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(6); // 7일 전부터 오늘까지
+
+        var dailyReadingTimes = store.findWeeklyReadingTime(memberId, startDate, endDate);
+
+        // Map으로 변환하여 조회 성능 향상
+        Map<LocalDate, Integer> readingTimeMap = new HashMap<>();
+        int totalReadingTime = 0;
+        for (var daily : dailyReadingTimes) {
+            readingTimeMap.put(daily.getReadingDate(), daily.getTotalReadingTime());
+            totalReadingTime += daily.getTotalReadingTime();
+        }
+
+        // 7일간의 데이터 생성 (없는 날짜는 0분)
+        List<ReadingDto.DailyReadingData> dailyList = new ArrayList<>();
+        for (int i = 0; i < 7; i++) {
+            LocalDate currentDate = startDate.plusDays(i);
+            int readingSeconds = readingTimeMap.getOrDefault(currentDate, 0);
+            int readingMinutes = readingSeconds / 60; // 초를 분으로 변환
+
+            String dayOfWeek = currentDate.getDayOfWeek()
+                    .getDisplayName(TextStyle.SHORT, Locale.KOREAN);
+
+            dailyList.add(ReadingDto.DailyReadingData.builder()
+                    .date(currentDate)
+                    .dayOfWeek(dayOfWeek)
+                    .readingTimeMinutes(readingMinutes)
+                    .build()
+            );
+        }
+
+        return ReadingDto.WeeklyReadingGraphRes.builder()
+                .dailyReadingList(dailyList)
+                .totalReadingTime(totalReadingTime / 60) // 초를 분으로 변환
+                .build();
+    }
+
+    /**
+     * ReadingStore에서 주별 독서 시간 조회
+     */
+    private List<com.bookripple.api.domain.reading.entity.DailyReadingTime> 
+            findWeeklyReadingTime(Long memberId, LocalDate startDate, LocalDate endDate) {
+        return store.findWeeklyReadingTime(memberId, startDate, endDate);
     }
 }

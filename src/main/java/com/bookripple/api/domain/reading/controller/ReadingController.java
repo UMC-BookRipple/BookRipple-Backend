@@ -90,4 +90,19 @@ public class ReadingController {
                 readingService.complete(memberId, request)
         );
     }
+
+    // 주별 독서 그래프 조회
+    @GetMapping("/graph/weekly")
+    @Operation(
+            summary = "주별 독서 그래프 조회",
+            description = "사용자의 최근 7일간 일별 독서 시간을 조회합니다. (마이페이지용)"
+    )
+    public ApiResponse<ReadingDto.WeeklyReadingGraphRes> getWeeklyReadingGraph(
+            @AuthenticationPrincipal Long memberId
+    ) {
+        return ApiResponse.onSuccess(
+                CommonSuccessCode.OK,
+                readingService.getWeeklyReadingGraph(memberId)
+        );
+    }
 }
