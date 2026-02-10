@@ -3,6 +3,7 @@ package com.bookripple.api.domain.library.controller;
 import com.bookripple.api.common.code.CommonSuccessCode;
 import com.bookripple.api.domain.book.dto.BookRes;
 import com.bookripple.api.domain.library.dto.LibraryBookDetailRes;
+import com.bookripple.api.domain.library.dto.LibraryBookSummaryListRes;
 import com.bookripple.api.domain.library.dto.LibraryDto;
 import com.bookripple.api.domain.library.dto.LibraryItemRes;
 import com.bookripple.api.global.annotation.PreventDuplicate;
@@ -82,6 +83,23 @@ public class LibraryController {
         return ApiResponse.onSuccess(
                 CommonSuccessCode.OK,
                 libraryQueryService.getMyLibraryBookDetail(memberId, bookId)
+        );
+    }
+
+    //4. 마이페이지 도서 목록 조회 API
+    @GetMapping("/books-summary")
+    @Operation(
+            summary = "마이페이지 도서 요약 목록 조회 (읽고 있는 책)",
+            description = "마이페이지에서 표시할 읽고 있는(READING) 책들의 요약 정보를 조회합니다. " +
+                    "각 책의 bookId, coverUrl, title, authors, status, progressPercent, " +
+                    "readingTimeMinutes, estimatedDaysToCompletion 정보를 반환합니다."
+    )
+    public ApiResponse<LibraryBookSummaryListRes> getMyLibraryBooksSummary(
+            @AuthenticationPrincipal Long memberId
+    ) {
+        return ApiResponse.onSuccess(
+                CommonSuccessCode.OK,
+                libraryQueryService.getMyLibraryBooksSummary(memberId)
         );
     }
 
