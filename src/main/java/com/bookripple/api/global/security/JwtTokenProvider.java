@@ -17,12 +17,15 @@ public class JwtTokenProvider {
 
   private final SecretKey secretKey;
   private final long accessTokenExpirationMs;
+  private final long refreshTokenExpirationMs;
 
   public JwtTokenProvider(
       @Value("${jwt.secret}") String secret,
-      @Value("${jwt.access-token-expiration-ms}") long accessTokenExpirationMs) {
+      @Value("${jwt.access-token-expiration-ms}") long accessTokenExpirationMs,
+      @Value("${jwt.refresh-token-expiration-ms}") long refreshTokenExpirationMs) {
     this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     this.accessTokenExpirationMs = accessTokenExpirationMs;
+    this.refreshTokenExpirationMs = refreshTokenExpirationMs;
   }
 
   public String createAccessToken(Long memberId, String role) {
@@ -32,6 +35,20 @@ public class JwtTokenProvider {
     return Jwts.builder()
         .subject(String.valueOf(memberId))
         .claim("role", role)
+        .claim("type", "access")
+        .issuedAt(now)
+        .expiration(expiry)
+        .signWith(secretKey)
+        .compact();
+  }
+
+  public String createRefreshToken(Long memberId) {
+    Date now = new Date();
+    Date expiry = new Date(now.getTime() + refreshTokenExpirationMs);
+
+    return Jwts.builder()
+        .subject(String.valueOf(memberId))
+        .claim("type", "refresh")
         .issuedAt(now)
         .expiration(expiry)
         .signWith(secretKey)
@@ -70,5 +87,23 @@ public class JwtTokenProvider {
 
     long now = new Date().getTime();
     return expiration.getTime() - now;
+  }
+
+  public Date getExpirationDate(String token) {
+    return Jwts.parser()
+        .verifyWith(secretKey)
+        .build()
+        .parseSignedClaims(token)
+        .getPayload()
+        .getExpiration();
+  }
+
+  public String getTokenType(String token) {
+    Claims claims = Jwts.parser()
+        .verifyWith(secretKey)
+        .build()
+        .parseSignedClaims(token)
+        .getPayload();
+    return claims.get("type", String.class);
   }
 }

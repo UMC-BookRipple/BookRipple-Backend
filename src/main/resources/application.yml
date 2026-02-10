@@ -11,7 +11,8 @@ spring:
         highlight_sql: true
 
 jwt:
-  access-token-expiration-ms: 1800000
+  access-token-expiration-ms: 1800000  # 30분
+  refresh-token-expiration-ms: 1209600000  # 14일
 
 server:
   port: 8080
