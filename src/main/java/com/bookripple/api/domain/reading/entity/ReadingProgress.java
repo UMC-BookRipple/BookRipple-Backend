@@ -34,15 +34,19 @@ public class ReadingProgress extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Setter
     @Column(name = "reading_time", nullable = false)
     private int readingTime;
 
+    @Setter
     @Column(name = "progress", nullable = false, precision = 5, scale = 2)
     private BigDecimal progress;
 
+    @Setter
     @Column(name = "is_liked", nullable = false)
     private boolean isLiked;
 
+    @Setter
     @Column(name = "is_completed", nullable = false)
     private boolean isCompleted;
 
