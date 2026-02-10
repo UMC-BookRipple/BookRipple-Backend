@@ -40,6 +40,10 @@ public class ReviewServiceImpl implements ReviewService {
   @Transactional
   public IdRes createReview(Long bookId, Long memberId, ContentReq request) {
 
+    if (reviewRepository.existsByMemberIdAndBookId(memberId, bookId)) {
+      throw new ApiException(ReviewErrorCode.REVIEW_ALREADY_EXISTS);
+    }
+
     Book book = bookRepository.findById(bookId)
         .orElseThrow(() -> new ApiException(BookErrorCode.NO_BOOK));
 
