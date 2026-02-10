@@ -1,13 +1,18 @@
 package com.bookripple.api.domain.library.service;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import com.bookripple.api.common.code.LibraryErrorCode;
 import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.domain.library.dto.LibraryBookDetailRes;
 import com.bookripple.api.domain.library.dto.LibraryDto;
+import com.bookripple.api.domain.library.enums.LibraryStatus;
 import com.bookripple.api.domain.reading.entity.ReadingProgress;
+import com.bookripple.api.domain.reading.entity.ReadingRecord;
 import com.bookripple.api.domain.reading.repository.ReadingProgressRepository;
+import com.bookripple.api.domain.reading.repository.ReadingRecordRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -16,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.bookripple.api.domain.library.dto.LibraryItemListRes;
 import com.bookripple.api.domain.library.dto.LibraryItemRes;
 import com.bookripple.api.domain.library.entity.LibraryItem;
-import com.bookripple.api.domain.library.enums.LibraryStatus;
 import com.bookripple.api.domain.library.repository.LibraryItemRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -28,6 +32,7 @@ public class LibraryQueryServiceImpl implements LibraryQueryService {
 
     private final LibraryItemRepository libraryItemRepository;
     private final ReadingProgressRepository readingProgressRepository;
+    private final ReadingRecordRepository readingRecordRepository;
 
     @Override
     public LibraryItemListRes getMyLibrary(Long memberId, LibraryStatus status, Long lastId, int size) {
@@ -92,9 +97,59 @@ public class LibraryQueryServiceImpl implements LibraryQueryService {
         LibraryItem item = libraryItemRepository.findByMemberIdAndBook_Id(memberId, bookId)
                 .orElseThrow(() -> new ApiException(LibraryErrorCode.NO_LIBRARY_BOOK));
 
-
         ReadingProgress progress = readingProgressRepository.findByMemberIdAndBookId(memberId, bookId);
-
-        return LibraryBookDetailRes.of(item, progress);
+        
+        // 읽는 속도와 완독 예상일 계산
+        Double readingSpeed = null;
+        Integer estimatedDaysToCompletion = null;
+        
+        // READING 상태일 때만 계산
+        if (item.getStatus() == LibraryStatus.READING) {
+            // 첫 독서 기록 조회
+            var firstRecordOpt = readingRecordRepository.findFirstByMemberIdAndBookIdOrderByCreatedAtAsc(memberId, bookId);
+            // 최근 독서 기록 조회
+            var latestRecordOpt = readingRecordRepository.findLatestByMemberIdAndBookId(memberId, bookId);
+            
+            if (firstRecordOpt.isPresent() && latestRecordOpt.isPresent()) {
+                ReadingRecord firstRecord = firstRecordOpt.get();
+                ReadingRecord latestRecord = latestRecordOpt.get();
+                
+                // 독서 시작 날짜
+                LocalDate readingStartDate = firstRecord.getCreatedAt().toLocalDate();
+                LocalDate today = LocalDate.now();
+                
+                // 독서 시작부터 오늘까지의 일 수
+                long daysSinceStart = ChronoUnit.DAYS.between(readingStartDate, today);
+                
+                // 최근 기록까지 읽은 총 페이지 수 (현재 progress의 진행률로 계산)
+                int totalPages = item.getBook().getTotalPage();
+                int pagesRead = (int) (totalPages * progress.getProgress().doubleValue() / 100.0);
+                
+                // 독서 진행 속도 (페이지/일)
+                if (daysSinceStart > 0) {
+                    readingSpeed = Math.round((double) pagesRead / daysSinceStart * 100.0) / 100.0;
+                    
+                    // 남은 페이지
+                    int remainingPages = totalPages - pagesRead;
+                    
+                    // 완독까지 예상 일수
+                    if (readingSpeed > 0) {
+                        estimatedDaysToCompletion = (int) Math.ceil(remainingPages / readingSpeed);
+                    }
+                } else if (pagesRead > 0) {
+                    // 같은 날에 읽은 경우
+                    readingSpeed = (double) pagesRead;
+                    
+                    int remainingPages = totalPages - pagesRead;
+                    if (readingSpeed > 0 && remainingPages > 0) {
+                        estimatedDaysToCompletion = (int) Math.ceil(remainingPages / readingSpeed);
+                    } else {
+                        estimatedDaysToCompletion = 0;
+                    }
+                }
+            }
+        }
+        
+        return LibraryBookDetailRes.ofWithReadingStats(item, progress, readingSpeed, estimatedDaysToCompletion);
     }
 }
