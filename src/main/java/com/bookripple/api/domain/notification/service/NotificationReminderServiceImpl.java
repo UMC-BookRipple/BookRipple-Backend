@@ -27,7 +27,7 @@ public class NotificationReminderServiceImpl implements NotificationReminderServ
   private final NotificationService notificationService;
 
   @Override
-  @Scheduled(cron = "0 0 9 * * *", zone = "Asia/Seoul")
+  @Scheduled(cron = "0 0 1 * * *", zone = "UTC")
   @Transactional
   public void sendReadingInactivityReminders() {
     LocalDateTime now = LocalDateTime.now();
@@ -63,7 +63,7 @@ public class NotificationReminderServiceImpl implements NotificationReminderServ
   }
 
   @Override
-  @Scheduled(cron = "0 0 9 * * *", zone = "Asia/Seoul")
+  @Scheduled(cron = "0 0 1 * * *", zone = "UTC")
   @Transactional
   public void sendReviewWriteReminders() {
     LocalDateTime threshold = LocalDateTime.now().minusDays(1);
