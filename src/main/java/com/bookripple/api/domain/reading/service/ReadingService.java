@@ -10,4 +10,9 @@ public interface ReadingService {
     ReadingDto.EndRes end(Long memberId, ReadingDto.EndReq req);
 
     ReadingDto.CompleteRes complete(Long memberId, ReadingDto.CompleteReq req);
+
+    /**
+     * 주별 독서 그래프 조회 (최근 7일)
+     */
+    ReadingDto.WeeklyReadingGraphRes getWeeklyReadingGraph(Long memberId);
 }

@@ -1,14 +1,19 @@
 package com.bookripple.api.domain.reading.repository;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
-import com.bookripple.api.domain.reading.enums.ReadingSessionStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.bookripple.api.domain.book.entity.Book;
 import com.bookripple.api.domain.member.entity.Member;
-import com.bookripple.api.domain.reading.entity.*;
+import com.bookripple.api.domain.reading.entity.DailyReadingTime;
+import com.bookripple.api.domain.reading.entity.ReadingProgress;
+import com.bookripple.api.domain.reading.entity.ReadingRecord;
+import com.bookripple.api.domain.reading.entity.ReadingSession;
+import com.bookripple.api.domain.reading.enums.ReadingSessionStatus;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,6 +25,7 @@ public class ReadingStore {
     private final ReadingSessionRepository sessionRepository;
     private final ReadingProgressRepository progressRepository;
     private final ReadingRecordRepository recordRepository;
+    private final DailyReadingTimeRepository dailyReadingTimeRepository;
 
     public Optional<ReadingSession> findSessionByIdAndMember(Long sessionId, Long memberId) {
         return sessionRepository.findByIdAndMemberId(sessionId, memberId);
@@ -73,5 +79,30 @@ public class ReadingStore {
     @Transactional
     public ReadingRecord saveRecord(ReadingRecord record) {
         return recordRepository.save(record);
+    }
+
+    /**
+     * 일별 독서 시간 저장 또는 업데이트
+     */
+    @Transactional
+    public void saveDailyReadingTime(Member member, LocalDate readingDate, int readingTimeSeconds) {
+        DailyReadingTime dailyReading = dailyReadingTimeRepository
+                .findByMemberIdAndReadingDate(member.getId(), readingDate)
+                .orElseGet(() -> DailyReadingTime.builder()
+                        .member(member)
+                        .readingDate(readingDate)
+                        .totalReadingTime(0)
+                        .build()
+                );
+
+        dailyReading.addReadingTime(readingTimeSeconds);
+        dailyReadingTimeRepository.save(dailyReading);
+    }
+
+    /**
+     * 주별 독서 시간 조회
+     */
+    public List<DailyReadingTime> findWeeklyReadingTime(Long memberId, LocalDate startDate, LocalDate endDate) {
+        return dailyReadingTimeRepository.findWeeklyReadingTime(memberId, startDate, endDate);
     }
 }

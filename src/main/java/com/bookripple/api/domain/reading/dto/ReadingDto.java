@@ -1,6 +1,8 @@
 package com.bookripple.api.domain.reading.dto;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
 import lombok.*;
 
 public class ReadingDto {
@@ -48,5 +50,24 @@ public class ReadingDto {
         private Long bookId;
         private BigDecimal progress;
         private boolean isCompleted;
+    }
+
+    /**
+     * 주별 독서 그래프 응답
+     */
+    @Getter @Builder
+    public static class WeeklyReadingGraphRes {
+        private List<DailyReadingData> dailyReadingList;
+        private int totalReadingTime; // 일주일 총 독서 시간 (분)
+    }
+
+    /**
+     * 일별 독서 데이터
+     */
+    @Getter @Builder
+    public static class DailyReadingData {
+        private LocalDate date;
+        private String dayOfWeek; // 요일 (월, 화, 수, 목, 금, 토, 일)
+        private int readingTimeMinutes; // 해당 날짜의 독서 시간 (분)
     }
 }
