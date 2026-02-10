@@ -27,7 +27,7 @@ public class Payment {
     @Column(nullable = false)
     private PaymentProvider provider;
 
-    @Column(nullable = false, length = 200)
+    @Column(nullable = true, length = 200)
     private String paymentKey;
 
     @Column(name = "order_id", nullable = false, unique = true, length = 100)
@@ -45,4 +45,11 @@ public class Payment {
 
     @Column(name = "raw_response", columnDefinition = "TEXT")
     private String rawResponse;
+
+    public void updatePaymentSuccess(String paymentKey, PaymentStatus status, LocalDateTime approvedAt) {
+        this.paymentKey = paymentKey;
+        this.status = status;
+        this.approvedAt = approvedAt;
+    }
+
 }

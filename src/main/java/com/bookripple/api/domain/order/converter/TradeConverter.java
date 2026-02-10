@@ -8,7 +8,7 @@ import com.bookripple.api.domain.order.entity.ShippingInfo;
 import com.bookripple.api.domain.order.entity.Trade;
 import com.bookripple.api.domain.order.enums.PaymentStatus;
 import com.bookripple.api.domain.order.enums.SettlementStatus;
-import com.bookripple.api.domain.toss.dto.TossPaymentDto;
+
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -47,18 +47,12 @@ public class TradeConverter {
     /**
      * [4-1단계] 토스 응답 데이터를 바탕으로 Payment 엔티티 업데이트
      */
-    public static void updatePaymentSuccess(Payment payment, TossPaymentDto.ConfirmResponse response) {
-        // 사용자님이 설계하신 필드들을 꽉꽉 채워줍니다.
-        payment = Payment.builder()
-                .id(payment.getId()) // 기존 ID 유지
-                .trade(payment.getTrade())
-                .provider(payment.getProvider())
-                .paymentKey(response.paymentKey())
-                .status(PaymentStatus.DONE) // 상태 완료!
-                .amount(response.totalAmount().intValue())
-                .approvedAt(LocalDateTime.parse(response.approvedAt(), DateTimeFormatter.ISO_OFFSET_DATE_TIME))
-                .rawResponse(response.rawJson()) // 전체 응답 저장
-                .build();
+    public static void updatePaymentSuccess(Payment payment, String paymentKey) {
+        payment.updatePaymentSuccess(
+                paymentKey,
+                PaymentStatus.DONE,
+                LocalDateTime.now()
+        );
     }
 
     /**
@@ -77,7 +71,7 @@ public class TradeConverter {
      */
     public static TradeResDto.SellerTradeDetail toSellerTradeDetail(Trade trade) {
         return TradeResDto.SellerTradeDetail.builder()
-                .title(trade.getBlindSalePost().getTitle())
+                .title(trade.getBlindSalePost().getSubtitle())
                 .price(trade.getAmount())
                 .buyerNickname(trade.getBuyer().getName())
                 .shippingAddress(trade.getShippingAddress())

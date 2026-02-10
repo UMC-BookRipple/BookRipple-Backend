@@ -42,12 +42,9 @@ public class TradeController {
     @PostMapping("/{tradeId}/confirm")
     public ApiResponse<String> confirmPayment(
             @AuthenticationPrincipal Long memberId,
-            @PathVariable Long tradeId,
-            @RequestParam String paymentKey,
-            @RequestParam String orderId,
-            @RequestParam Integer amount) {
+            @PathVariable Long tradeId) {
 
-        tradeService.confirmPayment(memberId, tradeId, paymentKey, orderId, amount);
+        tradeService.confirmPayment(memberId, tradeId);
         return ApiResponse.onSuccess(CommonSuccessCode.OK, "결제가 최종 완료되었습니다.");
     }
 
