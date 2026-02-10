@@ -19,6 +19,7 @@ public class BookSearchRes {
     @Builder
     public static class Item {
         private Long aladinItemId;
+        private Boolean registered;
         private String title;
         private String author;
         private String publisher;

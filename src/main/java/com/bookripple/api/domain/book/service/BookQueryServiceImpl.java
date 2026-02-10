@@ -14,6 +14,11 @@ import com.bookripple.api.domain.book.entity.Book;
 import com.bookripple.api.domain.book.enums.SearchLogType;
 import com.bookripple.api.domain.book.repository.BookRepository;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Set;
+
+import com.bookripple.api.domain.library.enums.LibraryStatus;
+import com.bookripple.api.domain.library.repository.LibraryItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +30,7 @@ public class BookQueryServiceImpl implements BookQueryService {
   private final BookRepository bookRepository;
   private final AladinService aladinService;
   private final SearchHistoryCommandService searchHistoryCommandService;
+  private final LibraryItemRepository libraryItemRepository;
 
 
   //1 알라딘 검색
@@ -49,13 +55,34 @@ public class BookQueryServiceImpl implements BookQueryService {
     AladinSearchResDto resDto =
             aladinService.search(keyword, start, size, queryType, searchTarget);
 
+    Set<Long> registeredAladinIds = java.util.Collections.emptySet();
+
+    if (memberId != null && resDto != null && resDto.getItem() != null && !resDto.getItem().isEmpty()) {
+      List<Long> aladinIds = resDto.getItem().stream()
+              .map(AladinSearchResDto.Item::getItemId)
+              .filter(id -> id != null)
+              .toList();
+
+      List<LibraryStatus> status = List.of(
+              LibraryStatus.COMPLETED,
+              LibraryStatus.READING,
+              LibraryStatus.LIKED
+      );
+
+      registeredAladinIds = new java.util.HashSet<>(
+              libraryItemRepository.findRegisteredAladinBookIds(memberId, status, aladinIds)
+      );
+    }
+
     if (memberId != null) {
       String normalized = keyword.trim();
       if (!normalized.isBlank()) {
         searchHistoryCommandService.saveOrRefresh(memberId, normalized, type);
       }
     }
-      return BookConverter.toBookSearchRes(resDto);
+
+
+    return BookConverter.toBookSearchRes(resDto, registeredAladinIds);
   }
 
   //2. 알라딘 도서 상세 조회 및 저장
