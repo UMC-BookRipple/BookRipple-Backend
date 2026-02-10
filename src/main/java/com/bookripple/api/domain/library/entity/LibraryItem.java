@@ -7,8 +7,6 @@ import com.bookripple.api.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Table(
         name = "library_item",

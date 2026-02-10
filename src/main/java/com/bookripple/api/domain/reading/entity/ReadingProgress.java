@@ -78,11 +78,6 @@ public class ReadingProgress extends BaseEntity {
         this.progress = BigDecimal.valueOf(100);
     }
 
-    public void uncomplete() {
-        this.isCompleted = false;
-        this.progress = BigDecimal.ZERO;
-    }
-
     public void toggleLiked(boolean liked) {
         this.isLiked = liked;
     }
@@ -90,13 +85,11 @@ public class ReadingProgress extends BaseEntity {
     public void applyRecord(ReadingRecord record, int totalPages) {
         if (totalPages <= 0) return;
 
-        int end = clamp(record.getEndPage(), 0, totalPages);
+        int end = clamp(record.getEndPage(), totalPages);
 
-        BigDecimal percent = BigDecimal.valueOf(end)
+        this.progress = BigDecimal.valueOf(end)
                 .multiply(BigDecimal.valueOf(100))
                 .divide(BigDecimal.valueOf(totalPages), 2, RoundingMode.DOWN);
-
-        this.progress = percent;
 
         if (end >= totalPages) {
             this.isCompleted = true;
@@ -104,8 +97,8 @@ public class ReadingProgress extends BaseEntity {
         }
     }
 
-    private int clamp(int v, int min, int max) {
-        return Math.min(Math.max(v, min), max);
+    private int clamp(int v, int max) {
+        return Math.min(Math.max(v, 0), max);
     }
 
 

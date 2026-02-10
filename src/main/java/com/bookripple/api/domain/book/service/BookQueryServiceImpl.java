@@ -2,7 +2,6 @@ package com.bookripple.api.domain.book.service;
 
 import com.bookripple.api.common.code.BookErrorCode;
 import com.bookripple.api.common.code.MemberErrorCode;
-import com.bookripple.api.common.code.MemoErrorCode;
 import com.bookripple.api.common.code.SearchErrorCode;
 import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.domain.aladin.dto.AladinItemLookUpResDto;
