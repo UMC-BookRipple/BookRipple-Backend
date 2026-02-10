@@ -5,6 +5,8 @@ import com.bookripple.api.common.code.QuestionErrorCode;
 import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.domain.member.entity.Member;
 import com.bookripple.api.domain.member.repository.MemberRepository;
+import com.bookripple.api.domain.notification.enums.NotificationType;
+import com.bookripple.api.domain.notification.service.NotificationService;
 import com.bookripple.api.domain.question.converter.AnswerConverter;
 import com.bookripple.api.domain.question.dto.AnswerResDto.Ans;
 import com.bookripple.api.domain.question.dto.AnswerResDto.AnswerList;
@@ -29,9 +31,12 @@ import org.springframework.transaction.annotation.Transactional;
 @AllArgsConstructor
 public class AnswerServiceImpl implements AnswerService {
 
+  private static final String QUESTION_ANSWERED_CONTENT = "내 질문에 답변이 달렸습니다.";
+
   private final QuestionRepository questionRepository;
   private final MemberRepository memberRepository;
   private final AnswerRepository answerRepository;
+  private final NotificationService notificationService;
 
   @Override
   @Transactional
@@ -44,6 +49,17 @@ public class AnswerServiceImpl implements AnswerService {
     Answer answer = AnswerConverter.toAnswer(question, member, request.content());
 
     answerRepository.save(answer);
+
+    // 본인 질문 글에 답을 달지 않은 경우 알림 발생
+    if (!question.getMember().getId().equals(memberId)) {
+      notificationService.create(
+          question.getMember(),
+          NotificationType.QUESTION_ANSWERED,
+          QUESTION_ANSWERED_CONTENT,
+          toQuestionUrl(questionId)
+      );
+    }
+
 
     return GlobalConverter.toIdRes(answer.getId());
   }
@@ -115,5 +131,9 @@ public class AnswerServiceImpl implements AnswerService {
     }
 
     return AnswerConverter.toMyAnswerList(myAnswerList, answerSlice.hasNext(), nextId);
+  }
+
+  private String toQuestionUrl(Long questionId) {
+    return "/questions/" + questionId;
   }
 }
