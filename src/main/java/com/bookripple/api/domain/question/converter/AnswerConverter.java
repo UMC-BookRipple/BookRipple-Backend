@@ -41,6 +41,7 @@ public class AnswerConverter {
         .updatedAt(answer.getUpdatedAt())
         .questionId(answer.getQuestion().getId())
         .questionContent(answer.getQuestion().getContent())
+        .bookTitle(answer.getQuestion().getBook().getTitle())
         .build();
   }
 
