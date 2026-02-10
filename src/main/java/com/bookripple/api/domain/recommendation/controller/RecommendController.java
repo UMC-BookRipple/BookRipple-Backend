@@ -14,7 +14,6 @@ import com.bookripple.api.global.validation.ValidationGroups;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -83,7 +82,7 @@ public class RecommendController {
   @GetMapping("/recommendations/me")
   public ApiResponse<MyRecommendList> getMyRecommendations(
       @AuthenticationPrincipal Long memberId,
-      @RequestParam(required = false) @NotBlank @Size(max = 100) String lastSourceBookTitle,
+      @RequestParam(required = false) @Size(max = 100) String lastSourceBookTitle,
       @RequestParam(required = false) @Min(1) Long lastId,
       @RequestParam(defaultValue = "3") @Max(100) int size
   ) {
