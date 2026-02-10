@@ -1,7 +1,9 @@
 package com.bookripple.api.domain.member.service;
 
+import com.bookripple.api.common.code.AuthErrorCode;
 import com.bookripple.api.common.code.MemberErrorCode;
 import com.bookripple.api.common.error.ApiException;
+import com.bookripple.api.domain.auth.repository.RefreshTokenRepository;
 import com.bookripple.api.domain.auth.service.EmailCodeService;
 import com.bookripple.api.domain.member.dto.MemberReqDto;
 import com.bookripple.api.domain.member.entity.Member;
@@ -9,6 +11,8 @@ import com.bookripple.api.domain.member.enums.LoginType;
 import com.bookripple.api.domain.member.enums.MemberStatus;
 import com.bookripple.api.domain.member.repository.MemberRepository;
 import com.bookripple.api.domain.verification.email.enums.EmailVerificationPurpose;
+import com.bookripple.api.global.security.JwtTokenProvider;
+import com.bookripple.api.global.service.TokenBlacklistService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,6 +25,9 @@ public class MemberService {
   private final MemberRepository memberRepository;
   private final PasswordEncoder passwordEncoder;
   private final EmailCodeService emailCodeService;
+  private final JwtTokenProvider jwtTokenProvider;
+  private final TokenBlacklistService tokenBlacklistService;
+  private final RefreshTokenRepository refreshTokenRepository;
 
   /**
    * 현재 비밀번호 확인
@@ -134,15 +141,22 @@ public class MemberService {
    * 회원 탈퇴
    */
   @Transactional
-  public void withdraw(Long memberId) {
+  public void withdraw(Long memberId, String accessToken, String refreshToken) {
     Member member = getMemberOrThrow(memberId);
 
     if (member.getStatus() == MemberStatus.QUIT) {
       throw new ApiException(MemberErrorCode.MEMBER_NOT_FOUND);
     }
 
-    member.withdraw();
+    if (accessToken != null && jwtTokenProvider.validateToken(accessToken)) {
+      tokenBlacklistService.addToBlacklist(accessToken);
+    }
 
+    if (refreshToken != null && jwtTokenProvider.validateToken(refreshToken)) {
+      refreshTokenRepository.deleteByToken(refreshToken);
+    }
+
+    member.withdraw();
   }
   // --- Helper Methods ---
 

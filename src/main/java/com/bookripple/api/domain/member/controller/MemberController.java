@@ -10,12 +10,14 @@ import com.bookripple.api.domain.member.dto.MemberReqDto;
 import com.bookripple.api.domain.member.service.MemberService;
 import com.bookripple.api.domain.verification.email.enums.EmailVerificationPurpose;
 import com.bookripple.api.global.dto.GlobalDto;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -143,9 +145,15 @@ public class MemberController {
    * 회원 탈퇴
    */
   @DeleteMapping("/me")
-  public ResponseEntity<ApiResponse<GlobalDto.IdRes>> withdrawMember() {
+  public ResponseEntity<ApiResponse<GlobalDto.IdRes>> withdrawMember(
+      HttpServletRequest request,
+      @RequestBody(required = false) AuthReqDto.RefreshToken refreshTokenRequest
+  ) {
     Long memberId = getCurrentMemberId();
-    memberService.withdraw(memberId);
+    String accessToken = resolveToken(request);
+    String refreshToken = refreshTokenRequest != null ? refreshTokenRequest.getRefreshToken() : null;
+
+    memberService.withdraw(memberId, accessToken, refreshToken);
 
     return ResponseEntity.ok(
         ApiResponse.onSuccess(
@@ -153,5 +161,13 @@ public class MemberController {
             new GlobalDto.IdRes(memberId)
         )
     );
+  }
+
+  private String resolveToken(HttpServletRequest request) {
+    String bearerToken = request.getHeader("Authorization");
+    if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+      return bearerToken.substring(7);
+    }
+    return null;
   }
 }
