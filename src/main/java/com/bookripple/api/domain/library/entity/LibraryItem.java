@@ -7,8 +7,6 @@ import com.bookripple.api.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Table(
         name = "library_item",
@@ -38,8 +36,5 @@ public class LibraryItem extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private LibraryStatus status;
-
-    // 필요할 수도 있으니 일단 넣어둠-> 진행률&날짜
-    private Integer progressPercent; // 0~100
 
 }

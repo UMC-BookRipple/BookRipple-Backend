@@ -58,10 +58,11 @@ public class BookSearchController {
       description = "알라딘 도서 상세 정보를 조회하고, DB로 가져옵니다."
   )
   public ApiResponse<BookRes> getOrCreateByAladinItemId(
+          @AuthenticationPrincipal Long memberId,
       @PathVariable("aladinItemId") Long itemId
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
-        bookQueryService.getOrCreateByAladinItemId(itemId));
+        bookQueryService.getOrCreateByAladinItemId(memberId, itemId));
   }
 
   @GetMapping("/itemNewSpecial")

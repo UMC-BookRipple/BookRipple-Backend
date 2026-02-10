@@ -4,6 +4,7 @@ import com.bookripple.api.domain.library.entity.LibraryItem;
 import com.bookripple.api.domain.library.enums.LibraryStatus;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,5 +25,17 @@ public interface LibraryItemRepository extends JpaRepository<LibraryItem, Long> 
             Long memberId, LibraryStatus status, List<Long> bookIds
     );
 
+    @Query("""
+  select li.book.aladinBookId
+  from LibraryItem li
+  where li.member.id = :memberId
+    and li.status in :status
+    and li.book.aladinBookId in :aladinBookIds
+""")
+    List<Long> findRegisteredAladinBookIds(
+            Long memberId,
+            List<LibraryStatus> status,
+            List<Long> aladinBookIds
+    );
 }
 

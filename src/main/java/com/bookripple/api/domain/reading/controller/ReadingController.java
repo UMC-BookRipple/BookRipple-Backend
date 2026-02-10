@@ -40,10 +40,6 @@ public class ReadingController {
     }
 
     // 독서 일시정지
-    @Tag(
-            name = "Reading",
-            description = "독서 세션 관련 API"
-    )
     @PreventDuplicate
     @PostMapping("/{session-id}/pause")
     @Operation(summary = "독서 일시정지", description = "사용자가 현재 진행 중인 독서 세션을 일시정지합니다.")
