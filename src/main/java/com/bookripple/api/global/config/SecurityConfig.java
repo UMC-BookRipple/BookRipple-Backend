@@ -1,7 +1,10 @@
 package com.bookripple.api.global.config;
 
+import com.bookripple.api.common.security.CustomAccessDeniedHandler;
+import com.bookripple.api.common.security.CustomAuthenticationEntryPoint;
+import com.bookripple.api.global.security.JwtAuthenticationFilter;
 import java.util.Arrays;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -11,12 +14,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import com.bookripple.api.common.security.CustomAccessDeniedHandler;
-import com.bookripple.api.common.security.CustomAuthenticationEntryPoint;
-import com.bookripple.api.global.security.JwtAuthenticationFilter;
-
-import lombok.RequiredArgsConstructor;
 
 @Configuration
 @RequiredArgsConstructor
@@ -70,8 +67,13 @@ public class SecurityConfig {
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
 
-    configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
-    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+    configuration.setAllowedOrigins(Arrays.asList(
+        "http://localhost:5173",
+        "https://www.bookripple.site",
+        "https://bookripple.site"
+    ));
+    configuration.setAllowedMethods(
+        Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
     configuration.setAllowedHeaders(Arrays.asList("*"));
     configuration.setAllowCredentials(true);
 
