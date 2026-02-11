@@ -50,11 +50,16 @@ public class ReadingServiceImpl implements ReadingService {
             throw new ApiException(ReadingErrorCode.ACTIVE_SESSION_ALREADY_EXISTS);
         });
 
+        var activeOpt = store.findActiveSession(memberId, bookId);
+        if (activeOpt.isPresent()) {
+            return ReadingConverter.toStartRes(activeOpt.get());
+        }
+
         var pausedOpt = store.findPausedSession(memberId, bookId);
         if (pausedOpt.isPresent()) {
             ReadingSession paused = pausedOpt.get();
-            paused.resume(); // lastResumedAt=now, status=ACTIVE
-            return ReadingConverter.toStartRes(paused); // sessionId 그대로 반환
+            paused.resume();
+            return ReadingConverter.toStartRes(paused);
         }
 
         Member member = memberRepository.findById(memberId)
@@ -66,8 +71,6 @@ public class ReadingServiceImpl implements ReadingService {
         store.saveSession(session);
 
         store.getOrCreateProgress(member, book);
-
-        // start 시점부터 진행중 책장에서 조회 가능하도록
         markAsReadingIfNotCompleted(member, book);
 
         return ReadingConverter.toStartRes(session);
