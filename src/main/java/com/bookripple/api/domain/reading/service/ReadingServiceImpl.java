@@ -46,10 +46,6 @@ public class ReadingServiceImpl implements ReadingService {
     public ReadingDto.StartRes start(Long memberId, ReadingDto.StartReq req) {
         Long bookId = req.getBookId();
 
-        store.findActiveSession(memberId, bookId).ifPresent(s -> {
-            throw new ApiException(ReadingErrorCode.ACTIVE_SESSION_ALREADY_EXISTS);
-        });
-
         var activeOpt = store.findActiveSession(memberId, bookId);
         if (activeOpt.isPresent()) {
             return ReadingConverter.toStartRes(activeOpt.get());
