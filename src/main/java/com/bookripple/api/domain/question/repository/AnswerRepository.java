@@ -14,8 +14,9 @@ public interface AnswerRepository extends JpaRepository<Answer, Long> {
 
   List<Answer> findAllByQuestionId(Long questionId);
 
-  @Query("SELECT a FROM Answer a " +
-      "JOIN FETCH a.question " +
+    @Query("SELECT a FROM Answer a " +
+      "JOIN FETCH a.question q " +
+      "JOIN FETCH q.book " +
       "WHERE a.member.id = :memberId " +
       "AND a.id < :lastId " +
       "ORDER BY a.id DESC ")

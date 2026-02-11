@@ -29,6 +29,7 @@ public class AnswerResDto {
       String questionContent,
       Long answerId,
       String answerContent,
+      String bookTitle,
       LocalDateTime updatedAt
   ) {
 
