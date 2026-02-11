@@ -72,7 +72,8 @@ public class SecurityConfig {
     configuration.setAllowedOrigins(Arrays.asList(
         "http://localhost:5173",
         "https://www.bookripple.site",
-        "https://bookripple.site"
+        "https://bookripple.site",
+        "https://book-ripple.vercel.app"
     ));
     configuration.setAllowedMethods(
         Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
