@@ -120,7 +120,7 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
         toBlindSalePostUrl(purchaseRequest.getBlindSalePost().getId())
     );
 
-    return PurchaseRequestConverter.toDecision(purchaseRequest);
+    return PurchaseRequestConverter.toDecisionWithTrade(purchaseRequest, trade);
   }
 
 

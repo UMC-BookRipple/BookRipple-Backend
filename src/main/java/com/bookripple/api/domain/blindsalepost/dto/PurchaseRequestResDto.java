@@ -19,7 +19,8 @@ public class PurchaseRequestResDto {
   public record Decision(
       Long purchaseRequestId,
       PurchaseStatus status,
-      LocalDateTime updatedAt
+      LocalDateTime updatedAt,
+      Long tradeId  // 승인 시에만 생성되는 Trade ID (취소 시 null)
   ){
 
   }
