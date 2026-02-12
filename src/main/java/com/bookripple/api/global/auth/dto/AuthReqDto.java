@@ -1,4 +1,4 @@
-package com.bookripple.api.domain.auth.dto;
+package com.bookripple.api.global.auth.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.AssertTrue;

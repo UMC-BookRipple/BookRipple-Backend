@@ -1,6 +1,6 @@
-package com.bookripple.api.domain.auth.code;
+package com.bookripple.api.global.auth.code;
 
-import com.bookripple.api.common.code.BaseErrorCode;
+import com.bookripple.api.global.code.BaseErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;

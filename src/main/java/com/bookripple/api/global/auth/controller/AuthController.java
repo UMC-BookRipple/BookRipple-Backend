@@ -1,17 +1,22 @@
-package com.bookripple.api.domain.auth.controller;
+package com.bookripple.api.global.auth.controller;
 
-import com.bookripple.api.common.code.CommonSuccessCode;
-import com.bookripple.api.common.response.ApiResponse;
-import com.bookripple.api.domain.auth.dto.AuthReqDto;
-import com.bookripple.api.domain.auth.dto.AuthResDto;
-import com.bookripple.api.domain.auth.service.AuthService;
+import com.bookripple.api.global.auth.dto.AuthReqDto;
+import com.bookripple.api.global.auth.dto.AuthResDto;
+import com.bookripple.api.global.auth.service.AuthService;
+import com.bookripple.api.global.code.CommonSuccessCode;
 import com.bookripple.api.global.dto.GlobalDto;
+import com.bookripple.api.global.response.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -97,7 +102,8 @@ public class AuthController {
     String accessToken = resolveToken(request);
 
     if (accessToken != null) {
-      String refreshToken = refreshTokenRequest != null ? refreshTokenRequest.getRefreshToken() : null;
+      String refreshToken =
+          refreshTokenRequest != null ? refreshTokenRequest.getRefreshToken() : null;
       authService.logout(accessToken, refreshToken);
     }
 

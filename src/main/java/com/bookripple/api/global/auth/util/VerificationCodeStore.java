@@ -1,4 +1,4 @@
-package com.bookripple.api.domain.auth.util;
+package com.bookripple.api.global.auth.util;
 
 import java.util.Optional;
 

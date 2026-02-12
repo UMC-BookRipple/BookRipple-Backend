@@ -1,4 +1,4 @@
-package com.bookripple.api.domain.auth.dto;
+package com.bookripple.api.global.auth.dto;
 
 import lombok.Builder;
 import lombok.Getter;
