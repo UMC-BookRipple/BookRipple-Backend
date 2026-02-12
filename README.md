@@ -100,8 +100,8 @@ src/main
 
 ## 팀원 및 주요 개발 사항
 * **고준섭** - 알림 관련 API 구현, AWS/DOCKER 기반의 배포 환경 및 CI/CD 파이프라인 구축, 문서화 작업
-* **박인영** - 마이페이지 관련 API 구현, 인증/인가 (JWT/Security/Email), Caffeine 기반 캐시 시스템 구축
-* **오영훈** - 도서 관련 API 구현, Gemini API 연동 및 프롬프트 작성, 쿼리 최적화, HTTPS 기반 백엔드 서버 구축
+* **박인영** - 마이페이지 관련 API 구현, 인증/인가 (JWT/Security), AWS SES 기반 이메일 인증
+* **오영훈** - 도서 관련 API 구현, Gemini API 연동 및 프롬프트 작성, 쿼리 최적화, Caffeine 기반 캐시 시스템 구축
 * **조현정** - 도서 관련 API 구현, 알라딘 API 연동 및 도서 도서 정보 DB 저장, Swagger 정리 및 리펙토링
 * **최서준** - 커뮤니티 관련 API 구현, 블라인드 도서 관련 API 구현, 도메인 및 ERD 모델링
 
