@@ -1,16 +1,15 @@
 package com.bookripple.api.domain.member.service;
 
-import com.bookripple.api.common.code.AuthErrorCode;
-import com.bookripple.api.common.code.MemberErrorCode;
-import com.bookripple.api.common.error.ApiException;
-import com.bookripple.api.domain.auth.repository.RefreshTokenRepository;
-import com.bookripple.api.domain.auth.service.EmailCodeService;
+import com.bookripple.api.domain.member.code.MemberErrorCode;
 import com.bookripple.api.domain.member.dto.MemberReqDto;
 import com.bookripple.api.domain.member.entity.Member;
 import com.bookripple.api.domain.member.enums.LoginType;
 import com.bookripple.api.domain.member.enums.MemberStatus;
 import com.bookripple.api.domain.member.repository.MemberRepository;
 import com.bookripple.api.domain.verification.email.enums.EmailVerificationPurpose;
+import com.bookripple.api.global.auth.repository.RefreshTokenRepository;
+import com.bookripple.api.global.auth.service.EmailCodeService;
+import com.bookripple.api.global.error.ApiException;
 import com.bookripple.api.global.security.JwtTokenProvider;
 import com.bookripple.api.global.service.TokenBlacklistService;
 import lombok.RequiredArgsConstructor;
