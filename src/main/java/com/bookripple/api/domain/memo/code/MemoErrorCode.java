@@ -1,6 +1,6 @@
 package com.bookripple.api.domain.memo.code;
 
-import com.bookripple.api.common.code.BaseErrorCode;
+import com.bookripple.api.global.code.BaseErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
