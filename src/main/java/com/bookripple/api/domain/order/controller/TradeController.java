@@ -25,13 +25,13 @@ public class TradeController {
     @Operation(summary = "결제 준비", description = "구매자가 배송지 정보를 작성하고 결제 준비를 완료합니다.")
     @PreventDuplicate
     @PostMapping("/{tradeId}/prepare")
-    public ApiResponse<String> preparePayment(
+    public ApiResponse<TradeResDto.PreparePaymentResponse> preparePayment(
             @AuthenticationPrincipal Long memberId,
             @PathVariable Long tradeId,
             @RequestBody TradeReqDto.PreparePayment requestDto) {
 
-        tradeService.preparePayment(memberId, tradeId, requestDto);
-        return ApiResponse.onSuccess(CommonSuccessCode.OK, "결제 준비가 완료되었습니다.");
+        TradeResDto.PreparePaymentResponse response = tradeService.preparePayment(memberId, tradeId, requestDto);
+        return ApiResponse.onSuccess(CommonSuccessCode.OK, response);
     }
 
     /**

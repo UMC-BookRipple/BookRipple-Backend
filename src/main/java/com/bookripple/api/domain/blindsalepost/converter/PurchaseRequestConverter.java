@@ -8,7 +8,6 @@ public class PurchaseRequestConverter {
   public static PurchaseRequestResDto.Create toCreate(PurchaseRequest purchaseRequest) {
     return PurchaseRequestResDto.Create.builder()
         .purchaseRequestId(purchaseRequest.getId())
-        .blindBookId(purchaseRequest.getBlindSalePost().getBook().getId())
         .status(purchaseRequest.getStatus())
         .createdAt(purchaseRequest.getCreatedAt())
         .build();

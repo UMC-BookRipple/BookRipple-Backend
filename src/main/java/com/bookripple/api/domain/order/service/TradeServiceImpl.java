@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -55,18 +56,32 @@ public class TradeServiceImpl implements TradeService {
             throw new ApiException(TradeErrorCode.NOT_TRADE_PARTICIPANT);
         }
 
+        // 2. 이미 결제 준비가 된 경우 기존 데이터 반환 (중복 요청 방지)
+        Optional<Payment> existingPayment = paymentRepository.findByTradeId(tradeId);
+        if (existingPayment.isPresent()) {
+            // 주소만 업데이트하고 기존 orderId 반환
+            trade.updateShippingAddress(dto.address());
+            return new TradeResDto.PreparePaymentResponse(
+                    existingPayment.get().getOrderId(),
+                    trade.getAmount()
+            );
+        }
+
         // orderId 생성
         String orderId = "ORDER_" + UUID.randomUUID().toString();
 
-        // 2. 한 줄 주소 업데이트
+        // 3. 한 줄 주소 업데이트
         trade.updateShippingAddress(dto.address());
 
-        // 3. 컨버터를 통해 엔티티 생성 및 저장
+        // 4. 컨버터를 통해 엔티티 생성 및 저장
         Payment payment = TradeConverter.toPayment(trade, dto, orderId);
         paymentRepository.save(payment);
 
-        Settlement settlement = TradeConverter.toSettlement(trade);
-        settlementRepository.save(settlement);
+        // Settlement도 중복 체크 후 생성
+        if (settlementRepository.findByTradeId(tradeId).isEmpty()) {
+            Settlement settlement = TradeConverter.toSettlement(trade);
+            settlementRepository.save(settlement);
+        }
 
         // 프론트에 orderId와 amount 반환
         return new TradeResDto.PreparePaymentResponse(orderId, trade.getAmount());
