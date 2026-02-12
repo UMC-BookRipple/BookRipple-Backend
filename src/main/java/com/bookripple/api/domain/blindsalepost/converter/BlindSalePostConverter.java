@@ -102,13 +102,14 @@ public class BlindSalePostConverter {
     }
 
     // 구매자용 내 요청 목록 변환 (결제 전까지 subtitle만 노출)
-    public static BlindSalePostResDto.MyRequestListElement toMyRequestListElement(PurchaseRequest request) {
+    public static BlindSalePostResDto.MyRequestListElement toMyRequestListElement(PurchaseRequest request, Long tradeId) {
         return BlindSalePostResDto.MyRequestListElement.builder()
                 .requestId(request.getId())
                 .blindBookId(request.getBlindSalePost().getId())
                 .subtitle(request.getBlindSalePost().getSubtitle())
                 .price(request.getBlindSalePost().getPrice())
                 .purchaseStatus(request.getStatus().name())
+                .tradeId(tradeId)
                 .build();
     }
 

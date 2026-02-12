@@ -75,7 +75,8 @@ public class BlindSalePostResDto {
             Long blindBookId,       // 블라인드 북 ID
             String subtitle,        // 포스트잇 내용만 노출 (실제 도서 정보는 비공개)
             Integer price,
-            String purchaseStatus   // 내부 Enum 값 (WAITING, ACCEPTED 등)
+            String purchaseStatus,  // 내부 Enum 값 (WAITING, ACCEPTED 등)
+            Long tradeId            // 거래 ID (승인 후 생성됨, 없으면 null)
     ) {}
 
     // 무한 스크롤 응답 묶음 (구매자용)

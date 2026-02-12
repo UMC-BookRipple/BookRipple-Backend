@@ -16,6 +16,7 @@ import com.bookripple.api.domain.book.entity.Book;
 import com.bookripple.api.domain.book.repository.BookRepository;
 import com.bookripple.api.domain.member.entity.Member;
 import com.bookripple.api.domain.member.repository.MemberRepository;
+import com.bookripple.api.domain.order.repository.TradeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +36,7 @@ public class BlindSalePostServiceImpl implements BlindSalePostService {
     private final MemberRepository memberRepository;
     private final BookRepository bookRepository;
     private final PurchaseRequestRepository purchaseRequestRepository;
+    private final TradeRepository tradeRepository;
 
     @Override
     @Transactional
@@ -195,9 +197,15 @@ public class BlindSalePostServiceImpl implements BlindSalePostService {
         boolean hasNext = requests.size() > size;
         List<PurchaseRequest> contentRequests = hasNext ? requests.subList(0, size) : requests;
 
-        // DTO 변환
+        // DTO 변환 (각 PurchaseRequest에 대한 Trade 조회)
         List<BlindSalePostResDto.MyRequestListElement> content = contentRequests.stream()
-                .map(BlindSalePostConverter::toMyRequestListElement)
+                .map(request -> {
+                    Long tradeId = tradeRepository
+                            .findByBuyerIdAndBlindSalePostId(memberId, request.getBlindSalePost().getId())
+                            .map(trade -> trade.getId())
+                            .orElse(null);
+                    return BlindSalePostConverter.toMyRequestListElement(request, tradeId);
+                })
                 .collect(Collectors.toList());
 
         // 다음 커서 결정 (마지막 요소의 ID)
