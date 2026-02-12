@@ -77,8 +77,11 @@ public class TradeServiceImpl implements TradeService {
         Payment payment = TradeConverter.toPayment(trade, dto, orderId);
         paymentRepository.save(payment);
 
-        Settlement settlement = TradeConverter.toSettlement(trade);
-        settlementRepository.save(settlement);
+        // Settlement도 중복 체크 후 생성
+        if (settlementRepository.findByTradeId(tradeId).isEmpty()) {
+            Settlement settlement = TradeConverter.toSettlement(trade);
+            settlementRepository.save(settlement);
+        }
 
         // 프론트에 orderId와 amount 반환
         return new TradeResDto.PreparePaymentResponse(orderId, trade.getAmount());
