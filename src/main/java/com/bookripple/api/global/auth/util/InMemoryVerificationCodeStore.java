@@ -1,10 +1,9 @@
-package com.bookripple.api.domain.auth.util;
-
-import org.springframework.stereotype.Component;
+package com.bookripple.api.global.auth.util;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.stereotype.Component;
 
 @Component
 public class InMemoryVerificationCodeStore implements VerificationCodeStore {

@@ -1,11 +1,11 @@
-package com.bookripple.api.domain.auth.service;
+package com.bookripple.api.global.auth.service;
 
-import com.bookripple.api.common.code.AuthErrorCode;
-import com.bookripple.api.common.error.ApiException;
-import com.bookripple.api.domain.auth.util.EmailSender;
-import com.bookripple.api.domain.auth.util.VerificationCodeStore;
 import com.bookripple.api.domain.verification.email.enums.EmailVerificationPurpose;
 import com.bookripple.api.domain.verification.email.service.EmailVerificationService;
+import com.bookripple.api.global.auth.code.AuthErrorCode;
+import com.bookripple.api.global.auth.util.EmailSender;
+import com.bookripple.api.global.auth.util.VerificationCodeStore;
+import com.bookripple.api.global.error.ApiException;
 import java.time.LocalDateTime;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;

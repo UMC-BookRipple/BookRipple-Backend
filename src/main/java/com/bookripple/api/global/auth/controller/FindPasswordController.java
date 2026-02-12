@@ -1,16 +1,19 @@
-package com.bookripple.api.domain.auth.controller;
+package com.bookripple.api.global.auth.controller;
 
-import com.bookripple.api.common.code.CommonSuccessCode;
-import com.bookripple.api.common.response.ApiResponse;
-import com.bookripple.api.domain.auth.dto.AuthReqDto;
-import com.bookripple.api.domain.auth.service.AuthService; // 추가
-import com.bookripple.api.domain.auth.service.EmailCodeService;
 import com.bookripple.api.domain.verification.email.enums.EmailVerificationPurpose;
+import com.bookripple.api.global.auth.dto.AuthReqDto;
+import com.bookripple.api.global.auth.service.AuthService;
+import com.bookripple.api.global.auth.service.EmailCodeService;
+import com.bookripple.api.global.code.CommonSuccessCode;
 import com.bookripple.api.global.dto.GlobalDto;
+import com.bookripple.api.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/auth/find-pw")
