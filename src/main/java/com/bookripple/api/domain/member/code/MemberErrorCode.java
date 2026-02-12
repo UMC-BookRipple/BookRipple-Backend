@@ -1,5 +1,6 @@
-package com.bookripple.api.common.code;
+package com.bookripple.api.domain.member.code;
 
+import com.bookripple.api.common.code.BaseErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
@@ -10,7 +11,8 @@ public enum MemberErrorCode implements BaseErrorCode {
 
   // 400 BAD_REQUEST: 회원 로직상 불가능한 요청
   PASSWORD_SAME_AS_OLD(HttpStatus.BAD_REQUEST, "MEMBER_400_1", "새 비밀번호는 기존 비밀번호와 다르게 설정해야 합니다."),
-  SOCIAL_PROFILE_RESTRICTION(HttpStatus.BAD_REQUEST, "MEMBER_400_2", "간편 로그인(카카오 등) 회원은 수정할 수 없는 정보입니다."),
+  SOCIAL_PROFILE_RESTRICTION(HttpStatus.BAD_REQUEST, "MEMBER_400_2",
+      "간편 로그인(카카오 등) 회원은 수정할 수 없는 정보입니다."),
   EMAIL_SAME_AS_OLD(HttpStatus.BAD_REQUEST, "MEMBER_400_3", "기존 이메일과 동일한 이메일로 변경할 수 없습니다."),
   PASSWORD_CONFIRM_MISMATCH(HttpStatus.BAD_REQUEST, "MEMBER_400_4", "새 비밀번호와 비밀번호 확인이 일치하지 않습니다."),
 
