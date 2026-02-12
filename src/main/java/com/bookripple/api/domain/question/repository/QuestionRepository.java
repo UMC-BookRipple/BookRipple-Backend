@@ -1,6 +1,7 @@
 package com.bookripple.api.domain.question.repository;
 
 import com.bookripple.api.domain.question.entity.Question;
+import com.bookripple.api.domain.question.enums.QuestionType;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -75,4 +76,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
   @Modifying(clearAutomatically = true)
   @Query("DELETE FROM Question q WHERE q.member.id = :memberId AND q.id IN :ids")
   void deleteMyQuestions(@Param("memberId") Long memberId, @Param("ids") List<Long> ids);
+
+  List<Question> findAllByMemberIdAndBookIdAndType(Long memberId, Long bookId,
+      QuestionType questionType);
 }
