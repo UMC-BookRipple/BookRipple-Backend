@@ -49,53 +49,42 @@ BookRipple(북리플) 은 “독서를 기록하고 나누며, 질문과 연결�
 ## 프로젝트 구조
 ```
 src/main
-├── java
-│   └── com.bookripple.api
-│       ├── common
-│       │   ├── code                # 성공/에러 코드 (BaseSuccessCode, BaseErrorCode 등)
-│       │   ├── controller          # 공통/테스트용 컨트롤러
-│       │   ├── error               # 예외 처리 (ApiException, GlobalExceptionHandler 등)
-│       │   ├── response            # ApiResponse 및 응답 포맷
-│       │   └── security            # 공통 보안 설정
-│       │
-│       ├── domain                  # 도메인 별 기능 모듈
-│       │   ├── ai
-│       │   ├── aladin
-│       │   ├── auth
-│       │   ├── blindsalepost
-│       │   ├── book
-│       │   ├── library
-│       │   ├── member
-│       │   ├── memo
-│       │   ├── notification
-│       │   ├── order
-│       │   ├── question
-│       │   ├── reading
-│       │   ├── recommendation
-│       │   ├── review
-│       │   ├── test.controller
-│       │   └── verification.email
-│       │
-│       ├── global                  # 전역 공통 모듈
-│       │   ├── annotation
-│       │   ├── aop
-│       │   ├── config
-│       │   ├── converter
-│       │   ├── dto
-│       │   ├── entity              # BaseEntity 공통 엔티티
-│       │   ├── security            # Security 설정 (Filter/Token)
-│       │   ├── service             # 전역 공통 서비스
-│       │   └── validation
-│       │
-│       ├── infrastructure.email    # 이메일 인프라(메일 발송/템플릿 연동 등)
-│       └── ApiApplication          # Spring Boot Application Entry Point
-│
-└── resources
-    ├── application.yml
-    ├── application-local.yml
-    └── application-prod.yml
-
-
+src/main/java/com
+└── bookripple
+    └── api
+        ├── ApiApplication.java      # Spring Boot Application Entry Point
+        ├── domain            # 도메인 별 기능 모듈
+        │   ├── blindsalepost
+        │   ├── book
+        │   ├── library
+        │   ├── member
+        │   ├── memo
+        │   ├── notification
+        │   ├── order
+        │   ├── question
+        │   ├── reading
+        │   ├── recommendation
+        │   ├── review
+        │   └── verification
+        ├── global            # 전역 공통 모듈
+        │   ├── annotation
+        │   ├── aop
+        │   ├── auth
+        │   ├── code            # 성공/에러 코드 (BaseSuccessCode, BaseErrorCode 등)
+        │   ├── config
+        │   ├── controller         # 공통/테스트용 컨트롤러
+        │   ├── converter
+        │   ├── dto
+        │   ├── entity            # BaseEntity 공통 엔티티
+        │   ├── error            # 예외 처리 (ApiException, GlobalExceptionHandler 등)
+        │   ├── response
+        │   ├── security         # 보안 설정
+        │   ├── service
+        │   └── validation
+        └── infrastructure         # 외부 시스템 연동 및 통신 (외부 API 및 이메일 검증)
+            ├── ai
+            ├── aladin
+            └── email
 ```
 
 ## 팀원 및 주요 개발 사항
