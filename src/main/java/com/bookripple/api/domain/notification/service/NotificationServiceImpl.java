@@ -1,12 +1,12 @@
 package com.bookripple.api.domain.notification.service;
 
 
-import com.bookripple.api.common.code.NotificationErrorCode;
-import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.domain.member.entity.Member;
+import com.bookripple.api.domain.notification.code.NotificationErrorCode;
 import com.bookripple.api.domain.notification.entity.Notification;
 import com.bookripple.api.domain.notification.enums.NotificationType;
 import com.bookripple.api.domain.notification.repository.NotificationRepository;
+import com.bookripple.api.global.error.ApiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
