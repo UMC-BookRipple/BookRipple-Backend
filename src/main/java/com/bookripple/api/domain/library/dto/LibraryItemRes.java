@@ -13,6 +13,7 @@ import lombok.Builder;
 public record LibraryItemRes(
         Long libraryItemId,
         Long bookId,
+        Long aladinItemId,
         String title,
         String coverUrl,
         List<String> authors,
@@ -24,6 +25,7 @@ public record LibraryItemRes(
         return LibraryItemRes.builder()
                 .libraryItemId(item.getId())
                 .bookId(book.getId())
+                .aladinItemId(book.getAladinBookId())
                 .title(book.getTitle())
                 .coverUrl(book.getBookCover())
                 .authors(List.of(book.getAuthor()))
@@ -36,6 +38,7 @@ public record LibraryItemRes(
         return LibraryItemRes.builder()
                 .libraryItemId(rp.getId())
                 .bookId(book.getId())
+                .aladinItemId(book.getAladinBookId())
                 .title(book.getTitle())
                 .coverUrl(book.getBookCover())
                 .authors(List.of(book.getAuthor()))
