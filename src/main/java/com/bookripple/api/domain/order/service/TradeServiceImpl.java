@@ -1,239 +1,246 @@
 package com.bookripple.api.domain.order.service;
 
-import com.bookripple.api.common.code.PaymentErrorCode;
-import com.bookripple.api.common.code.PurchaseRequestErrorCode;
-import com.bookripple.api.common.code.SettlementErrorCode;
-import com.bookripple.api.common.code.TradeErrorCode;
-import com.bookripple.api.common.error.ApiException;
+import com.bookripple.api.domain.blindsalepost.code.PurchaseRequestErrorCode;
 import com.bookripple.api.domain.blindsalepost.entity.PurchaseRequest;
 import com.bookripple.api.domain.blindsalepost.enums.PostStatus;
 import com.bookripple.api.domain.blindsalepost.enums.PurchaseStatus;
 import com.bookripple.api.domain.blindsalepost.repository.PurchaseRequestRepository;
 import com.bookripple.api.domain.notification.enums.NotificationType;
 import com.bookripple.api.domain.notification.service.NotificationService;
+import com.bookripple.api.domain.order.code.PaymentErrorCode;
+import com.bookripple.api.domain.order.code.SettlementErrorCode;
+import com.bookripple.api.domain.order.code.TradeErrorCode;
 import com.bookripple.api.domain.order.converter.TradeConverter;
 import com.bookripple.api.domain.order.dto.TradeReqDto;
 import com.bookripple.api.domain.order.dto.TradeResDto;
-import com.bookripple.api.domain.order.entity.*;
+import com.bookripple.api.domain.order.entity.Payment;
+import com.bookripple.api.domain.order.entity.Settlement;
+import com.bookripple.api.domain.order.entity.ShippingInfo;
+import com.bookripple.api.domain.order.entity.Trade;
 import com.bookripple.api.domain.order.enums.PaymentStatus;
 import com.bookripple.api.domain.order.enums.SettlementStatus;
 import com.bookripple.api.domain.order.enums.TradeStatus;
-import com.bookripple.api.domain.order.repository.*;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import com.bookripple.api.domain.order.repository.PaymentRepository;
+import com.bookripple.api.domain.order.repository.SettlementRepository;
+import com.bookripple.api.domain.order.repository.ShippingInfoRepository;
+import com.bookripple.api.domain.order.repository.TradeRepository;
+import com.bookripple.api.global.error.ApiException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class TradeServiceImpl implements TradeService {
 
-    private final TradeRepository tradeRepository;
-    private final PaymentRepository paymentRepository;
-    private final SettlementRepository settlementRepository;
-    private final NotificationService notificationService;
-    private final PurchaseRequestRepository purchaseRequestRepository;
-    private final ShippingInfoRepository shippingInfoRepository;
+  private final TradeRepository tradeRepository;
+  private final PaymentRepository paymentRepository;
+  private final SettlementRepository settlementRepository;
+  private final NotificationService notificationService;
+  private final PurchaseRequestRepository purchaseRequestRepository;
+  private final ShippingInfoRepository shippingInfoRepository;
 
 
-    private static final String PAYMENT_DONE_CONTENT = "결제가 완료되었습니다! 배송을 시작해 주세요.";
-    private static final String TRADE_CANCELED_CONTENT = "구매 요청이 취소되었습니다.";
-    private static final String SHIPPING_STARTED_CONTENT = "상품이 배송중입니다.";
+  private static final String PAYMENT_DONE_CONTENT = "결제가 완료되었습니다! 배송을 시작해 주세요.";
+  private static final String TRADE_CANCELED_CONTENT = "구매 요청이 취소되었습니다.";
+  private static final String SHIPPING_STARTED_CONTENT = "상품이 배송중입니다.";
 
 
-    @Override
-    @Transactional
-    public TradeResDto.PreparePaymentResponse preparePayment(Long memberId, Long tradeId, TradeReqDto.PreparePayment dto) {
-        // 1. 거래 조회 및 권한 확인
-        Trade trade = tradeRepository.findById(tradeId)
-                .orElseThrow(() -> new ApiException(TradeErrorCode.TRADE_NOT_FOUND));
+  @Override
+  @Transactional
+  public TradeResDto.PreparePaymentResponse preparePayment(Long memberId, Long tradeId,
+      TradeReqDto.PreparePayment dto) {
+    // 1. 거래 조회 및 권한 확인
+    Trade trade = tradeRepository.findById(tradeId)
+        .orElseThrow(() -> new ApiException(TradeErrorCode.TRADE_NOT_FOUND));
 
-        if (!trade.getBuyer().getId().equals(memberId)) {
-            throw new ApiException(TradeErrorCode.NOT_TRADE_PARTICIPANT);
-        }
-
-        // 2. 이미 결제 준비가 된 경우 기존 데이터 반환 (중복 요청 방지)
-        Optional<Payment> existingPayment = paymentRepository.findByTradeId(tradeId);
-        if (existingPayment.isPresent()) {
-            // 주소만 업데이트하고 기존 orderId 반환
-            trade.updateShippingAddress(dto.address());
-            return new TradeResDto.PreparePaymentResponse(
-                    existingPayment.get().getOrderId(),
-                    trade.getAmount()
-            );
-        }
-
-        // orderId 생성
-        String orderId = "ORDER_" + UUID.randomUUID().toString();
-
-        // 3. 한 줄 주소 업데이트
-        trade.updateShippingAddress(dto.address());
-
-        // 4. 컨버터를 통해 엔티티 생성 및 저장
-        Payment payment = TradeConverter.toPayment(trade, dto, orderId);
-        paymentRepository.save(payment);
-
-        // Settlement도 중복 체크 후 생성
-        if (settlementRepository.findByTradeId(tradeId).isEmpty()) {
-            Settlement settlement = TradeConverter.toSettlement(trade);
-            settlementRepository.save(settlement);
-        }
-
-        // 프론트에 orderId와 amount 반환
-        return new TradeResDto.PreparePaymentResponse(orderId, trade.getAmount());
+    if (!trade.getBuyer().getId().equals(memberId)) {
+      throw new ApiException(TradeErrorCode.NOT_TRADE_PARTICIPANT);
     }
 
-    @Override
-    @Transactional
-    public void confirmPayment(Long memberId, Long tradeId) {
-        // 2. 거래 및 기존 데이터 조회
-        Trade trade = tradeRepository.findById(tradeId)
-                .orElseThrow(() -> new ApiException(TradeErrorCode.TRADE_NOT_FOUND));
-        // prepare 단계에서 생성된 Payment와 Settlement를 가져옵니다.
-        Payment payment = paymentRepository.findByTradeId(tradeId)
-                .orElseThrow(() -> new ApiException(PaymentErrorCode.PAYMENT_NOT_FOUND));
-
-        Settlement settlement = settlementRepository.findByTradeId(tradeId)
-                .orElseThrow(() -> new ApiException(SettlementErrorCode.SETTLEMENT_NOT_FOUND));
-
-        // 2. 권한 확인 (구매자 본인인지)
-        if (!trade.getBuyer().getId().equals(memberId)) {
-            throw new ApiException(TradeErrorCode.NOT_TRADE_PARTICIPANT);
-        }
-
-        // 3. 결제(Payment) 정보 업데이트: READY -> DONE
-        // 3. 결제 상태 업데이트 (서버가 직접 Mock Key 생성)
-        payment.updatePaymentSuccess(
-                "MOCK_KEY_" + UUID.randomUUID().toString().substring(0, 8), // 내부 생성
-                PaymentStatus.DONE,
-                LocalDateTime.now()
-        );
-
-        // 4. 정산(Settlement) 정보 업데이트: PENDING -> COMPLETED
-        settlement.updateStatus(SettlementStatus.COMPLETED);
-
-        // 5. 연관 데이터 상태 일괄 변경 (사용자 로직 핵심)
-        trade.updateStatus(TradeStatus.PAID); // 거래 완료
-        trade.getBlindSalePost().updateStatus(PostStatus.SOLD_OUT); // 게시글 품절
-        PurchaseRequest purchaseRequest = purchaseRequestRepository
-                .findByBlindSalePostIdAndStatus(trade.getBlindSalePost().getId(), PurchaseStatus.ACCEPTED)
-                .orElseThrow(() -> new ApiException(PurchaseRequestErrorCode.PURCHASE_REQUEST_NOT_FOUND));
-        purchaseRequest.updateStatus(PurchaseStatus.PAYMENT_COMPLETED); // 거래 완료
-
-        // [알림 추가] 판매자에게 결제 완료 알림 발송
-        notificationService.create(
-                trade.getSeller(),
-                NotificationType.TRADE_APPROVED,
-                PAYMENT_DONE_CONTENT + " 주소: " + trade.getShippingAddress(), // 한 줄 주소 포함
-                "/blind-book/buy/" + trade.getBlindSalePost().getId()
-        );
-
+    // 2. 이미 결제 준비가 된 경우 기존 데이터 반환 (중복 요청 방지)
+    Optional<Payment> existingPayment = paymentRepository.findByTradeId(tradeId);
+    if (existingPayment.isPresent()) {
+      // 주소만 업데이트하고 기존 orderId 반환
+      trade.updateShippingAddress(dto.address());
+      return new TradeResDto.PreparePaymentResponse(
+          existingPayment.get().getOrderId(),
+          trade.getAmount()
+      );
     }
 
-    @Override
-    @Transactional
-    public void cancelTradeBeforePayment(Long memberId, Long tradeId) {
-        // 1. 거래 조회 및 권한 확인
-        Trade trade = tradeRepository.findById(tradeId)
-                .orElseThrow(() -> new ApiException(TradeErrorCode.TRADE_NOT_FOUND));
+    // orderId 생성
+    String orderId = "ORDER_" + UUID.randomUUID().toString();
 
-        if (!trade.getBuyer().getId().equals(memberId)) {
-            throw new ApiException(TradeErrorCode.NOT_TRADE_PARTICIPANT);
-        }
+    // 3. 한 줄 주소 업데이트
+    trade.updateShippingAddress(dto.address());
 
-        // 2. 현재 상태 확인 (결제 대기 중인 REQUESTED 상태일 때만 취소 가능)
-        if (trade.getStatus() != TradeStatus.REQUESTED) {
-            throw new ApiException(PurchaseRequestErrorCode.INVALID_STATUS);
-        }
+    // 4. 컨버터를 통해 엔티티 생성 및 저장
+    Payment payment = TradeConverter.toPayment(trade, dto, orderId);
+    paymentRepository.save(payment);
 
-        // 3. 상태 복구 (Rollback)
-
-        // 게시글: RESERVED -> SALE (다시 다른 사람이 살 수 있게 함)
-        trade.getBlindSalePost().updateStatus(PostStatus.SALE);
-
-        // 구매요청: ACCEPTED -> CANCELED
-        // (Trade와 PurchaseRequest가 연관관계가 없다면 Repository로 조회)
-        PurchaseRequest purchaseRequest = purchaseRequestRepository
-                .findByBlindSalePostIdAndStatus(trade.getBlindSalePost().getId(), PurchaseStatus.ACCEPTED)
-                .orElseThrow(() -> new ApiException(PurchaseRequestErrorCode.PURCHASE_REQUEST_NOT_FOUND));
-        purchaseRequest.updateStatus(PurchaseStatus.CANCELED);
-
-        // 거래: REQUESTED -> REJECTED
-        trade.updateStatus(TradeStatus.REJECTED);
-
-        // 4. 결제(Payment) 및 정산(Settlement) 데이터 처리
-        // 이미 생성된 READY/PENDING 데이터가 있다면 삭제하거나 CANCELED로 변경합니다.
-        paymentRepository.deleteByTradeId(tradeId);
-        settlementRepository.deleteByTradeId(tradeId);
-
-        // [알림 추가] 판매자에게 취소 알림 발송
-        notificationService.create(
-                trade.getSeller(),
-                NotificationType.TRADE_CANCELED,
-                TRADE_CANCELED_CONTENT + " 주소: " + trade.getShippingAddress(), // 한 줄 주소 포함
-                "/blind-book/buy/" + trade.getBlindSalePost().getId()
-        );
-
-
+    // Settlement도 중복 체크 후 생성
+    if (settlementRepository.findByTradeId(tradeId).isEmpty()) {
+      Settlement settlement = TradeConverter.toSettlement(trade);
+      settlementRepository.save(settlement);
     }
 
-    @Override
-    @Transactional
-    public void startShipping(Long memberId, Long tradeId, TradeReqDto.StartShipping dto) {
-        // 1. 거래 조회 및 판매자 권한 검증
-        Trade trade = tradeRepository.findById(tradeId)
-                .orElseThrow(() -> new ApiException(TradeErrorCode.TRADE_NOT_FOUND));
+    // 프론트에 orderId와 amount 반환
+    return new TradeResDto.PreparePaymentResponse(orderId, trade.getAmount());
+  }
 
-        if (!trade.getSeller().getId().equals(memberId)) {
-            throw new ApiException(TradeErrorCode.NOT_TRADE_PARTICIPANT);
-        }
+  @Override
+  @Transactional
+  public void confirmPayment(Long memberId, Long tradeId) {
+    // 2. 거래 및 기존 데이터 조회
+    Trade trade = tradeRepository.findById(tradeId)
+        .orElseThrow(() -> new ApiException(TradeErrorCode.TRADE_NOT_FOUND));
+    // prepare 단계에서 생성된 Payment와 Settlement를 가져옵니다.
+    Payment payment = paymentRepository.findByTradeId(tradeId)
+        .orElseThrow(() -> new ApiException(PaymentErrorCode.PAYMENT_NOT_FOUND));
 
-        // 2. 상태 확인: 결제 완료(PAID) 상태에서만 배송 가능
-        if (trade.getStatus() != TradeStatus.PAID) {
-            throw new ApiException(PurchaseRequestErrorCode.INVALID_STATUS);
-        }
+    Settlement settlement = settlementRepository.findByTradeId(tradeId)
+        .orElseThrow(() -> new ApiException(SettlementErrorCode.SETTLEMENT_NOT_FOUND));
 
-        // 3. ShippingInfo 생성 및 저장
-        ShippingInfo shippingInfo = TradeConverter.toShippingInfo(trade, dto);
-        shippingInfoRepository.save(shippingInfo);
-
-        // 4. 상태 일괄 업데이트
-        trade.updateStatus(TradeStatus.SHIPPED);
-
-        PurchaseRequest purchaseRequest = purchaseRequestRepository
-                .findByBlindSalePostIdAndStatus(trade.getBlindSalePost().getId(), PurchaseStatus.PAYMENT_COMPLETED)
-                .orElseThrow(() -> new ApiException(PurchaseRequestErrorCode.PURCHASE_REQUEST_NOT_FOUND));
-        purchaseRequest.updateStatus(PurchaseStatus.SHIPPING);
-
-        // [알림 추가] 구매자에게 배송 시작 알림 발송
-        notificationService.create(
-                trade.getBuyer(),
-                NotificationType.SHIPPING_STARTED,
-                SHIPPING_STARTED_CONTENT + " (" + dto.companyName() + " : " + dto.shippingNumber() + ")",
-                "/blind-book/buy/" + trade.getBlindSalePost().getId()
-        );
-
+    // 2. 권한 확인 (구매자 본인인지)
+    if (!trade.getBuyer().getId().equals(memberId)) {
+      throw new ApiException(TradeErrorCode.NOT_TRADE_PARTICIPANT);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public TradeResDto.SellerTradeDetail getSellerTradeDetail(Long memberId, Long tradeId) {
-        // 1. 거래 조회
-        Trade trade = tradeRepository.findById(tradeId)
-                .orElseThrow(() -> new ApiException(TradeErrorCode.TRADE_NOT_FOUND));
+    // 3. 결제(Payment) 정보 업데이트: READY -> DONE
+    // 3. 결제 상태 업데이트 (서버가 직접 Mock Key 생성)
+    payment.updatePaymentSuccess(
+        "MOCK_KEY_" + UUID.randomUUID().toString().substring(0, 8), // 내부 생성
+        PaymentStatus.DONE,
+        LocalDateTime.now()
+    );
 
-        // 2. 요청자가 해당 거래의 판매자인지 체크
-        if (!trade.getSeller().getId().equals(memberId)) {
-            throw new ApiException(TradeErrorCode.NOT_TRADE_PARTICIPANT);
-        }
+    // 4. 정산(Settlement) 정보 업데이트: PENDING -> COMPLETED
+    settlement.updateStatus(SettlementStatus.COMPLETED);
 
-        // 3. 컨버터를 통해 DTO 반환
-        return TradeConverter.toSellerTradeDetail(trade);
+    // 5. 연관 데이터 상태 일괄 변경 (사용자 로직 핵심)
+    trade.updateStatus(TradeStatus.PAID); // 거래 완료
+    trade.getBlindSalePost().updateStatus(PostStatus.SOLD_OUT); // 게시글 품절
+    PurchaseRequest purchaseRequest = purchaseRequestRepository
+        .findByBlindSalePostIdAndStatus(trade.getBlindSalePost().getId(), PurchaseStatus.ACCEPTED)
+        .orElseThrow(() -> new ApiException(PurchaseRequestErrorCode.PURCHASE_REQUEST_NOT_FOUND));
+    purchaseRequest.updateStatus(PurchaseStatus.PAYMENT_COMPLETED); // 거래 완료
+
+    // [알림 추가] 판매자에게 결제 완료 알림 발송
+    notificationService.create(
+        trade.getSeller(),
+        NotificationType.TRADE_APPROVED,
+        PAYMENT_DONE_CONTENT + " 주소: " + trade.getShippingAddress(), // 한 줄 주소 포함
+        "/blind-book/buy/" + trade.getBlindSalePost().getId()
+    );
+
+  }
+
+  @Override
+  @Transactional
+  public void cancelTradeBeforePayment(Long memberId, Long tradeId) {
+    // 1. 거래 조회 및 권한 확인
+    Trade trade = tradeRepository.findById(tradeId)
+        .orElseThrow(() -> new ApiException(TradeErrorCode.TRADE_NOT_FOUND));
+
+    if (!trade.getBuyer().getId().equals(memberId)) {
+      throw new ApiException(TradeErrorCode.NOT_TRADE_PARTICIPANT);
     }
+
+    // 2. 현재 상태 확인 (결제 대기 중인 REQUESTED 상태일 때만 취소 가능)
+    if (trade.getStatus() != TradeStatus.REQUESTED) {
+      throw new ApiException(PurchaseRequestErrorCode.INVALID_STATUS);
+    }
+
+    // 3. 상태 복구 (Rollback)
+
+    // 게시글: RESERVED -> SALE (다시 다른 사람이 살 수 있게 함)
+    trade.getBlindSalePost().updateStatus(PostStatus.SALE);
+
+    // 구매요청: ACCEPTED -> CANCELED
+    // (Trade와 PurchaseRequest가 연관관계가 없다면 Repository로 조회)
+    PurchaseRequest purchaseRequest = purchaseRequestRepository
+        .findByBlindSalePostIdAndStatus(trade.getBlindSalePost().getId(), PurchaseStatus.ACCEPTED)
+        .orElseThrow(() -> new ApiException(PurchaseRequestErrorCode.PURCHASE_REQUEST_NOT_FOUND));
+    purchaseRequest.updateStatus(PurchaseStatus.CANCELED);
+
+    // 거래: REQUESTED -> REJECTED
+    trade.updateStatus(TradeStatus.REJECTED);
+
+    // 4. 결제(Payment) 및 정산(Settlement) 데이터 처리
+    // 이미 생성된 READY/PENDING 데이터가 있다면 삭제하거나 CANCELED로 변경합니다.
+    paymentRepository.deleteByTradeId(tradeId);
+    settlementRepository.deleteByTradeId(tradeId);
+
+    // [알림 추가] 판매자에게 취소 알림 발송
+    notificationService.create(
+        trade.getSeller(),
+        NotificationType.TRADE_CANCELED,
+        TRADE_CANCELED_CONTENT + " 주소: " + trade.getShippingAddress(), // 한 줄 주소 포함
+        "/blind-book/buy/" + trade.getBlindSalePost().getId()
+    );
+
+
+  }
+
+  @Override
+  @Transactional
+  public void startShipping(Long memberId, Long tradeId, TradeReqDto.StartShipping dto) {
+    // 1. 거래 조회 및 판매자 권한 검증
+    Trade trade = tradeRepository.findById(tradeId)
+        .orElseThrow(() -> new ApiException(TradeErrorCode.TRADE_NOT_FOUND));
+
+    if (!trade.getSeller().getId().equals(memberId)) {
+      throw new ApiException(TradeErrorCode.NOT_TRADE_PARTICIPANT);
+    }
+
+    // 2. 상태 확인: 결제 완료(PAID) 상태에서만 배송 가능
+    if (trade.getStatus() != TradeStatus.PAID) {
+      throw new ApiException(PurchaseRequestErrorCode.INVALID_STATUS);
+    }
+
+    // 3. ShippingInfo 생성 및 저장
+    ShippingInfo shippingInfo = TradeConverter.toShippingInfo(trade, dto);
+    shippingInfoRepository.save(shippingInfo);
+
+    // 4. 상태 일괄 업데이트
+    trade.updateStatus(TradeStatus.SHIPPED);
+
+    PurchaseRequest purchaseRequest = purchaseRequestRepository
+        .findByBlindSalePostIdAndStatus(trade.getBlindSalePost().getId(),
+            PurchaseStatus.PAYMENT_COMPLETED)
+        .orElseThrow(() -> new ApiException(PurchaseRequestErrorCode.PURCHASE_REQUEST_NOT_FOUND));
+    purchaseRequest.updateStatus(PurchaseStatus.SHIPPING);
+
+    // [알림 추가] 구매자에게 배송 시작 알림 발송
+    notificationService.create(
+        trade.getBuyer(),
+        NotificationType.SHIPPING_STARTED,
+        SHIPPING_STARTED_CONTENT + " (" + dto.companyName() + " : " + dto.shippingNumber() + ")",
+        "/blind-book/buy/" + trade.getBlindSalePost().getId()
+    );
+
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public TradeResDto.SellerTradeDetail getSellerTradeDetail(Long memberId, Long tradeId) {
+    // 1. 거래 조회
+    Trade trade = tradeRepository.findById(tradeId)
+        .orElseThrow(() -> new ApiException(TradeErrorCode.TRADE_NOT_FOUND));
+
+    // 2. 요청자가 해당 거래의 판매자인지 체크
+    if (!trade.getSeller().getId().equals(memberId)) {
+      throw new ApiException(TradeErrorCode.NOT_TRADE_PARTICIPANT);
+    }
+
+    // 3. 컨버터를 통해 DTO 반환
+    return TradeConverter.toSellerTradeDetail(trade);
+  }
 
 
 }

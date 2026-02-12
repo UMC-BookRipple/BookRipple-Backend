@@ -1,14 +1,14 @@
 package com.bookripple.api.domain.review.controller;
 
-import com.bookripple.api.common.code.CommonSuccessCode;
-import com.bookripple.api.common.response.ApiResponse;
 import com.bookripple.api.domain.review.dto.ReviewResDto.MyReviewList;
 import com.bookripple.api.domain.review.dto.ReviewResDto.ReviewList;
 import com.bookripple.api.domain.review.service.ReviewService;
 import com.bookripple.api.global.annotation.PreventDuplicate;
+import com.bookripple.api.global.code.CommonSuccessCode;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdList;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
+import com.bookripple.api.global.response.ApiResponse;
 import com.bookripple.api.global.validation.ValidationGroups;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;

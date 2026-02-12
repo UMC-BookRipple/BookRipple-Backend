@@ -1,10 +1,10 @@
 package com.bookripple.api.domain.notification.controller;
 
-import com.bookripple.api.common.code.CommonSuccessCode;
-import com.bookripple.api.common.response.ApiResponse;
 import com.bookripple.api.domain.notification.dto.NotificationResDto.NotificationList;
 import com.bookripple.api.domain.notification.service.NotificationQueryService;
 import com.bookripple.api.domain.notification.service.NotificationService;
+import com.bookripple.api.global.code.CommonSuccessCode;
+import com.bookripple.api.global.response.ApiResponse;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;

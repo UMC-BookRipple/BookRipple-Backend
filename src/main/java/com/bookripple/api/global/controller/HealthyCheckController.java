@@ -1,0 +1,14 @@
+package com.bookripple.api.global.controller;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class HealthyCheckController {
+
+  @GetMapping("/health")
+  public ResponseEntity<String> check() {
+    return ResponseEntity.ok("ok");
+  }
+}

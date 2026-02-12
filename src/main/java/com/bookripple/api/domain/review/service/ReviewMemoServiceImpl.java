@@ -1,9 +1,8 @@
 package com.bookripple.api.domain.review.service;
 
-import com.bookripple.api.common.code.ReviewErrorCode;
-import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.domain.member.entity.Member;
 import com.bookripple.api.domain.member.repository.MemberRepository;
+import com.bookripple.api.domain.review.code.ReviewErrorCode;
 import com.bookripple.api.domain.review.converter.ReviewMemoConverter;
 import com.bookripple.api.domain.review.dto.ReviewMemoResDto.MyReviewMemoList;
 import com.bookripple.api.domain.review.dto.ReviewMemoResDto.ReviewAndMemo;
@@ -14,6 +13,7 @@ import com.bookripple.api.domain.review.repository.ReviewRepository;
 import com.bookripple.api.global.converter.GlobalConverter;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
+import com.bookripple.api.global.error.ApiException;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.AllArgsConstructor;

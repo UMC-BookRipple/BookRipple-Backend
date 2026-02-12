@@ -1,7 +1,7 @@
 package com.bookripple.api.global.config;
 
-import com.bookripple.api.common.security.CustomAccessDeniedHandler;
-import com.bookripple.api.common.security.CustomAuthenticationEntryPoint;
+import com.bookripple.api.global.security.CustomAccessDeniedHandler;
+import com.bookripple.api.global.security.CustomAuthenticationEntryPoint;
 import com.bookripple.api.global.security.JwtAuthenticationFilter;
 import java.util.Arrays;
 import lombok.RequiredArgsConstructor;

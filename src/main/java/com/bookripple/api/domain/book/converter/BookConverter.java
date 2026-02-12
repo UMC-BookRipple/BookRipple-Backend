@@ -1,9 +1,9 @@
 package com.bookripple.api.domain.book.converter;
 
-import com.bookripple.api.domain.aladin.dto.AladinSearchResDto;
 import com.bookripple.api.domain.book.dto.BookRes;
 import com.bookripple.api.domain.book.dto.BookSearchRes;
 import com.bookripple.api.domain.book.entity.Book;
+import com.bookripple.api.infrastructure.aladin.dto.AladinSearchResDto;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -27,7 +27,8 @@ public class BookConverter {
   }
 
   // 알라딘 검색 DTO -> BookSearchRes
-  public static BookSearchRes toBookSearchRes(AladinSearchResDto dto, Set<Long> registeredAladinIds) {
+  public static BookSearchRes toBookSearchRes(AladinSearchResDto dto,
+      Set<Long> registeredAladinIds) {
     if (dto == null) {
       // null이면 빈 응답으로 안전하게 반환 (외부 API 불안정 대응)
       return BookSearchRes.builder()
@@ -55,21 +56,23 @@ public class BookConverter {
         .build();
   }
 
-  private static List<BookSearchRes.Item> toSearchItems(AladinSearchResDto dto, Set<Long> registeredAladinIds) {
+  private static List<BookSearchRes.Item> toSearchItems(AladinSearchResDto dto,
+      Set<Long> registeredAladinIds) {
     if (dto.getItem() == null) {
       return Collections.emptyList();
     }
 
     return dto.getItem().stream()
-            .map(it -> toSearchItem(it, registeredAladinIds))
-            .toList();
+        .map(it -> toSearchItem(it, registeredAladinIds))
+        .toList();
   }
 
 
-  private static BookSearchRes.Item toSearchItem(AladinSearchResDto.Item it, Set<Long> registeredAladinIds) {
+  private static BookSearchRes.Item toSearchItem(AladinSearchResDto.Item it,
+      Set<Long> registeredAladinIds) {
     Long aladinItemId = it.getItemId();
     boolean registered = registeredAladinIds != null && aladinItemId != null
-            && registeredAladinIds.contains(aladinItemId);
+        && registeredAladinIds.contains(aladinItemId);
 
     return BookSearchRes.Item.builder()
         .aladinItemId(it.getItemId())

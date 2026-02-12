@@ -1,15 +1,15 @@
 package com.bookripple.api.domain.recommendation.controller;
 
-import com.bookripple.api.common.code.CommonSuccessCode;
-import com.bookripple.api.common.response.ApiResponse;
 import com.bookripple.api.domain.recommendation.dto.RecommendReqDto.Create;
 import com.bookripple.api.domain.recommendation.dto.RecommendResDto.MyRecommendList;
 import com.bookripple.api.domain.recommendation.dto.RecommendResDto.RecommendList;
 import com.bookripple.api.domain.recommendation.service.RecommendService;
 import com.bookripple.api.global.annotation.PreventDuplicate;
+import com.bookripple.api.global.code.CommonSuccessCode;
 import com.bookripple.api.global.dto.GlobalDto;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
+import com.bookripple.api.global.response.ApiResponse;
 import com.bookripple.api.global.validation.ValidationGroups;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;

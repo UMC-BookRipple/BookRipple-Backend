@@ -1,13 +1,11 @@
 package com.bookripple.api.domain.review.service;
 
-import com.bookripple.api.common.code.BookErrorCode;
-import com.bookripple.api.common.code.CommonErrorCode;
-import com.bookripple.api.common.code.ReviewErrorCode;
-import com.bookripple.api.common.error.ApiException;
+import com.bookripple.api.domain.book.code.BookErrorCode;
 import com.bookripple.api.domain.book.entity.Book;
 import com.bookripple.api.domain.book.repository.BookRepository;
 import com.bookripple.api.domain.member.entity.Member;
 import com.bookripple.api.domain.member.repository.MemberRepository;
+import com.bookripple.api.domain.review.code.ReviewErrorCode;
 import com.bookripple.api.domain.review.converter.ReviewConverter;
 import com.bookripple.api.domain.review.dto.ReviewResDto.Item;
 import com.bookripple.api.domain.review.dto.ReviewResDto.MyReview;
@@ -15,10 +13,12 @@ import com.bookripple.api.domain.review.dto.ReviewResDto.MyReviewList;
 import com.bookripple.api.domain.review.dto.ReviewResDto.ReviewList;
 import com.bookripple.api.domain.review.entity.Review;
 import com.bookripple.api.domain.review.repository.ReviewRepository;
+import com.bookripple.api.global.code.CommonErrorCode;
 import com.bookripple.api.global.converter.GlobalConverter;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdList;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
+import com.bookripple.api.global.error.ApiException;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

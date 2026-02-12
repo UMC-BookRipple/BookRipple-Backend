@@ -1,15 +1,15 @@
 package com.bookripple.api.domain.member.controller;
 
-import com.bookripple.api.common.code.CommonErrorCode;
-import com.bookripple.api.common.code.CommonSuccessCode;
-import com.bookripple.api.common.error.ApiException;
-import com.bookripple.api.common.response.ApiResponse;
-import com.bookripple.api.domain.auth.dto.AuthReqDto;
-import com.bookripple.api.domain.auth.service.EmailCodeService;
 import com.bookripple.api.domain.member.dto.MemberReqDto;
 import com.bookripple.api.domain.member.service.MemberService;
 import com.bookripple.api.domain.verification.email.enums.EmailVerificationPurpose;
+import com.bookripple.api.global.auth.dto.AuthReqDto;
+import com.bookripple.api.global.auth.service.EmailCodeService;
+import com.bookripple.api.global.code.CommonErrorCode;
+import com.bookripple.api.global.code.CommonSuccessCode;
 import com.bookripple.api.global.dto.GlobalDto;
+import com.bookripple.api.global.error.ApiException;
+import com.bookripple.api.global.response.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
@@ -18,7 +18,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -151,7 +159,8 @@ public class MemberController {
   ) {
     Long memberId = getCurrentMemberId();
     String accessToken = resolveToken(request);
-    String refreshToken = refreshTokenRequest != null ? refreshTokenRequest.getRefreshToken() : null;
+    String refreshToken =
+        refreshTokenRequest != null ? refreshTokenRequest.getRefreshToken() : null;
 
     memberService.withdraw(memberId, accessToken, refreshToken);
 

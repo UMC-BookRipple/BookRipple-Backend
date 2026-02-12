@@ -1,7 +1,7 @@
 package com.bookripple.api.global.aop;
 
-import com.bookripple.api.common.code.CommonErrorCode;
-import com.bookripple.api.common.error.ApiException;
+import com.bookripple.api.global.code.CommonErrorCode;
+import com.bookripple.api.global.error.ApiException;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import jakarta.servlet.http.HttpServletRequest;
