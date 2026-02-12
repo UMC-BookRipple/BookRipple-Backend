@@ -1,9 +1,9 @@
-package com.bookripple.api.common.error;
+package com.bookripple.api.global.error;
 
 
-import com.bookripple.api.common.code.BaseErrorCode;
-import com.bookripple.api.common.code.CommonErrorCode;
-import com.bookripple.api.common.response.ApiResponse;
+import com.bookripple.api.global.code.BaseErrorCode;
+import com.bookripple.api.global.code.CommonErrorCode;
+import com.bookripple.api.global.response.ApiResponse;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import java.util.HashMap;

@@ -1,20 +1,16 @@
-package com.bookripple.api.common.security;
+package com.bookripple.api.global.security;
 
-import java.io.IOException;
-
+import com.bookripple.api.global.code.CommonErrorCode;
+import com.bookripple.api.global.response.ApiResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
+import java.io.IOException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
-
-import com.bookripple.api.common.code.CommonErrorCode;
-import com.bookripple.api.common.response.ApiResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor

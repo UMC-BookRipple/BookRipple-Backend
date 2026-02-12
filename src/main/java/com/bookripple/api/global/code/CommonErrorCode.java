@@ -1,4 +1,4 @@
-package com.bookripple.api.common.code;
+package com.bookripple.api.global.code;
 
 import org.springframework.http.HttpStatus;
 

@@ -1,4 +1,4 @@
-package com.bookripple.api.common.controller;
+package com.bookripple.api.global.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
