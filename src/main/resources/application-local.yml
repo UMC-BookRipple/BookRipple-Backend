@@ -9,25 +9,16 @@ spring:
       ddl-auto: update
     show-sql: true
 
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-            required: true
-    protocol: smtp
-    default-encoding: UTF-8
-
 jwt:
   secret: ${JWT_SECRET}
   access-token-expiration-ms: ${JWT_ACCESS_TOKEN_EXPIRATION_MS:1800000}  # 30분
   refresh-token-expiration-ms: ${JWT_REFRESH_TOKEN_EXPIRATION_MS:1209600000}  # 14일
+
+aws:
+  ses:
+    from-email: ${AWS_SES_FROM_EMAIL:noreply@bookripple.site}
+    region: ${AWS_REGION:ap-northeast-2}
+    enabled: false  # 로컬에서는 Mock 사용
 
 logging:
   level:
