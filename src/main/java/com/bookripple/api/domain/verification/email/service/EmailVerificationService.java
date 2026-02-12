@@ -1,15 +1,14 @@
 package com.bookripple.api.domain.verification.email.service;
 
-import com.bookripple.api.common.code.AuthErrorCode;
-import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.domain.verification.email.entity.EmailVerification;
 import com.bookripple.api.domain.verification.email.enums.EmailVerificationPurpose;
 import com.bookripple.api.domain.verification.email.repository.EmailVerificationRepository;
+import com.bookripple.api.global.auth.code.AuthErrorCode;
+import com.bookripple.api.global.error.ApiException;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
