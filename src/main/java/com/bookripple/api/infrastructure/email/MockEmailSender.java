@@ -1,11 +1,9 @@
 package com.bookripple.api.infrastructure.email;
 
+import com.bookripple.api.global.auth.util.EmailSender;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
-
-import com.bookripple.api.domain.auth.util.EmailSender;
-
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
