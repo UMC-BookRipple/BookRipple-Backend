@@ -1,12 +1,12 @@
 package com.bookripple.api.domain.book.controller;
 
 
-import com.bookripple.api.common.code.CommonSuccessCode;
-import com.bookripple.api.common.response.ApiResponse;
 import com.bookripple.api.domain.book.dto.BookRes;
 import com.bookripple.api.domain.book.dto.BookSearchRes;
 import com.bookripple.api.domain.book.enums.SearchLogType;
 import com.bookripple.api.domain.book.service.BookQueryService;
+import com.bookripple.api.global.code.CommonSuccessCode;
+import com.bookripple.api.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
@@ -38,16 +38,17 @@ public class BookSearchController {
       description = "알라딘 오픈 API를 활용한 도서 검색 기능입니다."
   )
   public ApiResponse<BookSearchRes> search(
-          @AuthenticationPrincipal Long memberId,
+      @AuthenticationPrincipal Long memberId,
       @RequestParam @NotBlank @Size(max = 100) String keyword,
       @RequestParam(defaultValue = "1") int start,
       @RequestParam(defaultValue = "20") int size,
       @RequestParam(defaultValue = "Keyword") String queryType,
       @RequestParam(defaultValue = "Book") String searchTarget,
-          @RequestParam(defaultValue = "BOOK") SearchLogType type
+      @RequestParam(defaultValue = "BOOK") SearchLogType type
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
-        bookQueryService.searchFromAladin(memberId, keyword, start, size, queryType, searchTarget, type)
+        bookQueryService.searchFromAladin(memberId, keyword, start, size, queryType, searchTarget,
+            type)
     );
   }
 
@@ -58,7 +59,7 @@ public class BookSearchController {
       description = "알라딘 도서 상세 정보를 조회하고, DB로 가져옵니다."
   )
   public ApiResponse<BookRes> getOrCreateByAladinItemId(
-          @AuthenticationPrincipal Long memberId,
+      @AuthenticationPrincipal Long memberId,
       @PathVariable("aladinItemId") Long itemId
   ) {
     return ApiResponse.onSuccess(CommonSuccessCode.OK,
