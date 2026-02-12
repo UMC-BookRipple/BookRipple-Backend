@@ -1,8 +1,6 @@
 package com.bookripple.api.domain.blindsalepost.service;
 
-import com.bookripple.api.common.code.MemberErrorCode;
-import com.bookripple.api.common.code.PurchaseRequestErrorCode;
-import com.bookripple.api.common.error.ApiException;
+import com.bookripple.api.domain.blindsalepost.code.PurchaseRequestErrorCode;
 import com.bookripple.api.domain.blindsalepost.converter.PurchaseRequestConverter;
 import com.bookripple.api.domain.blindsalepost.dto.PurchaseRequestResDto;
 import com.bookripple.api.domain.blindsalepost.entity.BlindSalePost;
@@ -11,15 +9,16 @@ import com.bookripple.api.domain.blindsalepost.enums.PostStatus;
 import com.bookripple.api.domain.blindsalepost.enums.PurchaseStatus;
 import com.bookripple.api.domain.blindsalepost.repository.BlindSalePostRepository;
 import com.bookripple.api.domain.blindsalepost.repository.PurchaseRequestRepository;
+import com.bookripple.api.domain.member.code.MemberErrorCode;
 import com.bookripple.api.domain.member.entity.Member;
 import com.bookripple.api.domain.member.repository.MemberRepository;
 import com.bookripple.api.domain.notification.enums.NotificationType;
 import com.bookripple.api.domain.notification.service.NotificationService;
-import java.util.Arrays;
-
 import com.bookripple.api.domain.order.entity.Trade;
 import com.bookripple.api.domain.order.enums.TradeStatus;
 import com.bookripple.api.domain.order.repository.TradeRepository;
+import com.bookripple.api.global.error.ApiException;
+import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -102,12 +101,12 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
     post.updateStatus(PostStatus.RESERVED); // 게시글 잠금
 
     Trade trade = Trade.builder() // 거래 생성
-            .buyer(purchaseRequest.getMember())
-            .seller(post.getMember())
-            .blindSalePost(post)
-            .amount(post.getPrice())
-            .status(TradeStatus.REQUESTED) // 기본값으로 설정됨
-            .build();
+        .buyer(purchaseRequest.getMember())
+        .seller(post.getMember())
+        .blindSalePost(post)
+        .amount(post.getPrice())
+        .status(TradeStatus.REQUESTED) // 기본값으로 설정됨
+        .build();
     tradeRepository.save(trade);
 
     // 나머지 대기자들 일괄 거절 처리
@@ -122,7 +121,6 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
 
     return PurchaseRequestConverter.toDecisionWithTrade(purchaseRequest, trade);
   }
-
 
 
   private PurchaseRequest getPurchaseRequest(Long purchaseRequestId) {

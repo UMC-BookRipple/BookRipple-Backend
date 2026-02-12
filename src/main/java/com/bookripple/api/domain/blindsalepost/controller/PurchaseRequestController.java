@@ -1,12 +1,12 @@
 package com.bookripple.api.domain.blindsalepost.controller;
 
 
-import com.bookripple.api.common.code.CommonSuccessCode;
-import com.bookripple.api.common.response.ApiResponse;
 import com.bookripple.api.domain.blindsalepost.dto.PurchaseRequestResDto;
 import com.bookripple.api.domain.blindsalepost.dto.PurchaseRequestResDto.Create;
 import com.bookripple.api.domain.blindsalepost.service.PurchaseRequestService;
 import com.bookripple.api.global.annotation.PreventDuplicate;
+import com.bookripple.api.global.code.CommonSuccessCode;
+import com.bookripple.api.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Min;
