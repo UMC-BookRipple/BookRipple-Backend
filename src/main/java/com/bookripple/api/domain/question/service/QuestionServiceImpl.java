@@ -101,7 +101,7 @@ public class QuestionServiceImpl implements QuestionService {
             progressRepository.findByMemberIdAndBookId(memberId, bookId))
         .orElseThrow(() -> new ApiException(ReadingErrorCode.NO_READING_SESSION));
 
-    if (readingProgress.getProgress().compareTo(new BigDecimal("50")) < 0) {
+    if (readingProgress.getProgress().compareTo(new BigDecimal("30")) < 0) {
       throw new ApiException(QuestionErrorCode.INSUFFICIENT_PROGRESS);
     }
 
