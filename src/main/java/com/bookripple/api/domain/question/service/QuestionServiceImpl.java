@@ -168,6 +168,20 @@ public class QuestionServiceImpl implements QuestionService {
     if (!progress.isCompleted()) {
       throw new ApiException(QuestionErrorCode.INSUFFICIENT_PROGRESS_2);
     }
+    List<Question> existQuestions = questionRepository.findAllByMemberIdAndBookIdAndType(
+        memberId,
+        bookId,
+        QuestionType.AI_AFTER_READING
+    );
+
+    if (!existQuestions.isEmpty()) {
+
+      List<Q> res = existQuestions.stream()
+          .map(QuestionConverter::toQ)
+          .toList();
+
+      return QuestionConverter.toQuestionList(res, null, false, 3);
+    }
 
     AiQuestion aiQuestion = aiService.generateQuestions(AiQuestionType.AFTER, book.getTitle(),
         BigDecimal.valueOf(100));
