@@ -129,7 +129,7 @@ public class TradeServiceImpl implements TradeService {
                 trade.getSeller(),
                 NotificationType.TRADE_APPROVED,
                 PAYMENT_DONE_CONTENT + " 주소: " + trade.getShippingAddress(), // 한 줄 주소 포함
-                "/blind-sale-posts/" + trade.getBlindSalePost().getId()
+                "/blind-book/buy/" + trade.getBlindSalePost().getId()
         );
 
     }
@@ -175,7 +175,7 @@ public class TradeServiceImpl implements TradeService {
                 trade.getSeller(),
                 NotificationType.TRADE_CANCELED,
                 TRADE_CANCELED_CONTENT + " 주소: " + trade.getShippingAddress(), // 한 줄 주소 포함
-                "/blind-sale-posts/" + trade.getBlindSalePost().getId()
+                "/blind-book/buy/" + trade.getBlindSalePost().getId()
         );
 
 
@@ -214,7 +214,7 @@ public class TradeServiceImpl implements TradeService {
                 trade.getBuyer(),
                 NotificationType.SHIPPING_STARTED,
                 SHIPPING_STARTED_CONTENT + " (" + dto.companyName() + " : " + dto.shippingNumber() + ")",
-                "/blind-sale-posts/" + trade.getBlindSalePost().getId()
+                "/blind-book/buy/" + trade.getBlindSalePost().getId()
         );
 
     }

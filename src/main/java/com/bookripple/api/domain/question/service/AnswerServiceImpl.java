@@ -134,6 +134,6 @@ public class AnswerServiceImpl implements AnswerService {
   }
 
   private String toQuestionUrl(Long questionId) {
-    return "/questions/" + questionId;
+    return "/questions/me" + questionId;
   }
 }

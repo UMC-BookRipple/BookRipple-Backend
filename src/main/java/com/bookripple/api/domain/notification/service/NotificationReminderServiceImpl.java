@@ -102,6 +102,6 @@ public class NotificationReminderServiceImpl implements NotificationReminderServ
   }
 
   private String toBookUrl(Long bookId) {
-    return "/books/" + bookId;
+    return "/bookshelf";
   }
 }
