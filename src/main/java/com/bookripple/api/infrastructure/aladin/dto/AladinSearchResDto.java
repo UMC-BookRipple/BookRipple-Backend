@@ -1,0 +1,25 @@
+package com.bookripple.api.infrastructure.aladin.dto;
+
+import java.util.List;
+import lombok.Getter;
+
+@Getter
+public class AladinSearchResDto {
+
+  private Integer totalResults;
+  private Integer startIndex;
+  private Integer itemsPerPage;
+  private List<Item> item;
+
+  @Getter
+  public static class Item {
+
+    private Long itemId;        // 알라딘 itemId
+    private String title;
+    private String author;
+    private String publisher;
+    private String pubDate;     // "yyyy-MM-dd"
+    private String cover;
+    private String isbn13;
+  }
+}

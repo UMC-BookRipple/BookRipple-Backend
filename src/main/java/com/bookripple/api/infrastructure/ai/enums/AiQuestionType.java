@@ -1,4 +1,4 @@
-package com.bookripple.api.domain.ai.enums;
+package com.bookripple.api.infrastructure.ai.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

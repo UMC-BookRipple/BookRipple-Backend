@@ -1,4 +1,4 @@
-package com.bookripple.api.domain.ai.dto;
+package com.bookripple.api.infrastructure.ai.dto;
 
 import java.util.List;
 

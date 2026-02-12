@@ -1,14 +1,16 @@
-package com.bookripple.api.domain.aladin.config;
+package com.bookripple.api.infrastructure.aladin.config;
 
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@Getter @Setter
+@Getter
+@Setter
 @ConfigurationProperties(prefix = "aladin")
 public class AladinProperties {
-    private String baseUrl;
-    private String ttbKey;
-    private String version;
-    private String output;
+
+  private String baseUrl;
+  private String ttbKey;
+  private String version;
+  private String output;
 }

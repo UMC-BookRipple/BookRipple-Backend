@@ -1,8 +1,8 @@
-package com.bookripple.api.domain.aladin.service;
+package com.bookripple.api.infrastructure.aladin.service;
 
-import com.bookripple.api.domain.aladin.config.AladinProperties;
-import com.bookripple.api.domain.aladin.dto.AladinItemLookUpResDto;
-import com.bookripple.api.domain.aladin.dto.AladinSearchResDto;
+import com.bookripple.api.infrastructure.aladin.config.AladinProperties;
+import com.bookripple.api.infrastructure.aladin.dto.AladinItemLookUpResDto;
+import com.bookripple.api.infrastructure.aladin.dto.AladinSearchResDto;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import java.util.concurrent.TimeUnit;

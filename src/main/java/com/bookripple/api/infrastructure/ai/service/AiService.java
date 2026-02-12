@@ -1,11 +1,11 @@
-package com.bookripple.api.domain.ai.service;
+package com.bookripple.api.infrastructure.ai.service;
 
-import com.bookripple.api.common.error.ApiException;
-import com.bookripple.api.domain.ai.code.AiErrorCode;
-import com.bookripple.api.domain.ai.dto.AiReqDto.GeminiReq;
-import com.bookripple.api.domain.ai.dto.AiResDto.AiQuestion;
-import com.bookripple.api.domain.ai.dto.AiResDto.GeminiRes;
-import com.bookripple.api.domain.ai.enums.AiQuestionType;
+import com.bookripple.api.global.error.ApiException;
+import com.bookripple.api.infrastructure.ai.code.AiErrorCode;
+import com.bookripple.api.infrastructure.ai.dto.AiReqDto.GeminiReq;
+import com.bookripple.api.infrastructure.ai.dto.AiResDto.AiQuestion;
+import com.bookripple.api.infrastructure.ai.dto.AiResDto.GeminiRes;
+import com.bookripple.api.infrastructure.ai.enums.AiQuestionType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.util.List;
