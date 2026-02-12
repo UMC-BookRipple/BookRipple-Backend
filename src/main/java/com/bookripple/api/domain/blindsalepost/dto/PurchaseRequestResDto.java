@@ -8,7 +8,6 @@ public class PurchaseRequestResDto {
   @Builder
   public record Create(
       Long purchaseRequestId,
-      Long blindBookId,
       PurchaseStatus status,
       LocalDateTime createdAt
   ){
