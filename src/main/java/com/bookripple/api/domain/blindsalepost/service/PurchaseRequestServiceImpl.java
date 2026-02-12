@@ -152,6 +152,6 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
   }
 
   private String toBlindSalePostUrl(Long blindSalePostId) {
-    return "/blind-book/" + blindSalePostId;
+    return "/blind-book/buy/" + blindSalePostId;
   }
 }
