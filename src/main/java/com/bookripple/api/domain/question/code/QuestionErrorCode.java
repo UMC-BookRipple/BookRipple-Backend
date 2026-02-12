@@ -1,6 +1,6 @@
 package com.bookripple.api.domain.question.code;
 
-import com.bookripple.api.common.code.BaseErrorCode;
+import com.bookripple.api.global.code.BaseErrorCode;
 import org.springframework.http.HttpStatus;
 
 public enum QuestionErrorCode implements BaseErrorCode {

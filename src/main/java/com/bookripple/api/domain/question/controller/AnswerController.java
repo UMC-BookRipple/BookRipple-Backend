@@ -1,13 +1,13 @@
 package com.bookripple.api.domain.question.controller;
 
-import com.bookripple.api.common.code.CommonSuccessCode;
-import com.bookripple.api.common.response.ApiResponse;
 import com.bookripple.api.domain.question.dto.AnswerResDto.AnswerList;
 import com.bookripple.api.domain.question.dto.AnswerResDto.MyAnswerList;
 import com.bookripple.api.domain.question.service.AnswerService;
 import com.bookripple.api.global.annotation.PreventDuplicate;
+import com.bookripple.api.global.code.CommonSuccessCode;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
+import com.bookripple.api.global.response.ApiResponse;
 import com.bookripple.api.global.validation.ValidationGroups;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

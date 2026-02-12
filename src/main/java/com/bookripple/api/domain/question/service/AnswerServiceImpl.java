@@ -1,12 +1,11 @@
 package com.bookripple.api.domain.question.service;
 
-import com.bookripple.api.common.code.AnswerErrorCode;
-import com.bookripple.api.common.code.QuestionErrorCode;
-import com.bookripple.api.common.error.ApiException;
 import com.bookripple.api.domain.member.entity.Member;
 import com.bookripple.api.domain.member.repository.MemberRepository;
 import com.bookripple.api.domain.notification.enums.NotificationType;
 import com.bookripple.api.domain.notification.service.NotificationService;
+import com.bookripple.api.domain.question.code.AnswerErrorCode;
+import com.bookripple.api.domain.question.code.QuestionErrorCode;
 import com.bookripple.api.domain.question.converter.AnswerConverter;
 import com.bookripple.api.domain.question.dto.AnswerResDto.Ans;
 import com.bookripple.api.domain.question.dto.AnswerResDto.AnswerList;
@@ -19,6 +18,7 @@ import com.bookripple.api.domain.question.repository.QuestionRepository;
 import com.bookripple.api.global.converter.GlobalConverter;
 import com.bookripple.api.global.dto.GlobalDto.ContentReq;
 import com.bookripple.api.global.dto.GlobalDto.IdRes;
+import com.bookripple.api.global.error.ApiException;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -59,7 +59,6 @@ public class AnswerServiceImpl implements AnswerService {
           toQuestionUrl(questionId)
       );
     }
-
 
     return GlobalConverter.toIdRes(answer.getId());
   }
