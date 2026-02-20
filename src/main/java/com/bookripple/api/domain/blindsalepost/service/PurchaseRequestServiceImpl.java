@@ -45,6 +45,11 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
     BlindSalePost blindSalePost = blindSalePostRepository.findById(blindSalePostId)
         .orElseThrow(() -> new ApiException(PurchaseRequestErrorCode.BLIND_SALE_POST_NOT_FOUND));
 
+    // 판매자 본인의 게시글에는 구매 요청 불가
+    if (blindSalePost.getMember().getId().equals(memberId)) {
+      throw new ApiException(PurchaseRequestErrorCode.SELF_PURCHASE_NOT_ALLOWED);
+    }
+
     Member buyer = memberRepository.findById(memberId)
         .orElseThrow(() -> new ApiException(MemberErrorCode.MEMBER_NOT_FOUND));
 
