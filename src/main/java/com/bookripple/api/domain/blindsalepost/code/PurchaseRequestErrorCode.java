@@ -17,7 +17,9 @@ public enum PurchaseRequestErrorCode implements BaseErrorCode {
   SELLER_FORBIDDEN(HttpStatus.FORBIDDEN, "PURCHASE_REQUEST_403_2",
       "구매 요청에 대한 판매자 권한이 없습니다."),
   INVALID_STATUS(HttpStatus.BAD_REQUEST, "PURCHASE_REQUEST_400_1",
-      "허용되지 않은 상태 전이입니다.");
+      "허용되지 않은 상태 전이입니다."),
+  SELF_PURCHASE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "PURCHASE_REQUEST_400_2",
+      "본인의 판매 게시글에는 구매 요청을 할 수 없습니다.");
 
   private final HttpStatus httpStatus;
   private final String code;
