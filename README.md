@@ -1,4 +1,5 @@
 <img width="382" height="96" alt="로고" src="https://github.com/user-attachments/assets/fc74f414-bec9-4947-9289-f8746b9cc28d" />
+
 # BookRipple-Backend
 
 BookRipple(북리플) 은 “독서를 기록하고 나누며, 질문과 연결을 통해 책 너머의 경험을 확장하는 서비스”입니다.
